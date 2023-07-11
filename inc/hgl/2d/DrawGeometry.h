@@ -126,7 +126,7 @@ namespace hgl
                 for(int y=t;y<t+h;y++)
                 {
                     for(int i=0;i<length;i++)
-                        *p++=(*blend)Blend(draw_color,*p,alpha);
+                        *p++=(*blend)(draw_color,*p,alpha);
 
                     p+=width-w;
                 }
@@ -153,7 +153,7 @@ namespace hgl
 
                 for(int i=0;i<length;i++)
                 {
-                    *p=(*blend)Blend(draw_color,*p,alpha);
+                    *p=(*blend)(draw_color,*p,alpha);
                     p+=line_bytes;
                 }
 
@@ -439,6 +439,44 @@ namespace hgl
                     xy[15]++;
                 }
                 free(xy);
+            }
+
+            void DrawMonoBitmap(const int left,const int top,const uint8 *data,const int w,const int h)
+            {
+                if(!data)return;
+
+                if(left<0||left>=bitmap->GetWidth()-w)return;
+                if(top<0||top>=bitmap->GetHeight()-h)return;
+
+                const uint8 *sp=data;
+                uint8 bit;
+                T *tp=bitmap->GetData(left,top);
+
+                const uint line_wrap=bitmap->GetWidth()-w;
+
+                bit=1<<7;
+
+                for(int row=0;row<h;row++)
+                {
+                    for(int col=0;col<w;col++)
+                    {
+                        if(*sp&bit)
+                        {
+                            *tp=(*blend)(draw_color,*tp,alpha);
+                        }
+
+                        ++tp;
+
+                        bit>>=1;
+                        if(bit==0)
+                        {
+                            ++sp;
+                            bit=1<<7;
+                        }
+                    }
+
+                    tp+=line_wrap;
+                }
             }
         };//template<typename T,uint CHANNELS> class DrawGeometry
     }//namespace bitmap
