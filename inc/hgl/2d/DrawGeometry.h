@@ -21,6 +21,7 @@ namespace hgl
             T draw_color;
             float alpha;
 
+            BlendColor<T> no_blend;
             BlendColor<T> *blend;
 
         public:
@@ -28,8 +29,9 @@ namespace hgl
             DrawGeometry(FormatBitmap *fb)
             {
                 bitmap=fb;
-                draw_color=0;
+                hgl_zero(draw_color);
                 alpha=1;
+                blend=&no_blend;
             }
 
             virtual ~DrawGeometry()=default;
@@ -44,14 +46,9 @@ namespace hgl
                 blend=bc;
             }
 
-            virtual void SetBlend(const BlendMode &mode)
-            {
-                blend->mode=mode;                
-            }
-
             void CloseBlend()
             {
-                blend->mode=BlendMode.NoBlend;
+                blend=&no_blend;
             }
 
             void SetAlpha(const float &a)
@@ -80,7 +77,7 @@ namespace hgl
 
                 if(!p)return(false);
 
-                *p=blend->Blend(draw_color,*p,alpha);
+                *p=(*blend)(draw_color,*p,alpha);
 
                 return(true);
             }
@@ -102,7 +99,7 @@ namespace hgl
                 T *p=bitmap->GetData(x,y);
 
                 for(int i=0;i<length;i++)
-                    *p++=blend->Blend(draw_color,*p,alpha);
+                    *p++=(*blend)(draw_color,*p,alpha);
 
                 return(true);
             }
@@ -129,7 +126,7 @@ namespace hgl
                 for(int y=t;y<t+h;y++)
                 {
                     for(int i=0;i<length;i++)
-                        *p++=blend->Blend(draw_color,*p,alpha);
+                        *p++=(*blend)Blend(draw_color,*p,alpha);
 
                     p+=width-w;
                 }
@@ -156,7 +153,7 @@ namespace hgl
 
                 for(int i=0;i<length;i++)
                 {
-                    *p=blend->Blend(draw_color,*p,alpha);
+                    *p=(*blend)Blend(draw_color,*p,alpha);
                     p+=line_bytes;
                 }
 
