@@ -48,6 +48,12 @@ namespace hgl
                 return (x<0||x>=width||y<0||y>=height)?nullptr:data+(y*width+x);
             }
 
+            const T *GetData()const{return data;}
+            const T *GetData(int x,int y)const
+            {
+                return (x<0||x>=width||y<0||y>=height)?nullptr:data+(y*width+x);
+            }
+
             bool Create(uint w,uint h)
             {
                 if(!w||!h)return(false);
