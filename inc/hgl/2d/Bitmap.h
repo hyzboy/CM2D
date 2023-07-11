@@ -3,14 +3,21 @@
 
 #include<hgl/type/DataType.h>
 #include<hgl/math/HalfFloat.h>
+#include<iterator>
 namespace hgl
 {
+    template<typename T> 
+    static void FillPixels(T *p,const T &color,const int length)
+    {
+        std::fill_n(p,length,color);
+    }
+
     /**
      * 简单的2D象素处理
      */
-    template<typename T,uint CHANNELS> class Bitmap
+    template<typename T> class Bitmap
     {
-        uint width,height;
+        int width,height;
 
         T *data;
 
@@ -27,13 +34,17 @@ namespace hgl
             delete[] data;
         }
 
-        const uint GetWidth()const{return width;}
-        const uint GetHeight()const{return height;}
-        const uint GetTotalPixels()const{return width*height;}
-        const uint GetLineBytea()const{return width*CHANNELS*sizeof(T);}
-        const uint GetTotalBytes()const{return width*height*CHANNELS*sizeof(T);}
+        const int  GetWidth         ()const{return width;}
+        const int  GetHeight        ()const{return height;}
+        const uint GetTotalPixels   ()const{return width*height;}
+        const uint GetLineBytes     ()const{return width*sizeof(T);}
+        const uint GetTotalBytes    ()const{return width*height*sizeof(T);}
 
         T *GetData(){return data;}
+        T *GetData(int x,int y)
+        {
+            return (x<0||x>=width||y<0||y>=height)?nullptr:data+(y*width+x);
+        }
 
         bool Create(uint w,uint h)
         {
@@ -49,7 +60,7 @@ namespace hgl
 
             delete[] data;
 
-            data=new T[width*height*CHANNELS];
+            data=new T[width*height];
 
             return(true);
         }
@@ -65,95 +76,23 @@ namespace hgl
             width=height=0;
         }
 
-        void ClearColor(T *color)
+        void ClearColor(const T &color)
         {
-            if(!data||!color)return;
+            if(!data)return;
     
-            uint total=width*height;
-
-            T *p=data;
-
-            for(size_t i=0; i<length; i++)
-            {
-                for(uint j=0;j<CHANNELS;j++)
-                {
-                    *p=*color;
-                    ++p;
-                }
-            }
-        }
-
-        bool SplitChannels(Bitmap<T,1> *outputs)
-        {
-            if(!data||!outputs)            
-                return(false);
-
-            T *sp=data;
-            AutoDeleteArray<T *> op=new T *[CHANNELS];
-
-            for(uint i=0;i<CHANNELS;i++)
-            {
-                outputs[i].Create(width,height);
-                op[i]=outputs[i].data;
-            }
-
-            const uint total=width*height;
-
-            for(uint i=0;i<total;i++)
-            {
-                for(uint j=0;j<CHANNELS;j++)
-                {
-                    op[j]=*p;
-                    ++op[h];
-                    ++p;
-                }
-            }
-
-            return(true);
-        }
-
-        bool MerageChannels(Bitmap<T,1> *inputs)
-        {
-            if(!data||!inputs)            
-                return(false);
-
-            T *dp=data;
-            AutoDeleteArray<T *> ip=new T *[CHANNELS];
-
-            for(uint i=0;i<CHANNELS;i++)
-            {
-                if(!inputs[i].data)
-                    return(false);
-
-                ip[i]=inputs[i].data;
-            }
-
-            const uint total=width*height;
-
-            for(uint i=0;i<total;i++)
-            {
-                for(uint j=0;j<CHANNELS;j++)
-                {
-                    *dp=*ip[j];
-                    ++ip[j];
-                    ++dp;
-                }
-            }
-
-            return(true);
+            FillPixels<T>(data,color,width*height);
         }
 
         void Flip()
         {
             if(!data||height<=1)return;
 
-            const uint line_pixels=width*CHANNELS;
-            const uint line_bytes=width*CHANNELS*sizeof(T);
+            const uint line_bytes=width*sizeof(T);
 
-            T *temp=new T[line_pixels];
+            T *temp=new T[width];
 
             T *top=data;
-            T *bottom=data+(line_pixels*(height-1));
+            T *bottom=data+(width*(height-1));
 
             while(top<bottom)
             {
@@ -161,61 +100,12 @@ namespace hgl
                 memcpy(top,bottom,line_bytes);
                 memcpy(bottom,temp,line_bytes);
 
-                top+=line_pixels;
-                bottom-=line_pixels;
+                top+=width;
+                bottom-=width;
             }
 
             delete[] temp;
         }
-
-        void PutPixel(int x,int y,const T *color)
-        {
-            if(!data||!color)return;
-
-            if(x<0||y<0||x>=width||y>=height)return;
-
-            T *p=data+(y*width+x)*CHANNELS;
-
-            for(uint i=0;i<CHANNELS;i++)
-            {
-                *p=*color;
-                ++p;
-                ++color;
-            }
-        }
-
-        bool GetPixel(int x,int y,T *color)
-        {
-            if(!data||!color)return(false);
-
-            if(x<0||y<0||x>=width||y>=height)return(false);
-
-            T *p=data+(y*width+x)*CHANNELS;
-
-            for(uint i=0;i<CHANNELS;i++)
-            {
-                *color=*p;
-                ++p;
-                ++color;
-            }
-
-            return(true);
-        }
-    };//template<typename T,uint CHANNELS> class Bitmap
-
-    using BitmapR8      =Bitmap<uint8,  1>;
-    using BitmapR16     =Bitmap<uint16, 1>;
-    using BitmapR32U    =Bitmap<uint32, 1>;
-    using BitmapR32F    =Bitmap<float,  1>;
-
-    using BitmapRG8     =Bitmap<uint8,  2>;
-    using BitmapRG16    =Bitmap<uint16, 2>;
-    using BitmapRG32U   =Bitmap<uint32, 2>;
-    using BitmapRG32F   =Bitmap<float,  2>;
-
-    using BitmapRGBA8   =Bitmap<uint8,  4>;
-    using BitmapRGBA16  =Bitmap<uint16, 4>;
-    using BitmapRGBA32U =Bitmap<uint32, 4>;
-    using BitmapRGBA32F =Bitmap<float,  4>;
+    };//template<typename T> class Bitmap
 }//namespace hgl
 #endif//HGL_2D_BITMAP_INCLUDE
