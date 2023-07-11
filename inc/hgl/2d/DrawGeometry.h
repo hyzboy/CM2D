@@ -148,13 +148,12 @@ namespace hgl
 
                 if(length<=0)return(false);
 
-                const uint line_bytes=bitmap->GetLineBytes();
                 T *p=bitmap->GetData(x,y);
 
                 for(int i=0;i<length;i++)
                 {
                     *p=(*blend)(draw_color,*p,alpha);
-                    p+=line_bytes;
+                    p+=width;
                 }
 
                 return(true);
