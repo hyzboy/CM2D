@@ -159,6 +159,40 @@ namespace hgl
 
             delete[] temp;
         }
+
+        void PutPixel(int x,int y,const T *color)
+        {
+            if(!data||!color)return;
+
+            if(x<0||y<0||x>=width||y>=height)return;
+
+            T *p=data+(y*width+x)*CHANNELS;
+
+            for(uint i=0;i<CHANNELS;i++)
+            {
+                *p=*color;
+                ++p;
+                ++color;
+            }
+        }
+
+        bool GetPixel(int x,int y,T *color)
+        {
+            if(!data||!color)return(false);
+
+            if(x<0||y<0||x>=width||y>=height)return(false);
+
+            T *p=data+(y*width+x)*CHANNELS;
+
+            for(uint i=0;i<CHANNELS;i++)
+            {
+                *color=*p;
+                ++p;
+                ++color;
+            }
+
+            return(true);
+        }
     };//template<typename T,uint CHANNELS> class Bitmap
 
     using BitmapR8      =Bitmap<uint8,  1>;
