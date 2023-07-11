@@ -27,6 +27,14 @@ namespace hgl
             delete[] data;
         }
 
+        const uint GetWidth()const{return width;}
+        const uint GetHeight()const{return height;}
+        const uint GetTotalPixels()const{return width*height;}
+        const uint GetLineBytea()const{return width*CHANNELS*sizeof(T);}
+        const uint GetTotalBytes()const{return width*height*CHANNELS*sizeof(T);}
+
+        T *GetData(){return data;}
+
         bool Create(uint w,uint h)
         {
             if(!w||!h)return(false);
