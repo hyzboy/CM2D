@@ -347,7 +347,7 @@ namespace hgl
             void DrawSector(int x0, int y0, uint r, uint stangle, uint endangle)
             {
                 int i, j;
-                int *xy;
+                AutoDeleteArray<int> xy(20);
                 int bx, ex, bxd, exd, bxf, exf, ben;
                 int tn, x, y;
                 int xmax;
@@ -356,7 +356,6 @@ namespace hgl
                 xmax=(int)(r*HGL_SIN_45);
                 tn=(1-r*2);
 
-                xy=(int *)calloc(20, sizeof(int));
                 xy[0]=x0+r;xy[1]=y0;
                 xy[2]=x0;  xy[3]=y0-r;
                 xy[4]=x0;  xy[5]=y0-r;
@@ -437,7 +436,6 @@ namespace hgl
                     xy[12]++;
                     xy[15]++;
                 }
-                free(xy);
             }
 
             void DrawMonoBitmap(const int left,const int top,const uint8 *data,const int w,const int h)
