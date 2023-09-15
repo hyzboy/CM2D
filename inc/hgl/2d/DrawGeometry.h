@@ -474,6 +474,7 @@ namespace hgl
         };//template<typename T,uint CHANNELS> class DrawGeometry
 
         using DrawGeometryU32=DrawGeometry<uint32,BitmapU32>;
+        using DrawGeometryRGB8=DrawGeometry<Vector3u8,BitmapRGB8>;
         using DrawGeometryRGBA8=DrawGeometry<Vector4u8,BitmapRGBA8>;
     }//namespace bitmap
 }//namespace hgl
