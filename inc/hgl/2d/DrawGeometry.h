@@ -1,19 +1,15 @@
 #pragma once
 
 #include<hgl/2d/Bitmap.h>
-#include<hgl/2d/blend.h>
+#include<hgl/2d/Blend.h>
 #include<hgl/math/FastTriangle.h>
 
 namespace hgl
 {
     namespace bitmap
     {
-        template<typename T> class DrawGeometry
+        template<typename T,typename FormatBitmap> class DrawGeometry
         {
-        public:
-
-            using FormatBitmap=Bitmap<T>;
-
         protected:
 
             FormatBitmap *bitmap;
@@ -476,5 +472,8 @@ namespace hgl
                 }
             }
         };//template<typename T,uint CHANNELS> class DrawGeometry
+
+        using DrawGeometryU32=DrawGeometry<uint32,BitmapU32>;
+        using DrawGeometryRGBA8=DrawGeometry<Vector4u8,BitmapRGBA8>;
     }//namespace bitmap
 }//namespace hgl

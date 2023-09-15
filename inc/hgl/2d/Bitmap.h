@@ -2,6 +2,7 @@
 #define HGL_2D_BITMAP_INCLUDE
 
 #include<hgl/type/DataType.h>
+#include<hgl/type/String.h>
 #include<hgl/math/HalfFloat.h>
 #include<iterator>
 namespace hgl
@@ -17,7 +18,7 @@ namespace hgl
         /**
          * 简单的2D象素处理
          */
-        template<typename T> class Bitmap
+        template<typename T,uint C> class Bitmap
         {
             int width,height;
 
@@ -35,6 +36,9 @@ namespace hgl
             {
                 delete[] data;
             }
+
+            const uint GetChannels      ()const{return C;}
+            const uint GetChannelBits   ()const{return (sizeof(T)/C)<<3;}
 
             const int  GetWidth         ()const{return width;}
             const int  GetHeight        ()const{return height;}
@@ -115,6 +119,15 @@ namespace hgl
                 delete[] temp;
             }
         };//template<typename T> class Bitmap
+
+        using BitmapGrey8=Bitmap<uint8,1>;
+        using BitmapRG8=Bitmap<Vector2u8,2>;
+        using BitmapRGB8=Bitmap<Vector3u8,3>;
+        using BitmapRGBA8=Bitmap<Vector4u8,4>;
+
+        using BitmapU16=Bitmap<uint16,1>;
+        using BitmapU32=Bitmap<uint32,1>;
     }//namespace bitmap
 }//namespace hgl
 #endif//HGL_2D_BITMAP_INCLUDE
+
