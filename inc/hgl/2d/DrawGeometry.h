@@ -54,9 +54,9 @@ namespace hgl
 
             bool GetPixel(int x,int y,T &color)
             {
-                if(!data)return(false);
+                if(!bitmap)return(false);
 
-                T *p=GetData(x,y);
+                T *p=bitmap->GetData(x,y);
 
                 if(!p)return(false);
 
@@ -76,6 +76,11 @@ namespace hgl
                 *p=(*blend)(draw_color,*p,alpha);
 
                 return(true);
+            }
+
+            bool PutPixel(const Vector2i &v)
+            {
+                return PutPixel(v.x,v.y);
             }
 
             bool DrawHLine(int x,int y,int length)
@@ -117,7 +122,7 @@ namespace hgl
 
                 if(w<=0||h<=0)return(false);
 
-                T *p=bitmap->GetData(x,y);
+                T *p=bitmap->GetData(l,t);
 
                 for(int y=t;y<t+h;y++)
                 {
@@ -338,6 +343,11 @@ namespace hgl
                         }
                     }
                 }
+            }
+            
+            void DrawLine(const Vector2i &start,const Vector2i &end)
+            {
+                DrawLine(start.x,start.y,end.x,end.y);
             }
 
             void DrawSector(int x0, int y0, uint r, uint stangle, uint endangle)

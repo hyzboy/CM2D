@@ -79,7 +79,7 @@ namespace hgl
             io::OpenFileInputStream fis(filename);
 
             if(!fis)
-                return(false);
+                return(nullptr);
 
             return LoadBitmapFromTGA<T>(&fis);
         }
