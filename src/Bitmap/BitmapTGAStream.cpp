@@ -45,7 +45,7 @@ namespace hgl
         }
     
         /**
-        * 以TGA格式保存Bitmap数据到流
+        * 浠GA鏍煎紡淇濆瓨Bitmap鏁版嵁鍒版祦
         */
         bool SaveBitmapToTGA(io::OutputStream *os,void *data,uint width,uint height,uint channels,uint single_channel_bits)
         {
