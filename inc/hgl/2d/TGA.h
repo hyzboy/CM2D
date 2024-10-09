@@ -44,7 +44,7 @@ namespace hgl
         };
 #pragma pack(pop)
 
-        constexpr size_t TGAHeaderSize=sizeof(TGAHeader);
+        constexpr size_t TGAHeaderSize=sizeof(TGAHeader);       ///<TGA文件头，必须等于18
 
         bool FillTGAHeader(TGAHeader *header,const uint16 width,const uint16 height,const uint8 channels,const uint8 single_channel_bits=8);
     }//namespace imgfmt
