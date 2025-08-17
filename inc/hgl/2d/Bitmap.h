@@ -125,4 +125,9 @@ namespace hgl::bitmap
 
     using BitmapU16=Bitmap<uint16,1>;
     using BitmapU32=Bitmap<uint32,1>;
+
+    using Bitmap32F=Bitmap<float,1>;
+    using BitmapRG32F=Bitmap<Vector2f,2>;
+    using BitmapRGB32F=Bitmap<Vector3f,3>;
+    using BitmapRGBA32F=Bitmap<Vector4f,4>;
 }//namespace hgl::bitmap
