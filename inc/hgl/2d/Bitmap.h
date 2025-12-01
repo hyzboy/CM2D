@@ -1,6 +1,7 @@
 #pragma once
 
 #include<hgl/type/DataType.h>
+#include<hgl/math/Vector.h>
 #include<hgl/type/String.h>
 #include<hgl/math/HalfFloat.h>
 #include<iterator>
