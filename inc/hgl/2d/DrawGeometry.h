@@ -25,7 +25,7 @@ namespace hgl
             DrawGeometry(FormatBitmap *fb)
             {
                 bitmap=fb;
-                hgl_zero(draw_color);
+                mem_zero(draw_color);
                 alpha=1;
                 blend=&no_blend;
             }
@@ -78,7 +78,7 @@ namespace hgl
                 return(true);
             }
 
-            bool PutPixel(const Vector2i &v)
+            bool PutPixel(const math::Vector2i &v)
             {
                 return PutPixel(v.x,v.y);
             }
@@ -345,7 +345,7 @@ namespace hgl
                 }
             }
             
-            void DrawLine(const Vector2i &start,const Vector2i &end)
+            void DrawLine(const math::Vector2i &start,const math::Vector2i &end)
             {
                 DrawLine(start.x,start.y,end.x,end.y);
             }

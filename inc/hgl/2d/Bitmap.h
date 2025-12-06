@@ -120,15 +120,15 @@ namespace hgl::bitmap
     };//template<typename T> class Bitmap
 
     using BitmapGrey8=Bitmap<uint8,1>;
-    using BitmapRG8=Bitmap<Vector2u8,2>;
-    using BitmapRGB8=Bitmap<Vector3u8,3>;
-    using BitmapRGBA8=Bitmap<Vector4u8,4>;
+    using BitmapRG8=Bitmap<math::Vector2u8,2>;
+    using BitmapRGB8=Bitmap<math::Vector3u8,3>;
+    using BitmapRGBA8=Bitmap<math::Vector4u8,4>;
 
     using BitmapU16=Bitmap<uint16,1>;
     using BitmapU32=Bitmap<uint32,1>;
 
     using Bitmap32F=Bitmap<float,1>;
-    using BitmapRG32F=Bitmap<Vector2f,2>;
-    using BitmapRGB32F=Bitmap<Vector3f,3>;
-    using BitmapRGBA32F=Bitmap<Vector4f,4>;
+    using BitmapRG32F=Bitmap<math::Vector2f,2>;
+    using BitmapRGB32F=Bitmap<math::Vector3f,3>;
+    using BitmapRGBA32F=Bitmap<math::Vector4f,4>;
 }//namespace hgl::bitmap
