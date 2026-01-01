@@ -39,14 +39,6 @@ namespace hgl::bitmap::resize
     // ===================== Helper Functions =====================
     
     /**
-     * Clamp value to range [0, 1]
-     */
-    inline float Clamp01(float value)
-    {
-        return std::clamp(value, 0.0f, 1.0f);
-    }
-
-    /**
      * Clamp value to byte range [0, 255]
      */
     inline uint8 ClampByte(float value)
@@ -343,6 +335,7 @@ namespace hgl::bitmap::resize
         {
             Bitmap<T, C> result;
             result.Create(new_width, new_height);
+            // Using memcpy for POD types (consistent with Bitmap::Flip implementation)
             memcpy(result.GetData(), source.GetData(), source.GetTotalBytes());
             return result;
         }

@@ -94,6 +94,7 @@ namespace hgl::bitmap::mipmap
             // Level 0 is the original image (copy it)
             Bitmap<T, C> level0;
             level0.Create(base_width, base_height);
+            // Using memcpy for POD types (consistent with Bitmap::Flip implementation)
             memcpy(level0.GetData(), base.GetData(), base.GetTotalBytes());
             levels_.push_back(std::move(level0));
 

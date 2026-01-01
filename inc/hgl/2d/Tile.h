@@ -170,6 +170,7 @@ namespace hgl::bitmap::tile
                 {
                     const T* src_row = src_data + (tile_y + y) * src_width + tile_x;
                     T* tile_row = tile_data + y * actual_width;
+                    // Using memcpy for POD types (consistent with Bitmap::Flip implementation)
                     memcpy(tile_row, src_row, actual_width * sizeof(T));
                 }
 
@@ -273,6 +274,7 @@ namespace hgl::bitmap::tile
         // Create result as a copy of source
         Bitmap<T, C> result;
         result.Create(width, height);
+        // Using memcpy for POD types (consistent with Bitmap::Flip implementation)
         memcpy(result.GetData(), source.GetData(), source.GetTotalBytes());
 
         T* data = result.GetData();
