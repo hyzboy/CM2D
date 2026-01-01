@@ -112,9 +112,7 @@ namespace hgl
              */
             T operator()(const T &src, const T &dst) const
             {
-                if (blend_func)
-                    return blend_func(src, dst, 1.0f);
-                return src;
+                return operator()(src, dst, 1.0f);
             }
 
             /**
@@ -339,7 +337,7 @@ namespace hgl
             {
                 // Scale source alpha by global alpha
                 Vector4u8 src_scaled = *src;
-                src_scaled.a = ClampByte(src->a * alpha);
+                src_scaled.a = ClampByte(static_cast<float>(src->a) * alpha);
 
                 // Convert RGB8 dst to RGBA8 for blending
                 Vector4u8 dst_rgba(dst->r, dst->g, dst->b, 255);

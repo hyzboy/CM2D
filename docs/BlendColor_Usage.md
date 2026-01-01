@@ -54,15 +54,18 @@ The following blend modes from `AlphaBlendMode` enum are supported:
 
 ```cpp
 // Define a custom blend function
+// Note: This example shows a simple average blend for demonstration purposes
+// In practice, you should use the alpha parameter appropriately
 math::Vector4u8 CustomBlend(const math::Vector4u8 &src, 
                             const math::Vector4u8 &dst, 
                             float alpha)
 {
     math::Vector4u8 result;
-    result.r = static_cast<uint8>((src.r + dst.r) / 2);
-    result.g = static_cast<uint8>((src.g + dst.g) / 2);
-    result.b = static_cast<uint8>((src.b + dst.b) / 2);
-    result.a = static_cast<uint8>((src.a + dst.a) / 2);
+    // Blend using alpha: result = dst * (1 - alpha) + src * alpha
+    result.r = static_cast<uint8>(dst.r * (1.0f - alpha) + src.r * alpha);
+    result.g = static_cast<uint8>(dst.g * (1.0f - alpha) + src.g * alpha);
+    result.b = static_cast<uint8>(dst.b * (1.0f - alpha) + src.b * alpha);
+    result.a = static_cast<uint8>(dst.a * (1.0f - alpha) + src.a * alpha);
     return result;
 }
 
