@@ -1,5 +1,16 @@
 #pragma once
 
+/**
+ * @file Blend.h
+ * @brief Flexible alpha blending system for bitmap operations
+ * 
+ * This file provides a template-based blending system that supports multiple
+ * blend modes from CMMath library. It requires the following external dependencies:
+ * - hgl::AlphaBlendMode enum from CMCoreType
+ * - hgl::graph::GetAlphaBlendFunc*() functions from CMMath
+ * - hgl::math::Vector types from CMMath
+ */
+
 #include<hgl/CoreType.h>
 #include<hgl/2d/Bitmap.h>
 #include<hgl/math/AlphaBlend.h>
@@ -331,7 +342,8 @@ namespace hgl
             const Vector4u8 *src = src_bitmap->GetData();
 
             // Use default Normal blend mode for standard alpha blending
-            static BlendColorRGBA8 blend_color;
+            // Static is safe here - const and thread-safe initialization in C++11+
+            static const BlendColorRGBA8 blend_color;
 
             for (uint i = 0; i < width * height; i++)
             {
