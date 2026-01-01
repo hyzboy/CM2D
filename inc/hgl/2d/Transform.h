@@ -213,8 +213,8 @@ namespace hgl::bitmap::transform
      * @param bitmap Bitmap to flip
      * @param direction Flip direction
      * 
-     * Note: Only supports Horizontal and Vertical flips, not Both
-     *       For vertical flip, uses the existing Bitmap::Flip() method
+     * Note: For vertical flip, uses the existing Bitmap::Flip() method
+     *       For Both direction, performs vertical then horizontal flip
      */
     template<typename T, uint C>
     void FlipInPlace(Bitmap<T, C>& bitmap, FlipDirection direction)
