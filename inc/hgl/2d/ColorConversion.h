@@ -2,6 +2,8 @@
 
 #include<hgl/2d/Bitmap.h>
 #include<hgl/math/Vector.h>
+#include<hgl/math/Color.h>
+#include<hgl/math/Clamp.h>
 #include<cmath>
 #include<algorithm>
 
@@ -30,54 +32,6 @@
 
 namespace hgl::bitmap::color
 {
-    // ===================== Helper Functions =====================
-
-    /**
-     * Clamp value to byte range [0, 255]
-     */
-    inline uint8 ClampByte(float value)
-    {
-        return static_cast<uint8>(std::clamp(value, 0.0f, 255.0f));
-    }
-
-    /**
-     * Convert sRGB value (0-1) to linear color space
-     */
-    inline float SRGBToLinear(float srgb)
-    {
-        if (srgb <= 0.04045f)
-            return srgb / 12.92f;
-        else
-            return std::pow((srgb + 0.055f) / 1.055f, 2.4f);
-    }
-
-    /**
-     * Convert linear value (0-1) to sRGB color space
-     */
-    inline float LinearToSRGB(float linear)
-    {
-        if (linear <= 0.0031308f)
-            return linear * 12.92f;
-        else
-            return 1.055f * std::pow(linear, 1.0f / 2.4f) - 0.055f;
-    }
-
-    /**
-     * Convert sRGB byte (0-255) to linear float (0-1)
-     */
-    inline float SRGBByteToLinear(uint8 srgb)
-    {
-        return SRGBToLinear(srgb / 255.0f);
-    }
-
-    /**
-     * Convert linear float (0-1) to sRGB byte (0-255)
-     */
-    inline uint8 LinearToSRGBByte(float linear)
-    {
-        return ClampByte(LinearToSRGB(linear) * 255.0f);
-    }
-
     // ===================== RGB ↔ RGBA Conversions =====================
 
     /**
@@ -170,7 +124,7 @@ namespace hgl::bitmap::color
         {
             // ITU-R BT.601 luma coefficients
             float grey = 0.299f * src[i].r + 0.587f * src[i].g + 0.114f * src[i].b;
-            dst[i] = ClampByte(grey);
+            dst[i] = hgl::math::ClampU8(grey);
         }
         
         return result;
@@ -199,7 +153,7 @@ namespace hgl::bitmap::color
         for (int i = 0; i < width * height; ++i)
         {
             float grey = 0.299f * src[i].r + 0.587f * src[i].g + 0.114f * src[i].b;
-            dst[i] = ClampByte(grey);
+            dst[i] = hgl::math::ClampU8(grey);
         }
         
         return result;
@@ -355,9 +309,9 @@ namespace hgl::bitmap::color
         
         for (int i = 0; i < width * height; ++i)
         {
-            dst[i].x = SRGBByteToLinear(src[i].r);
-            dst[i].y = SRGBByteToLinear(src[i].g);
-            dst[i].z = SRGBByteToLinear(src[i].b);
+            dst[i].x = hgl::math::SRGBByteToLinear(src[i].r);
+            dst[i].y = hgl::math::SRGBByteToLinear(src[i].g);
+            dst[i].z = hgl::math::SRGBByteToLinear(src[i].b);
         }
         
         return result;
@@ -387,9 +341,9 @@ namespace hgl::bitmap::color
         
         for (int i = 0; i < width * height; ++i)
         {
-            dst[i].x = SRGBByteToLinear(src[i].r);
-            dst[i].y = SRGBByteToLinear(src[i].g);
-            dst[i].z = SRGBByteToLinear(src[i].b);
+            dst[i].x = hgl::math::SRGBByteToLinear(src[i].r);
+            dst[i].y = hgl::math::SRGBByteToLinear(src[i].g);
+            dst[i].z = hgl::math::SRGBByteToLinear(src[i].b);
             dst[i].w = src[i].a / 255.0f; // Alpha is linear
         }
         
@@ -418,9 +372,9 @@ namespace hgl::bitmap::color
         
         for (int i = 0; i < width * height; ++i)
         {
-            dst[i].r = LinearToSRGBByte(src[i].x);
-            dst[i].g = LinearToSRGBByte(src[i].y);
-            dst[i].b = LinearToSRGBByte(src[i].z);
+            dst[i].r = hgl::math::LinearToSRGBByte(src[i].x);
+            dst[i].g = hgl::math::LinearToSRGBByte(src[i].y);
+            dst[i].b = hgl::math::LinearToSRGBByte(src[i].z);
         }
         
         return result;
@@ -450,10 +404,10 @@ namespace hgl::bitmap::color
         
         for (int i = 0; i < width * height; ++i)
         {
-            dst[i].r = LinearToSRGBByte(src[i].x);
-            dst[i].g = LinearToSRGBByte(src[i].y);
-            dst[i].b = LinearToSRGBByte(src[i].z);
-            dst[i].a = ClampByte(src[i].w * 255.0f); // Alpha is linear
+            dst[i].r = hgl::math::LinearToSRGBByte(src[i].x);
+            dst[i].g = hgl::math::LinearToSRGBByte(src[i].y);
+            dst[i].b = hgl::math::LinearToSRGBByte(src[i].z);
+            dst[i].a = hgl::math::ClampU8(src[i].w * 255.0f); // Alpha is linear
         }
         
         return result;

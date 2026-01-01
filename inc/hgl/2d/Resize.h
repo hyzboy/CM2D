@@ -2,6 +2,8 @@
 
 #include<hgl/2d/Bitmap.h>
 #include<hgl/math/Vector.h>
+#include<hgl/math/Clamp.h>
+#include<hgl/math/VectorOperations.h>
 #include<algorithm>
 #include<cmath>
 
@@ -44,97 +46,6 @@ namespace hgl::bitmap::resize
         Lanczos3,         // Lanczos with a=3 (highest quality, very sharp)
         Adaptive          // Automatically select best filter based on scale ratio
     };
-
-    // ===================== Helper Functions =====================
-    
-    /**
-     * Clamp value to byte range [0, 255]
-     */
-    inline uint8 ClampByte(float value)
-    {
-        return static_cast<uint8>(std::clamp(value, 0.0f, 255.0f));
-    }
-
-    /**
-     * Linear interpolation for scalar types
-     */
-    template<typename T>
-    inline T Lerp(const T& a, const T& b, float t)
-    {
-        return a + (b - a) * t;
-    }
-
-    /**
-     * Linear interpolation for Vector2u8
-     */
-    inline math::Vector2u8 Lerp(const math::Vector2u8& a, const math::Vector2u8& b, float t)
-    {
-        return math::Vector2u8(
-            ClampByte(a.x + (b.x - a.x) * t),
-            ClampByte(a.y + (b.y - a.y) * t)
-        );
-    }
-
-    /**
-     * Linear interpolation for Vector3u8 (RGB)
-     */
-    inline math::Vector3u8 Lerp(const math::Vector3u8& a, const math::Vector3u8& b, float t)
-    {
-        return math::Vector3u8(
-            ClampByte(a.r + (b.r - a.r) * t),
-            ClampByte(a.g + (b.g - a.g) * t),
-            ClampByte(a.b + (b.b - a.b) * t)
-        );
-    }
-
-    /**
-     * Linear interpolation for Vector4u8 (RGBA)
-     */
-    inline math::Vector4u8 Lerp(const math::Vector4u8& a, const math::Vector4u8& b, float t)
-    {
-        return math::Vector4u8(
-            ClampByte(a.r + (b.r - a.r) * t),
-            ClampByte(a.g + (b.g - a.g) * t),
-            ClampByte(a.b + (b.b - a.b) * t),
-            ClampByte(a.a + (b.a - a.a) * t)
-        );
-    }
-
-    /**
-     * Linear interpolation for Vector2f
-     */
-    inline math::Vector2f Lerp(const math::Vector2f& a, const math::Vector2f& b, float t)
-    {
-        return math::Vector2f(
-            a.x + (b.x - a.x) * t,
-            a.y + (b.y - a.y) * t
-        );
-    }
-
-    /**
-     * Linear interpolation for Vector3f (RGB float)
-     */
-    inline math::Vector3f Lerp(const math::Vector3f& a, const math::Vector3f& b, float t)
-    {
-        return math::Vector3f(
-            a.x + (b.x - a.x) * t,
-            a.y + (b.y - a.y) * t,
-            a.z + (b.z - a.z) * t
-        );
-    }
-
-    /**
-     * Linear interpolation for Vector4f (RGBA float)
-     */
-    inline math::Vector4f Lerp(const math::Vector4f& a, const math::Vector4f& b, float t)
-    {
-        return math::Vector4f(
-            a.x + (b.x - a.x) * t,
-            a.y + (b.y - a.y) * t,
-            a.z + (b.z - a.z) * t,
-            a.w + (b.w - a.w) * t
-        );
-    }
 
     // ===================== Sampling Functions =====================
 
@@ -188,9 +99,9 @@ namespace hgl::bitmap::resize
         T p11 = data[y1 * width + x1];
         
         // Bilinear interpolation
-        T top = Lerp(p00, p10, fx);
-        T bottom = Lerp(p01, p11, fx);
-        return Lerp(top, bottom, fy);
+        T top = hgl::math::lerp(p00, p10, fx);
+        T bottom = hgl::math::lerp(p01, p11, fx);
+        return hgl::math::lerp(top, bottom, fy);
     }
 
     /**
@@ -314,7 +225,7 @@ namespace hgl::bitmap::resize
         if constexpr (C == 1)
         {
             if constexpr (std::is_same_v<T, uint8>)
-                return ClampByte(r_sum);
+                return hgl::math::ClampU8(r_sum);
             else if constexpr (std::is_same_v<T, float>)
                 return r_sum;
             else
@@ -323,21 +234,21 @@ namespace hgl::bitmap::resize
         else if constexpr (C == 2)
         {
             if constexpr (std::is_same_v<T, math::Vector2u8>)
-                return math::Vector2u8(ClampByte(r_sum), ClampByte(g_sum));
+                return math::Vector2u8(hgl::math::ClampU8(r_sum), hgl::math::ClampU8(g_sum));
             else
                 return T(r_sum, g_sum);
         }
         else if constexpr (C == 3)
         {
             if constexpr (std::is_same_v<T, math::Vector3u8>)
-                return math::Vector3u8(ClampByte(r_sum), ClampByte(g_sum), ClampByte(b_sum));
+                return math::Vector3u8(hgl::math::ClampU8(r_sum), hgl::math::ClampU8(g_sum), hgl::math::ClampU8(b_sum));
             else
                 return T(r_sum, g_sum, b_sum);
         }
         else if constexpr (C == 4)
         {
             if constexpr (std::is_same_v<T, math::Vector4u8>)
-                return math::Vector4u8(ClampByte(r_sum), ClampByte(g_sum), ClampByte(b_sum), ClampByte(a_sum));
+                return math::Vector4u8(hgl::math::ClampU8(r_sum), hgl::math::ClampU8(g_sum), hgl::math::ClampU8(b_sum), hgl::math::ClampU8(a_sum));
             else
                 return T(r_sum, g_sum, b_sum, a_sum);
         }
@@ -426,7 +337,7 @@ namespace hgl::bitmap::resize
         if constexpr (C == 1)
         {
             if constexpr (std::is_same_v<T, uint8>)
-                return ClampByte(r_sum);
+                return hgl::math::ClampU8(r_sum);
             else if constexpr (std::is_same_v<T, float>)
                 return r_sum;
             else
@@ -435,21 +346,21 @@ namespace hgl::bitmap::resize
         else if constexpr (C == 2)
         {
             if constexpr (std::is_same_v<T, math::Vector2u8>)
-                return math::Vector2u8(ClampByte(r_sum), ClampByte(g_sum));
+                return math::Vector2u8(hgl::math::ClampU8(r_sum), hgl::math::ClampU8(g_sum));
             else
                 return T(r_sum, g_sum);
         }
         else if constexpr (C == 3)
         {
             if constexpr (std::is_same_v<T, math::Vector3u8>)
-                return math::Vector3u8(ClampByte(r_sum), ClampByte(g_sum), ClampByte(b_sum));
+                return math::Vector3u8(hgl::math::ClampU8(r_sum), hgl::math::ClampU8(g_sum), hgl::math::ClampU8(b_sum));
             else
                 return T(r_sum, g_sum, b_sum);
         }
         else if constexpr (C == 4)
         {
             if constexpr (std::is_same_v<T, math::Vector4u8>)
-                return math::Vector4u8(ClampByte(r_sum), ClampByte(g_sum), ClampByte(b_sum), ClampByte(a_sum));
+                return math::Vector4u8(hgl::math::ClampU8(r_sum), hgl::math::ClampU8(g_sum), hgl::math::ClampU8(b_sum), hgl::math::ClampU8(a_sum));
             else
                 return T(r_sum, g_sum, b_sum, a_sum);
         }
