@@ -1,7 +1,8 @@
-﻿#pragma once
+#pragma once
 
 #include<hgl/CoreType.h>
 #include<hgl/2d/Bitmap.h>
+#include<hgl/math/AlphaBlend.h>
 
 namespace hgl
 {
@@ -51,23 +52,14 @@ namespace hgl
         {
             const Vector4u8 operator()(const Vector4u8 &src,const Vector4u8 &dst)const
             {
-                uint8 na=255-src.a;
-
-                return Vector4u8((src.r*src.a+dst.r*na)/255,
-                                 (src.g*src.a+dst.g*na)/255,
-                                 (src.b*src.a+dst.b*na)/255,
-                                 dst.a);
+                return hgl::math::AlphaBlend(src, dst);
             }
 
             const Vector4u8 operator()(const Vector4u8 &src,const Vector4u8 &dst,const float &alpha)const
             {
-                uint8 a=src.a*alpha;
-                uint8 na=255-src.a;
-
-                return Vector4u8((src.r*src.a+dst.r*na)/255,
-                                 (src.g*src.a+dst.g*na)/255,
-                                 (src.b*src.a+dst.b*na)/255,
-                                 dst.a);
+                Vector4u8 src_scaled = src;
+                src_scaled.a = static_cast<uint8>(src.a * alpha);
+                return hgl::math::AlphaBlend(src_scaled, dst);
             }
         };
 
@@ -84,17 +76,17 @@ namespace hgl
                   Vector3u8 *dst=dst_bitmap->GetData();
             const Vector4u8 *src=src_bitmap->GetData();
 
-            float a;
-            float na;
-
             for(uint i=0;i<width*height;i++)
             {
-                a=src->a*alpha;
-                na=255-src->a;
-
-                dst->r=(src->r*a+dst->r*na)/255;
-                dst->g=(src->g*a+dst->g*na)/255;
-                dst->b=(src->b*a+dst->b*na)/255;
+                Vector4u8 src_scaled = *src;
+                src_scaled.a = static_cast<uint8>(src->a * alpha);
+                
+                Vector4u8 dst_rgba(dst->r, dst->g, dst->b, 255);
+                Vector4u8 blended = hgl::math::AlphaBlend(src_scaled, dst_rgba);
+                
+                dst->r = blended.r;
+                dst->g = blended.g;
+                dst->b = blended.b;
 
                 ++dst;
                 ++src;
