@@ -9,15 +9,21 @@
  * Image Resize Module
  * 
  * Provides various interpolation methods for image scaling.
- * Supports nearest neighbor, bilinear, and bicubic interpolation.
+ * Supports nearest neighbor, bilinear, bicubic, Lanczos, and adaptive filtering.
  * 
  * Example usage:
  * ```cpp
  * BitmapRGB8 source;
  * source.Create(100, 100);
  * 
- * // Resize to specific dimensions with bilinear filtering
+ * // Resize with bilinear filtering (balanced quality/speed)
  * auto resized = hgl::bitmap::resize::Resize(source, 200, 150);
+ * 
+ * // High-quality Lanczos downscaling
+ * auto downscaled = hgl::bitmap::resize::Resize(source, 50, 50, FilterType::Lanczos3);
+ * 
+ * // Adaptive mode (automatically selects best filter)
+ * auto adaptive = hgl::bitmap::resize::Resize(source, 75, 75, FilterType::Adaptive);
  * 
  * // Scale by factor with nearest neighbor (for pixel art)
  * auto scaled = hgl::bitmap::resize::ResizeScale(source, 2.0f, FilterType::NearestNeighbor);
@@ -33,7 +39,10 @@ namespace hgl::bitmap::resize
     { 
         NearestNeighbor,  // Fast, preserves hard edges (good for pixel art)
         Bilinear,         // Balanced quality and performance
-        Bicubic           // Highest quality, slower
+        Bicubic,          // High quality with cubic interpolation
+        Lanczos2,         // Lanczos with a=2 (high quality, sharper)
+        Lanczos3,         // Lanczos with a=3 (highest quality, very sharp)
+        Adaptive          // Automatically select best filter based on scale ratio
     };
 
     // ===================== Helper Functions =====================
@@ -199,6 +208,37 @@ namespace hgl::bitmap::resize
     }
 
     /**
+     * Lanczos kernel function
+     * 
+     * @param x Distance from sample point
+     * @param a Lanczos kernel size (typically 2 or 3)
+     */
+    inline float LanczosWeight(float x, int a)
+    {
+        x = std::abs(x);
+        if (x < 1e-6f)
+            return 1.0f;
+        if (x >= a)
+            return 0.0f;
+        
+        constexpr float PI = 3.14159265358979323846f;
+        float pi_x = PI * x;
+        return (a * std::sin(pi_x) * std::sin(pi_x / a)) / (pi_x * pi_x);
+    }
+
+    /**
+     * Sinc function for Lanczos kernel
+     */
+    inline float Sinc(float x)
+    {
+        if (std::abs(x) < 1e-6f)
+            return 1.0f;
+        constexpr float PI = 3.14159265358979323846f;
+        float pi_x = PI * x;
+        return std::sin(pi_x) / pi_x;
+    }
+
+    /**
      * Sample pixel with bicubic interpolation
      */
     template<typename T, uint C>
@@ -305,6 +345,146 @@ namespace hgl::bitmap::resize
         return T{};
     }
 
+    /**
+     * Sample pixel with Lanczos interpolation
+     * 
+     * @param source Source bitmap
+     * @param x X coordinate (can be fractional)
+     * @param y Y coordinate (can be fractional)
+     * @param a Lanczos kernel size (2 or 3)
+     */
+    template<typename T, uint C>
+    T SampleLanczos(const Bitmap<T, C>& source, float x, float y, int a)
+    {
+        const int width = source.GetWidth();
+        const int height = source.GetHeight();
+        const T* data = source.GetData();
+        
+        int x0 = static_cast<int>(std::floor(x));
+        int y0 = static_cast<int>(std::floor(y));
+        
+        // For uint8 types, we need to accumulate as floats
+        float r_sum = 0.0f, g_sum = 0.0f, b_sum = 0.0f, a_sum = 0.0f;
+        float weight_sum = 0.0f;
+        
+        // Sample neighborhood based on kernel size (a)
+        for (int dy = -a + 1; dy <= a; ++dy)
+        {
+            for (int dx = -a + 1; dx <= a; ++dx)
+            {
+                int sx = std::clamp(x0 + dx, 0, width - 1);
+                int sy = std::clamp(y0 + dy, 0, height - 1);
+                
+                float wx = LanczosWeight(x - (x0 + dx), a);
+                float wy = LanczosWeight(y - (y0 + dy), a);
+                float w = wx * wy;
+                
+                const T& pixel = data[sy * width + sx];
+                
+                // Handle different pixel types
+                if constexpr (C == 1)
+                {
+                    // Grayscale or single channel
+                    if constexpr (std::is_same_v<T, uint8>)
+                        r_sum += pixel * w;
+                    else
+                        r_sum += pixel * w;
+                }
+                else if constexpr (C == 2)
+                {
+                    r_sum += pixel.x * w;
+                    g_sum += pixel.y * w;
+                }
+                else if constexpr (C == 3)
+                {
+                    r_sum += pixel.r * w;
+                    g_sum += pixel.g * w;
+                    b_sum += pixel.b * w;
+                }
+                else if constexpr (C == 4)
+                {
+                    r_sum += pixel.r * w;
+                    g_sum += pixel.g * w;
+                    b_sum += pixel.b * w;
+                    a_sum += pixel.a * w;
+                }
+                
+                weight_sum += w;
+            }
+        }
+        
+        // Normalize and construct result
+        if (weight_sum > 0.0f)
+        {
+            r_sum /= weight_sum;
+            g_sum /= weight_sum;
+            b_sum /= weight_sum;
+            a_sum /= weight_sum;
+        }
+        
+        // Construct result based on type
+        if constexpr (C == 1)
+        {
+            if constexpr (std::is_same_v<T, uint8>)
+                return ClampByte(r_sum);
+            else if constexpr (std::is_same_v<T, float>)
+                return r_sum;
+            else
+                return static_cast<T>(r_sum);
+        }
+        else if constexpr (C == 2)
+        {
+            if constexpr (std::is_same_v<T, math::Vector2u8>)
+                return math::Vector2u8(ClampByte(r_sum), ClampByte(g_sum));
+            else
+                return T(r_sum, g_sum);
+        }
+        else if constexpr (C == 3)
+        {
+            if constexpr (std::is_same_v<T, math::Vector3u8>)
+                return math::Vector3u8(ClampByte(r_sum), ClampByte(g_sum), ClampByte(b_sum));
+            else
+                return T(r_sum, g_sum, b_sum);
+        }
+        else if constexpr (C == 4)
+        {
+            if constexpr (std::is_same_v<T, math::Vector4u8>)
+                return math::Vector4u8(ClampByte(r_sum), ClampByte(g_sum), ClampByte(b_sum), ClampByte(a_sum));
+            else
+                return T(r_sum, g_sum, b_sum, a_sum);
+        }
+        
+        return T{};
+    }
+
+    /**
+     * Determine the best filter type for given scale ratio (used by Adaptive mode)
+     * 
+     * @param scale_ratio Scaling ratio (new_size / old_size)
+     * @return Recommended filter type
+     */
+    inline FilterType DetermineAdaptiveFilter(float scale_ratio)
+    {
+        // For significant downscaling, use Lanczos for best quality
+        if (scale_ratio <= 0.5f)
+            return FilterType::Lanczos3;
+        
+        // For moderate downscaling, use Bicubic
+        if (scale_ratio < 0.75f)
+            return FilterType::Bicubic;
+        
+        // For slight downscaling or upscaling up to 2x, use Bilinear
+        if (scale_ratio <= 2.0f)
+            return FilterType::Bilinear;
+        
+        // For significant upscaling (>2x), use Bicubic for smoother results
+        if (scale_ratio <= 4.0f)
+            return FilterType::Bicubic;
+        
+        // For extreme upscaling, use Nearest Neighbor to preserve clarity
+        return FilterType::NearestNeighbor;
+    }
+
     // ===================== Main Resize Functions =====================
 
     /**
@@ -348,6 +528,14 @@ namespace hgl::bitmap::resize
         float x_scale = static_cast<float>(src_width) / new_width;
         float y_scale = static_cast<float>(src_height) / new_height;
         
+        // For adaptive mode, determine the best filter based on scale ratio
+        FilterType actual_filter = filter;
+        if (filter == FilterType::Adaptive)
+        {
+            float avg_scale = (1.0f / x_scale + 1.0f / y_scale) / 2.0f;
+            actual_filter = DetermineAdaptiveFilter(avg_scale);
+        }
+        
         // Resample each pixel
         for (int dst_y = 0; dst_y < new_height; ++dst_y)
         {
@@ -359,7 +547,7 @@ namespace hgl::bitmap::resize
                 
                 // Sample based on filter type
                 T pixel;
-                switch (filter)
+                switch (actual_filter)
                 {
                     case FilterType::NearestNeighbor:
                         pixel = SampleNearest(source, src_x, src_y);
@@ -369,6 +557,16 @@ namespace hgl::bitmap::resize
                         break;
                     case FilterType::Bicubic:
                         pixel = SampleBicubic(source, src_x, src_y);
+                        break;
+                    case FilterType::Lanczos2:
+                        pixel = SampleLanczos(source, src_x, src_y, 2);
+                        break;
+                    case FilterType::Lanczos3:
+                        pixel = SampleLanczos(source, src_x, src_y, 3);
+                        break;
+                    case FilterType::Adaptive:
+                        // Should not reach here as we resolve adaptive above
+                        pixel = SampleBilinear(source, src_x, src_y);
                         break;
                 }
                 
