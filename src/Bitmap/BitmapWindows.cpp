@@ -17,7 +17,7 @@ namespace hgl::bitmap
     template<typename T, uint C>
     BitmapWindows<T, C>::~BitmapWindows()
     {
-        // 必须在释放平台资源前将data设为nullptr，防止基类重复释放
+        // Must set data to nullptr before releasing platform resources to prevent base class double-free
         this->data = nullptr;
 
         if (memDC)
@@ -37,7 +37,7 @@ namespace hgl::bitmap
         if (!w || !h)
             return false;
 
-        // 清理旧资源
+        // Clean up old resources
         if (memDC)
         {
             if (hOldBitmap)
@@ -57,7 +57,7 @@ namespace hgl::bitmap
         this->width = w;
         this->height = h;
 
-        // 创建内存DC
+        // Create memory DC
         HDC screenDC = hdc ? hdc : GetDC(nullptr);
         memDC = CreateCompatibleDC(screenDC);
         if (!memDC)
@@ -67,16 +67,16 @@ namespace hgl::bitmap
             return false;
         }
 
-        // 准备BITMAPINFO
+        // Prepare BITMAPINFO
         BITMAPINFO bmi = {};
         bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmi.bmiHeader.biWidth = w;
-        bmi.bmiHeader.biHeight = -(int)h;  // 负值表示top-down DIB
+        bmi.bmiHeader.biHeight = -(int)h;  // Negative value indicates top-down DIB
         bmi.bmiHeader.biPlanes = 1;
         bmi.bmiHeader.biBitCount = sizeof(T) * 8;
         bmi.bmiHeader.biCompression = BI_RGB;
 
-        // 创建DIB Section
+        // Create DIB Section
         void* bits = nullptr;
         hBitmap = CreateDIBSection(memDC, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
 
@@ -93,10 +93,10 @@ namespace hgl::bitmap
             return false;
         }
 
-        // 将DIB Section选入内存DC
+        // Select DIB Section into memory DC
         hOldBitmap = (HBITMAP)SelectObject(memDC, hBitmap);
 
-        // 将基类的data指针指向DIB Section的内存
+        // Point base class data pointer to DIB Section memory
         this->data = (T*)bits;
 
         return true;
@@ -136,12 +136,12 @@ namespace hgl::bitmap
         blend.BlendOp = AC_SRC_OVER;
         blend.BlendFlags = 0;
         blend.SourceConstantAlpha = alpha;
-        blend.AlphaFormat = (C == 4) ? AC_SRC_ALPHA : 0;  // 只有RGBA格式使用per-pixel alpha
+        blend.AlphaFormat = (C == 4) ? AC_SRC_ALPHA : 0;  // Only RGBA format uses per-pixel alpha
 
         return AlphaBlend(hdc, dx, dy, dw, dh, memDC, sx, sy, sw, sh, blend) != FALSE;
     }
 
-    // 显式实例化常用类型
+    // Explicit instantiation of common types
     template class BitmapWindows<math::Vector4u8, 4>;
     template class BitmapWindows<math::Vector3u8, 3>;
     template class BitmapWindows<math::Vector2u8, 2>;

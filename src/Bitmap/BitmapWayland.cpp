@@ -7,23 +7,32 @@
 #include<fcntl.h>
 #include<cstring>
 #include<errno.h>
+#include<cstdio>
+#include<cstdlib>
+
+#ifdef __linux__
+#include<sys/syscall.h>
+#ifndef MFD_CLOEXEC
+#define MFD_CLOEXEC 0x0001U
+#endif
+#endif
 
 namespace hgl::bitmap
 {
-    // 创建匿名文件用于共享内存
+    // Create anonymous file for shared memory
     static int create_anonymous_file(size_t size)
     {
         int fd = -1;
         char name[32];
 
-        // 尝试使用memfd_create (Linux 3.17+)
+        // Try to use memfd_create (Linux 3.17+)
         #ifdef __NR_memfd_create
         fd = syscall(__NR_memfd_create, "wl_shm", MFD_CLOEXEC);
         if (fd >= 0)
             return fd;
         #endif
 
-        // 回退到传统方法
+        // Fall back to traditional method
         const char* path = getenv("XDG_RUNTIME_DIR");
         if (!path)
             return -1;
@@ -59,7 +68,7 @@ namespace hgl::bitmap
     template<typename T, uint C>
     BitmapWayland<T, C>::~BitmapWayland()
     {
-        // 必须在释放平台资源前将data设为nullptr，防止基类重复释放
+        // Must set data to nullptr before releasing platform resources to prevent base class double-free
         this->data = nullptr;
 
         if (buffer)
@@ -87,7 +96,7 @@ namespace hgl::bitmap
         }
 
         shm_size = 0;
-        // 注意：我们不释放shm，因为它是外部传入的
+        // Note: We don't release shm as it is externally provided
     }
 
     template<typename T, uint C>
@@ -96,7 +105,7 @@ namespace hgl::bitmap
         if (!w || !h || !wayland_shm)
             return false;
 
-        // 清理旧资源
+        // Clean up old resources
         if (buffer)
         {
             wl_buffer_destroy(buffer);
@@ -126,16 +135,16 @@ namespace hgl::bitmap
         this->height = h;
         shm = wayland_shm;
 
-        // 计算所需内存大小
+        // Calculate required memory size
         size_t stride = w * sizeof(T);
         shm_size = stride * h;
 
-        // 创建共享内存文件
+        // Create shared memory file
         shm_fd = create_anonymous_file(shm_size);
         if (shm_fd < 0)
             return false;
 
-        // 映射共享内存
+        // Map shared memory
         shm_data = mmap(nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
         if (shm_data == MAP_FAILED)
         {
@@ -146,7 +155,7 @@ namespace hgl::bitmap
 
         memset(shm_data, 0, shm_size);
 
-        // 创建wl_shm_pool
+        // Create wl_shm_pool
         pool = wl_shm_create_pool(shm, shm_fd, shm_size);
         if (!pool)
         {
@@ -157,14 +166,14 @@ namespace hgl::bitmap
             return false;
         }
 
-        // 确定像素格式
-        uint32_t format = WL_SHM_FORMAT_ARGB8888;  // 默认格式
+        // Determine pixel format
+        uint32_t format = WL_SHM_FORMAT_ARGB8888;  // Default format
         if (C == 4)
             format = WL_SHM_FORMAT_ARGB8888;
         else if (C == 3)
             format = WL_SHM_FORMAT_XRGB8888;
 
-        // 创建buffer
+        // Create buffer
         buffer = wl_shm_pool_create_buffer(pool, 0, w, h, stride, format);
         if (!buffer)
         {
@@ -177,7 +186,7 @@ namespace hgl::bitmap
             return false;
         }
 
-        // 将基类的data指针指向共享内存
+        // Point base class data pointer to shared memory
         this->data = (T*)shm_data;
 
         return true;
@@ -196,7 +205,7 @@ namespace hgl::bitmap
         return true;
     }
 
-    // 显式实例化常用类型
+    // Explicit instantiation of common types
     template class BitmapWayland<math::Vector4u8, 4>;
     template class BitmapWayland<math::Vector3u8, 3>;
     template class BitmapWayland<math::Vector2u8, 2>;

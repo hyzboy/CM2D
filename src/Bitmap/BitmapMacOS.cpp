@@ -4,6 +4,7 @@
 #include<CoreGraphics/CoreGraphics.h>
 #include<ApplicationServices/ApplicationServices.h>
 #include<cstring>
+#include<cstdlib>
 
 namespace hgl::bitmap
 {
@@ -18,7 +19,10 @@ namespace hgl::bitmap
     template<typename T, uint C>
     BitmapMacOS<T, C>::~BitmapMacOS()
     {
-        // 必须在释放平台资源前将data设为nullptr，防止基类重复释放
+        // Save data pointer for cleanup
+        void* dataToFree = this->data;
+        
+        // Must set data to nullptr before releasing platform resources to prevent base class double-free
         this->data = nullptr;
 
         if (cgContext)
@@ -32,6 +36,12 @@ namespace hgl::bitmap
             CGColorSpaceRelease(colorSpace);
             colorSpace = nullptr;
         }
+
+        // Free malloc-allocated memory
+        if (dataToFree)
+        {
+            free(dataToFree);
+        }
     }
 
     template<typename T, uint C>
@@ -40,7 +50,7 @@ namespace hgl::bitmap
         if (!w || !h)
             return false;
 
-        // 清理旧资源
+        // Clean up old resources
         if (cgContext)
         {
             CGContextRelease(cgContext);
@@ -57,7 +67,7 @@ namespace hgl::bitmap
         this->width = w;
         this->height = h;
 
-        // 创建颜色空间
+        // Create color space
         if (C >= 3)
             colorSpace = CGColorSpaceCreateDeviceRGB();
         else
@@ -66,15 +76,15 @@ namespace hgl::bitmap
         if (!colorSpace)
             return false;
 
-        // 计算参数
+        // Calculate parameters
         size_t bytesPerRow = w * sizeof(T);
         size_t bitsPerComponent = 8;
         CGBitmapInfo bitmapInfo = 0;
 
-        // 根据通道数设置bitmap info
+        // Set bitmap info based on channel count
         if (C == 4)
         {
-            // RGBA - 假设是RGBA格式
+            // RGBA - assume RGBA format
             bitmapInfo = kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big;
         }
         else if (C == 3)
@@ -84,16 +94,16 @@ namespace hgl::bitmap
         }
         else if (C == 2)
         {
-            // RG - 灰度+Alpha
+            // RG - Gray + Alpha
             bitmapInfo = kCGImageAlphaPremultipliedLast;
         }
         else
         {
-            // 灰度
+            // Grayscale
             bitmapInfo = kCGImageAlphaNone;
         }
 
-        // 分配内存并创建context
+        // Allocate memory and create context
         size_t dataSize = w * h * sizeof(T);
         void* bitmapData = malloc(dataSize);
         if (!bitmapData)
@@ -123,7 +133,7 @@ namespace hgl::bitmap
             return false;
         }
 
-        // 将基类的data指针指向bitmap数据
+        // Point base class data pointer to bitmap data
         this->data = (T*)bitmapData;
 
         return true;
@@ -164,7 +174,7 @@ namespace hgl::bitmap
         if (!fullImage)
             return false;
 
-        // 裁剪源区域
+        // Crop source region
         CGImageRef croppedImage = CGImageCreateWithImageInRect(fullImage, sourceRect);
         CGImageRelease(fullImage);
 
@@ -177,7 +187,7 @@ namespace hgl::bitmap
         return true;
     }
 
-    // 显式实例化常用类型
+    // Explicit instantiation of common types
     template class BitmapMacOS<math::Vector4u8, 4>;
     template class BitmapMacOS<math::Vector3u8, 3>;
     template class BitmapMacOS<math::Vector2u8, 2>;

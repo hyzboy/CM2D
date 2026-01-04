@@ -2,23 +2,23 @@ file(GLOB CM2D_HEADER ${CM2D_ROOT_INCLUDE_PATH}/hgl/2d/*.h)
 
 file(GLOB CM2D_PIXEL_SOURCE PixelFormat/*.cpp)
 
-# 基础Bitmap源文件（排除平台特定文件）
+# Base Bitmap source files (excluding platform-specific files)
 file(GLOB CM2D_BITMAP_BASE_SOURCE 
     Bitmap/tga.cpp 
     Bitmap/BitmapTGAStream.cpp
 )
 
-# 平台特定源文件
+# Platform-specific source files
 set(CM2D_BITMAP_PLATFORM_SOURCE "")
 
-# Windows平台
+# Windows platform
 if(WIN32)
     list(APPEND CM2D_BITMAP_PLATFORM_SOURCE Bitmap/BitmapWindows.cpp)
     set(CM2D_PLATFORM_LIBS "")
     list(APPEND CM2D_PLATFORM_LIBS gdi32 msimg32)
 endif()
 
-# macOS平台
+# macOS platform
 if(APPLE)
     list(APPEND CM2D_BITMAP_PLATFORM_SOURCE Bitmap/BitmapMacOS.cpp)
     set(CM2D_PLATFORM_LIBS "")
@@ -27,11 +27,11 @@ if(APPLE)
     list(APPEND CM2D_PLATFORM_LIBS ${COREGRAPHICS_LIBRARY} ${APPSERVICES_LIBRARY})
 endif()
 
-# Linux平台
+# Linux platform
 if(UNIX AND NOT APPLE)
     set(CM2D_PLATFORM_LIBS "")
     
-    # X11支持选项
+    # X11 support option
     option(CM2D_USE_X11 "Enable X11 support" ON)
     if(CM2D_USE_X11)
         find_package(X11)
@@ -47,7 +47,7 @@ if(UNIX AND NOT APPLE)
         endif()
     endif()
     
-    # Wayland支持选项
+    # Wayland support option
     option(CM2D_USE_WAYLAND "Enable Wayland support" OFF)
     if(CM2D_USE_WAYLAND)
         find_package(PkgConfig)
@@ -75,7 +75,7 @@ SOURCE_GROUP("Bitmap" FILES ${CM2D_BITMAP_SOURCE})
 
 add_cm_library(CM2D "CM" ${CM2D_HEADER} ${CM2D_PIXEL_SOURCE} ${CM2D_BITMAP_SOURCE})
 
-# 链接平台特定库
+# Link platform-specific libraries
 if(DEFINED CM2D_PLATFORM_LIBS)
     target_link_libraries(CM2D ${CM2D_PLATFORM_LIBS})
 endif()

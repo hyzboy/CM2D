@@ -7,6 +7,7 @@
 #include<sys/ipc.h>
 #include<sys/shm.h>
 #include<cstring>
+#include<cstdlib>
 
 namespace hgl::bitmap
 {
@@ -24,7 +25,10 @@ namespace hgl::bitmap
     template<typename T, uint C>
     BitmapX11<T, C>::~BitmapX11()
     {
-        // 必须在释放平台资源前将data设为nullptr，防止基类重复释放
+        // Save data pointer for non-SHM mode cleanup
+        void* dataToFree = (!using_shm) ? this->data : nullptr;
+        
+        // Must set data to nullptr before releasing platform resources to prevent base class double-free
         this->data = nullptr;
 
         if (ximage)
@@ -38,9 +42,14 @@ namespace hgl::bitmap
             }
             else
             {
-                // 非SHM模式下，XDestroyImage会释放data，所以我们需要先detach
+                // In non-SHM mode, we need to manually free memory
+                // XDestroyImage normally frees data, but we have detached it
                 ximage->data = nullptr;
                 XDestroyImage(ximage);
+                if (dataToFree)
+                {
+                    free(dataToFree);
+                }
             }
             ximage = nullptr;
         }
@@ -51,7 +60,7 @@ namespace hgl::bitmap
             gc = None;
         }
 
-        // 注意：我们不关闭display，因为它可能是外部传入的
+        // Note: We don't close display as it may be externally provided
     }
 
     template<typename T, uint C>
@@ -60,7 +69,7 @@ namespace hgl::bitmap
         if (!w || !h)
             return false;
 
-        // 清理旧资源
+        // Clean up old resources
         if (ximage)
         {
             if (using_shm)
@@ -88,7 +97,7 @@ namespace hgl::bitmap
         this->width = w;
         this->height = h;
 
-        // 如果没有提供display，打开默认显示
+        // If no display provided, open default display
         bool own_display = false;
         if (!dpy)
         {
@@ -100,11 +109,11 @@ namespace hgl::bitmap
 
         display = dpy;
 
-        // 获取视觉信息
+        // Get visual information
         Visual* visual = DefaultVisual(display, screen);
         int depth = DefaultDepth(display, screen);
 
-        // 尝试使用MIT-SHM扩展
+        // Try to use MIT-SHM extension
         using_shm = false;
         if (try_shm && XShmQueryExtension(display))
         {
@@ -125,7 +134,7 @@ namespace hgl::bitmap
                             using_shm = true;
                             this->data = (T*)ximage->data;
 
-                            // 创建GC
+                            // Create GC
                             gc = XCreateGC(display, DefaultRootWindow(display), 0, nullptr);
 
                             return true;
@@ -138,7 +147,7 @@ namespace hgl::bitmap
             }
         }
 
-        // 回退到普通XImage
+        // Fall back to regular XImage
         size_t dataSize = w * h * sizeof(T);
         void* imageData = malloc(dataSize);
         if (!imageData)
@@ -161,7 +170,7 @@ namespace hgl::bitmap
 
         this->data = (T*)imageData;
 
-        // 创建GC
+        // Create GC
         gc = XCreateGC(display, DefaultRootWindow(display), 0, nullptr);
 
         return true;
@@ -195,7 +204,7 @@ namespace hgl::bitmap
         return PutToWindow(window, dx, dy, 0, 0, this->width, this->height);
     }
 
-    // 显式实例化常用类型
+    // Explicit instantiation of common types
     template class BitmapX11<math::Vector4u8, 4>;
     template class BitmapX11<math::Vector3u8, 3>;
     template class BitmapX11<math::Vector2u8, 2>;
