@@ -28,9 +28,10 @@ namespace hgl::bitmap
         int ix = static_cast<int>(std::floor(x));
         int iy = static_cast<int>(std::floor(y));
 
-        // Start with large distance value
-        const float INIT_DISTANCE = 10000.0f;
-        float minDist = INIT_DISTANCE;
+        // Start with large distance value (maximum possible distance for 3x3 grid search)
+        // Maximum distance in a 3x3 unit cell grid is ~sqrt(8) ≈ 2.83
+        const float MAX_SEARCH_DISTANCE = 3.0f;
+        float minDist = MAX_SEARCH_DISTANCE;
 
         // Check 3x3 grid of cells around point
         for (int dy = -1; dy <= 1; dy++)

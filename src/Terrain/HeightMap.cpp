@@ -40,10 +40,11 @@ namespace hgl::bitmap
         }
 
         // Avoid division by zero
-        const float MIN_RANGE = 0.0001f; // Small epsilon to prevent division by zero
+        // Use small epsilon to detect essentially flat data
+        const float MIN_RANGE = 0.0001f; // Minimum detectable range (prevents division by zero)
         float range = currentMax - currentMin;
         if (range < MIN_RANGE)
-            range = 1.0f;
+            range = 1.0f; // Fallback to unit range for flat data
 
         // Normalize to [minHeight, maxHeight]
         float targetRange = maxHeight - minHeight;
