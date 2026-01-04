@@ -2,6 +2,7 @@
 
 #include<hgl/2d/Bitmap.h>
 #include<hgl/math/Vector.h>
+#include<cstring>
 
 /**
  * Channel Split Module
@@ -50,10 +51,15 @@ namespace hgl::bitmap::channel
         BitmapGrey8* b_channel = new BitmapGrey8();
         BitmapGrey8* a_channel = new BitmapGrey8();
         
-        r_channel->Create(w, h);
-        g_channel->Create(w, h);
-        b_channel->Create(w, h);
-        a_channel->Create(w, h);
+        if (!r_channel->Create(w, h) || !g_channel->Create(w, h) || 
+            !b_channel->Create(w, h) || !a_channel->Create(w, h))
+        {
+            delete r_channel;
+            delete g_channel;
+            delete b_channel;
+            delete a_channel;
+            return {nullptr, nullptr, nullptr, nullptr};
+        }
         
         uint8* r_data = r_channel->GetData();
         uint8* g_data = g_channel->GetData();
@@ -90,9 +96,13 @@ namespace hgl::bitmap::channel
         BitmapGrey8* g_channel = new BitmapGrey8();
         BitmapGrey8* b_channel = new BitmapGrey8();
         
-        r_channel->Create(w, h);
-        g_channel->Create(w, h);
-        b_channel->Create(w, h);
+        if (!r_channel->Create(w, h) || !g_channel->Create(w, h) || !b_channel->Create(w, h))
+        {
+            delete r_channel;
+            delete g_channel;
+            delete b_channel;
+            return {nullptr, nullptr, nullptr};
+        }
         
         uint8* r_data = r_channel->GetData();
         uint8* g_data = g_channel->GetData();
@@ -126,8 +136,12 @@ namespace hgl::bitmap::channel
         BitmapGrey8* r_channel = new BitmapGrey8();
         BitmapGrey8* g_channel = new BitmapGrey8();
         
-        r_channel->Create(w, h);
-        g_channel->Create(w, h);
+        if (!r_channel->Create(w, h) || !g_channel->Create(w, h))
+        {
+            delete r_channel;
+            delete g_channel;
+            return {nullptr, nullptr};
+        }
         
         uint8* r_data = r_channel->GetData();
         uint8* g_data = g_channel->GetData();
@@ -159,8 +173,12 @@ namespace hgl::bitmap::channel
         BitmapRGB8* rgb_bitmap = new BitmapRGB8();
         BitmapGrey8* a_channel = new BitmapGrey8();
         
-        rgb_bitmap->Create(w, h);
-        a_channel->Create(w, h);
+        if (!rgb_bitmap->Create(w, h) || !a_channel->Create(w, h))
+        {
+            delete rgb_bitmap;
+            delete a_channel;
+            return {nullptr, nullptr};
+        }
         
         math::Vector3u8* rgb_data = rgb_bitmap->GetData();
         uint8* a_data = a_channel->GetData();
@@ -196,7 +214,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapGrey8* channel = new BitmapGrey8();
-        channel->Create(w, h);
+        if (!channel->Create(w, h))
+        {
+            delete channel;
+            return nullptr;
+        }
         
         uint8* channel_data = channel->GetData();
         const int total = w * h;
@@ -235,7 +257,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapGrey8* channel = new BitmapGrey8();
-        channel->Create(w, h);
+        if (!channel->Create(w, h))
+        {
+            delete channel;
+            return nullptr;
+        }
         
         uint8* channel_data = channel->GetData();
         const int total = w * h;
@@ -272,7 +298,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapGrey8* channel = new BitmapGrey8();
-        channel->Create(w, h);
+        if (!channel->Create(w, h))
+        {
+            delete channel;
+            return nullptr;
+        }
         
         uint8* channel_data = channel->GetData();
         const int total = w * h;
@@ -304,13 +334,17 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapGrey8* channel = new BitmapGrey8();
-        channel->Create(w, h);
+        if (!channel->Create(w, h))
+        {
+            delete channel;
+            return nullptr;
+        }
         
         uint8* channel_data = channel->GetData();
         const int total = w * h;
         
-        for (int i = 0; i < total; ++i)
-            channel_data[i] = src_data[i];
+        // Use memcpy for efficient copy
+        memcpy(channel_data, src_data, total * sizeof(uint8));
         
         return channel;
     }

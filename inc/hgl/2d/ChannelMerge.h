@@ -57,7 +57,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapRGBA8* result = new BitmapRGBA8();
-        result->Create(w, h);
+        if (!result->Create(w, h))
+        {
+            delete result;
+            return nullptr;
+        }
         
         math::Vector4u8* result_data = result->GetData();
         const int total = w * h;
@@ -98,7 +102,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapRGB8* result = new BitmapRGB8();
-        result->Create(w, h);
+        if (!result->Create(w, h))
+        {
+            delete result;
+            return nullptr;
+        }
         
         math::Vector3u8* result_data = result->GetData();
         const int total = w * h;
@@ -135,7 +143,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapRG8* result = new BitmapRG8();
-        result->Create(w, h);
+        if (!result->Create(w, h))
+        {
+            delete result;
+            return nullptr;
+        }
         
         math::Vector2u8* result_data = result->GetData();
         const int total = w * h;
@@ -171,7 +183,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapRGBA8* result = new BitmapRGBA8();
-        result->Create(w, h);
+        if (!result->Create(w, h))
+        {
+            delete result;
+            return nullptr;
+        }
         
         math::Vector4u8* result_data = result->GetData();
         const int total = w * h;
@@ -210,7 +226,11 @@ namespace hgl::bitmap::channel
             return nullptr;
         
         BitmapRGB8* result = new BitmapRGB8();
-        result->Create(w, h);
+        if (!result->Create(w, h))
+        {
+            delete result;
+            return nullptr;
+        }
         
         math::Vector3u8* result_data = result->GetData();
         const int total = w * h;
