@@ -52,8 +52,8 @@ namespace hgl::bitmap
         // Normalize to approximately [-1, 1]
         // Typical min distance is ~0, max is ~sqrt(2) for unit cells
         // Scale down by sqrt(2) to get [0, 1], then convert to [-1, 1]
-        const float SQRT_TWO = std::sqrt(2.0f);
-        return (minDist / SQRT_TWO) * 2.0f - 1.0f;
+        const float INV_SQRT_TWO = 0.70710678f; // 1/sqrt(2)
+        return (minDist * INV_SQRT_TWO) * 2.0f - 1.0f;
     }
 
 }//namespace hgl::bitmap

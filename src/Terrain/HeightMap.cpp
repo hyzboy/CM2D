@@ -61,6 +61,8 @@ namespace hgl::bitmap
         slopeMap.Create(width, height);
         float* slopeData = slopeMap.GetData();
 
+        const float GRADIENT_SCALE = 0.5f; // Scale factor for central difference
+
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -72,9 +74,9 @@ namespace hgl::bitmap
                 float dx = 0.0f, dy = 0.0f;
 
                 if (x > 0 && x < width - 1)
-                    dx = (data[y * width + (x + 1)] - data[y * width + (x - 1)]) * 0.5f;
+                    dx = (data[y * width + (x + 1)] - data[y * width + (x - 1)]) * GRADIENT_SCALE;
                 if (y > 0 && y < height - 1)
-                    dy = (data[(y + 1) * width + x] - data[(y - 1) * width + x]) * 0.5f;
+                    dy = (data[(y + 1) * width + x] - data[(y - 1) * width + x]) * GRADIENT_SCALE;
 
                 // Calculate slope magnitude
                 float slope = std::sqrt(dx * dx + dy * dy);
@@ -90,6 +92,8 @@ namespace hgl::bitmap
     {
         if (!data || width <= 0 || height <= 0)
             return;
+
+        const float EROSION_RATE = 0.5f; // Material transfer rate
 
         for (int iter = 0; iter < iterations; iter++)
         {
@@ -120,7 +124,7 @@ namespace hgl::bitmap
                     // If slope exceeds talus angle, move material
                     if (maxDiff > talusAngle)
                     {
-                        float amount = 0.5f * (maxDiff - talusAngle);
+                        float amount = EROSION_RATE * (maxDiff - talusAngle);
                         data[idx] -= amount;
                         data[maxIdx] += amount;
                     }
@@ -133,6 +137,8 @@ namespace hgl::bitmap
     {
         if (!data || width <= 0 || height <= 0)
             return;
+
+        const float SEDIMENT_RATE = 0.5f; // Sediment transport rate
 
         for (int iter = 0; iter < iterations; iter++)
         {
@@ -168,7 +174,7 @@ namespace hgl::bitmap
                     if (minIdx != idx)
                     {
                         float diff = h - minHeight;
-                        float amount = diff * strength * 0.5f;
+                        float amount = diff * strength * SEDIMENT_RATE;
                         data[idx] -= amount;
                         data[minIdx] += amount;
                     }

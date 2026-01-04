@@ -48,9 +48,9 @@ namespace hgl::bitmap
 
     float SimplexNoise::Generate(float x, float y) const
     {
-        // Skewing factors for 2D simplex grid
-        const float F2 = 0.5f * (std::sqrt(3.0f) - 1.0f);
-        const float G2 = (3.0f - std::sqrt(3.0f)) / 6.0f;
+        // Skewing factors for 2D simplex grid (precomputed for performance)
+        const float F2 = 0.366025403f; // 0.5 * (sqrt(3) - 1)
+        const float G2 = 0.211324865f; // (3 - sqrt(3)) / 6
 
         // Skew input space to determine which simplex cell we're in
         float s = (x + y) * F2;

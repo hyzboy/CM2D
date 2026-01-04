@@ -125,8 +125,9 @@ int main(int argc, char** argv)
         HeightMap heightMap;
         heightMap.Create(width, height);
         
+        const float VORONOI_CELL_SCALE = 10.0f; // Larger scale for bigger cells
         VoronoiNoise noise(seed);
-        heightMap.GenerateFromNoise(noise, scale * 10.0f); // Larger cells
+        heightMap.GenerateFromNoise(noise, scale * VORONOI_CELL_SCALE);
         heightMap.Normalize(0.0f, 1.0f);
         
         BitmapGrey8 grayscale;
