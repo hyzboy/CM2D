@@ -104,6 +104,8 @@ namespace hgl::bitmap
 
         // Add contributions and scale to [-1, 1]
         // Scaling factor for simplex noise normalization
+        // This value was empirically determined to map simplex noise contributions
+        // (which sum up from 3 gradient contributions) to approximate [-1, 1] range
         const float SIMPLEX_SCALE = 70.0f;
         return SIMPLEX_SCALE * (n0 + n1 + n2);
     }

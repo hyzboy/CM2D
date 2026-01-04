@@ -11,21 +11,25 @@
 using namespace hgl;
 using namespace hgl::bitmap;
 
-// Convert float heightmap to grayscale for visualization
-void ConvertHeightMapToGrayscale(const HeightMap& heightMap, BitmapGrey8& output)
+// Convert float bitmap to grayscale for visualization
+void ConvertFloat32ToGrayscale(const Bitmap32F& floatMap, BitmapGrey8& output)
 {
-    int w = heightMap.GetWidth();
-    int h = heightMap.GetHeight();
+    int w = floatMap.GetWidth();
+    int h = floatMap.GetHeight();
     
     output.Create(w, h);
     
-    const float* heightData = heightMap.GetData();
+    const float* floatData = floatMap.GetData();
     uint8* outData = output.GetData();
     
     for (int i = 0; i < w * h; i++)
     {
         // Convert [0, 1] float to [0, 255] byte
-        outData[i] = static_cast<uint8>(heightData[i] * 255.0f);
+        float value = floatData[i];
+        // Clamp to [0, 1] range
+        if (value < 0.0f) value = 0.0f;
+        if (value > 1.0f) value = 1.0f;
+        outData[i] = static_cast<uint8>(value * 255.0f);
     }
 }
 
@@ -92,7 +96,7 @@ int main(int argc, char** argv)
         heightMap.Normalize(0.0f, 1.0f);
         
         BitmapGrey8 grayscale;
-        ConvertHeightMapToGrayscale(heightMap, grayscale);
+        ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_perlin.tga"), &grayscale);
         
         std::cout << "   Saved: terrain_perlin.tga" << std::endl;
@@ -109,7 +113,7 @@ int main(int argc, char** argv)
         heightMap.Normalize(0.0f, 1.0f);
         
         BitmapGrey8 grayscale;
-        ConvertHeightMapToGrayscale(heightMap, grayscale);
+        ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_simplex.tga"), &grayscale);
         
         std::cout << "   Saved: terrain_simplex.tga" << std::endl;
@@ -126,7 +130,7 @@ int main(int argc, char** argv)
         heightMap.Normalize(0.0f, 1.0f);
         
         BitmapGrey8 grayscale;
-        ConvertHeightMapToGrayscale(heightMap, grayscale);
+        ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_voronoi.tga"), &grayscale);
         
         std::cout << "   Saved: terrain_voronoi.tga" << std::endl;
@@ -138,13 +142,13 @@ int main(int argc, char** argv)
         HeightMap heightMap;
         heightMap.Create(width, height);
         
-        PerlinNoise* perlin = new PerlinNoise(seed);
-        FractalNoise fbm(perlin, 6, 2.0f, 0.5f, true);
+        PerlinNoise perlin(seed);
+        FractalNoise fbm(&perlin, 6, 2.0f, 0.5f, false);
         heightMap.GenerateFromNoise(fbm, scale);
         heightMap.Normalize(0.0f, 1.0f);
         
         BitmapGrey8 grayscale;
-        ConvertHeightMapToGrayscale(heightMap, grayscale);
+        ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_fbm.tga"), &grayscale);
         
         std::cout << "   Saved: terrain_fbm.tga" << std::endl;
@@ -159,7 +163,7 @@ int main(int argc, char** argv)
         generator.GenerateDetailed(heightMap, 1.0f, 6, 50);
         
         BitmapGrey8 grayscale;
-        ConvertHeightMapToGrayscale(heightMap, grayscale);
+        ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_eroded.tga"), &grayscale);
         
         std::cout << "   Saved: terrain_eroded.tga" << std::endl;
@@ -188,8 +192,8 @@ int main(int argc, char** argv)
         HeightMap heightMap;
         heightMap.Create(width, height);
         
-        PerlinNoise* perlin = new PerlinNoise(seed);
-        FractalNoise fbm(perlin, 6, 2.0f, 0.5f, true);
+        PerlinNoise perlin(seed);
+        FractalNoise fbm(&perlin, 6, 2.0f, 0.5f, false);
         heightMap.GenerateFromNoise(fbm, scale);
         heightMap.Normalize(0.0f, 1.0f);
         
@@ -197,7 +201,7 @@ int main(int argc, char** argv)
         heightMap.CalculateSlopeMap(slopeMap);
         
         BitmapGrey8 grayscale;
-        ConvertHeightMapToGrayscale(slopeMap, grayscale);
+        ConvertFloat32ToGrayscale(slopeMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_slope.tga"), &grayscale);
         
         std::cout << "   Saved: terrain_slope.tga" << std::endl;

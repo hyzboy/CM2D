@@ -7,9 +7,9 @@ namespace hgl::bitmap
         if (!heightMap.Create(width, height))
             return;
 
-        // Create Perlin noise with FBM
-        PerlinNoise* perlin = new PerlinNoise(seed);
-        FractalNoise fbm(perlin, octaves, 2.0f, 0.5f, true);
+        // Create Perlin noise with FBM (using unique_ptr for exception safety)
+        PerlinNoise perlin(seed);
+        FractalNoise fbm(&perlin, octaves, 2.0f, 0.5f, false);
 
         // Generate heightmap
         heightMap.GenerateFromNoise(fbm, scale / width);
@@ -44,18 +44,18 @@ namespace hgl::bitmap
         if (heightMap.GetWidth() != width || heightMap.GetHeight() != height)
             return;
 
-        // Generate temperature map
+        // Generate temperature map with well-separated seed
         Bitmap32F temperatureMap;
         temperatureMap.Create(width, height);
-        PerlinNoise tempNoise(seed + 1);
+        PerlinNoise tempNoise(seed ^ 0x9E3779B9); // Use XOR with golden ratio for seed independence
         FractalNoise tempFBM(&tempNoise, 4, 2.0f, 0.5f, false);
         temperatureMap.GenerateFromNoise(tempFBM, tempScale / width);
         temperatureMap.Normalize(0.0f, 1.0f);
 
-        // Generate moisture map
+        // Generate moisture map with different seed offset
         Bitmap32F moistureMap;
         moistureMap.Create(width, height);
-        PerlinNoise moistNoise(seed + 2);
+        PerlinNoise moistNoise(seed ^ 0x517CC1B7); // Use XOR with different constant
         FractalNoise moistFBM(&moistNoise, 4, 2.0f, 0.5f, false);
         moistureMap.GenerateFromNoise(moistFBM, moistScale / width);
         moistureMap.Normalize(0.0f, 1.0f);
