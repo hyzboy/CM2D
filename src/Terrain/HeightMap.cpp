@@ -40,8 +40,9 @@ namespace hgl::bitmap
         }
 
         // Avoid division by zero
+        const float MIN_RANGE = 0.0001f; // Small epsilon to prevent division by zero
         float range = currentMax - currentMin;
-        if (range < 0.0001f)
+        if (range < MIN_RANGE)
             range = 1.0f;
 
         // Normalize to [minHeight, maxHeight]

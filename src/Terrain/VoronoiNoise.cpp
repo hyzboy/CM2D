@@ -28,7 +28,9 @@ namespace hgl::bitmap
         int ix = static_cast<int>(std::floor(x));
         int iy = static_cast<int>(std::floor(y));
 
-        float minDist = 10000.0f;
+        // Start with large distance value
+        const float INIT_DISTANCE = 10000.0f;
+        float minDist = INIT_DISTANCE;
 
         // Check 3x3 grid of cells around point
         for (int dy = -1; dy <= 1; dy++)
@@ -49,7 +51,8 @@ namespace hgl::bitmap
 
         // Normalize to approximately [-1, 1]
         // Typical min distance is ~0, max is ~sqrt(2) for unit cells
-        return (minDist * 1.414f) * 2.0f - 1.0f;
+        const float SQRT_TWO = std::sqrt(2.0f);
+        return (minDist * SQRT_TWO) * 2.0f - 1.0f;
     }
 
 }//namespace hgl::bitmap

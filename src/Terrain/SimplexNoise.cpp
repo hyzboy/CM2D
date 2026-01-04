@@ -103,7 +103,9 @@ namespace hgl::bitmap
         }
 
         // Add contributions and scale to [-1, 1]
-        return 70.0f * (n0 + n1 + n2);
+        // Scaling factor for simplex noise normalization
+        const float SIMPLEX_SCALE = 70.0f;
+        return SIMPLEX_SCALE * (n0 + n1 + n2);
     }
 
 }//namespace hgl::bitmap
