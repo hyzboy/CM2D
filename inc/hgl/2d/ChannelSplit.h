@@ -33,17 +33,14 @@ namespace hgl::bitmap::channel
 {
     /**
      * Split RGBA bitmap into 4 separate single-channel bitmaps (R, G, B, A)
-     * @param src Source RGBA bitmap
+     * @param src Source RGBA bitmap with Vector4u8 pixel type
      * @return Tuple of 4 single-channel bitmaps (R, G, B, A)
      */
-    template<typename T, uint C>
-    auto SplitRGBA(const Bitmap<T, C>& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
+    inline auto SplitRGBA(const BitmapRGBA8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
     {
-        static_assert(C == 4, "Source bitmap must have 4 channels");
-        
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const T* src_data = src.GetData();
+        const math::Vector4u8* src_data = src.GetData();
         
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr, nullptr, nullptr};
@@ -77,17 +74,14 @@ namespace hgl::bitmap::channel
 
     /**
      * Split RGB bitmap into 3 separate single-channel bitmaps (R, G, B)
-     * @param src Source RGB bitmap
+     * @param src Source RGB bitmap with Vector3u8 pixel type
      * @return Tuple of 3 single-channel bitmaps (R, G, B)
      */
-    template<typename T, uint C>
-    auto SplitRGB(const Bitmap<T, C>& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
+    inline auto SplitRGB(const BitmapRGB8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
     {
-        static_assert(C == 3, "Source bitmap must have 3 channels");
-        
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const T* src_data = src.GetData();
+        const math::Vector3u8* src_data = src.GetData();
         
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr, nullptr};
@@ -117,17 +111,14 @@ namespace hgl::bitmap::channel
 
     /**
      * Split RG bitmap into 2 separate single-channel bitmaps (R, G)
-     * @param src Source RG bitmap
+     * @param src Source RG bitmap with Vector2u8 pixel type
      * @return Tuple of 2 single-channel bitmaps (R, G)
      */
-    template<typename T, uint C>
-    auto SplitRG(const Bitmap<T, C>& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*>
+    inline auto SplitRG(const BitmapRG8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*>
     {
-        static_assert(C == 2, "Source bitmap must have 2 channels");
-        
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const T* src_data = src.GetData();
+        const math::Vector2u8* src_data = src.GetData();
         
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr};
@@ -153,17 +144,14 @@ namespace hgl::bitmap::channel
 
     /**
      * Split RGBA bitmap into RGB (3-channel) + A (1-channel)
-     * @param src Source RGBA bitmap
+     * @param src Source RGBA bitmap with Vector4u8 pixel type
      * @return Tuple of RGB bitmap and Alpha channel bitmap
      */
-    template<typename T, uint C>
-    auto SplitRGBA_To_RGB_A(const Bitmap<T, C>& src) -> std::tuple<BitmapRGB8*, BitmapGrey8*>
+    inline auto SplitRGBA_To_RGB_A(const BitmapRGBA8& src) -> std::tuple<BitmapRGB8*, BitmapGrey8*>
     {
-        static_assert(C == 4, "Source bitmap must have 4 channels");
-        
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const T* src_data = src.GetData();
+        const math::Vector4u8* src_data = src.GetData();
         
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr};
@@ -190,20 +178,19 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Extract single channel from multi-channel bitmap by index
-     * @param src Source bitmap
+     * Extract single channel from RGBA bitmap by index
+     * @param src Source RGBA bitmap
      * @param channel_index Channel index (0=R, 1=G, 2=B, 3=A)
      * @return Single-channel bitmap, or nullptr if index is invalid
      */
-    template<typename T, uint C>
-    BitmapGrey8* ExtractChannel(const Bitmap<T, C>& src, uint channel_index)
+    inline BitmapGrey8* ExtractChannel(const BitmapRGBA8& src, uint channel_index)
     {
-        if (channel_index >= C)
+        if (channel_index >= 4)
             return nullptr;
         
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const T* src_data = src.GetData();
+        const math::Vector4u8* src_data = src.GetData();
         
         if (!src_data || w <= 0 || h <= 0)
             return nullptr;
@@ -214,43 +201,116 @@ namespace hgl::bitmap::channel
         uint8* channel_data = channel->GetData();
         const int total = w * h;
         
-        if constexpr (C == 1)
+        for (int i = 0; i < total; ++i)
         {
-            // Single channel, just copy
-            for (int i = 0; i < total; ++i)
-                channel_data[i] = src_data[i];
+            if (channel_index == 0)
+                channel_data[i] = src_data[i].r;
+            else if (channel_index == 1)
+                channel_data[i] = src_data[i].g;
+            else if (channel_index == 2)
+                channel_data[i] = src_data[i].b;
+            else
+                channel_data[i] = src_data[i].a;
         }
-        else if constexpr (C == 2)
+        
+        return channel;
+    }
+
+    /**
+     * Extract single channel from RGB bitmap by index
+     * @param src Source RGB bitmap
+     * @param channel_index Channel index (0=R, 1=G, 2=B)
+     * @return Single-channel bitmap, or nullptr if index is invalid
+     */
+    inline BitmapGrey8* ExtractChannel(const BitmapRGB8& src, uint channel_index)
+    {
+        if (channel_index >= 3)
+            return nullptr;
+        
+        const int w = src.GetWidth();
+        const int h = src.GetHeight();
+        const math::Vector3u8* src_data = src.GetData();
+        
+        if (!src_data || w <= 0 || h <= 0)
+            return nullptr;
+        
+        BitmapGrey8* channel = new BitmapGrey8();
+        channel->Create(w, h);
+        
+        uint8* channel_data = channel->GetData();
+        const int total = w * h;
+        
+        for (int i = 0; i < total; ++i)
         {
-            for (int i = 0; i < total; ++i)
-                channel_data[i] = (channel_index == 0) ? src_data[i].r : src_data[i].g;
+            if (channel_index == 0)
+                channel_data[i] = src_data[i].r;
+            else if (channel_index == 1)
+                channel_data[i] = src_data[i].g;
+            else
+                channel_data[i] = src_data[i].b;
         }
-        else if constexpr (C == 3)
+        
+        return channel;
+    }
+
+    /**
+     * Extract single channel from RG bitmap by index
+     * @param src Source RG bitmap
+     * @param channel_index Channel index (0=R, 1=G)
+     * @return Single-channel bitmap, or nullptr if index is invalid
+     */
+    inline BitmapGrey8* ExtractChannel(const BitmapRG8& src, uint channel_index)
+    {
+        if (channel_index >= 2)
+            return nullptr;
+        
+        const int w = src.GetWidth();
+        const int h = src.GetHeight();
+        const math::Vector2u8* src_data = src.GetData();
+        
+        if (!src_data || w <= 0 || h <= 0)
+            return nullptr;
+        
+        BitmapGrey8* channel = new BitmapGrey8();
+        channel->Create(w, h);
+        
+        uint8* channel_data = channel->GetData();
+        const int total = w * h;
+        
+        for (int i = 0; i < total; ++i)
         {
-            for (int i = 0; i < total; ++i)
-            {
-                if (channel_index == 0)
-                    channel_data[i] = src_data[i].r;
-                else if (channel_index == 1)
-                    channel_data[i] = src_data[i].g;
-                else
-                    channel_data[i] = src_data[i].b;
-            }
+            channel_data[i] = (channel_index == 0) ? src_data[i].r : src_data[i].g;
         }
-        else if constexpr (C == 4)
-        {
-            for (int i = 0; i < total; ++i)
-            {
-                if (channel_index == 0)
-                    channel_data[i] = src_data[i].r;
-                else if (channel_index == 1)
-                    channel_data[i] = src_data[i].g;
-                else if (channel_index == 2)
-                    channel_data[i] = src_data[i].b;
-                else
-                    channel_data[i] = src_data[i].a;
-            }
-        }
+        
+        return channel;
+    }
+
+    /**
+     * Extract single channel from single-channel bitmap (just copies)
+     * @param src Source single-channel bitmap
+     * @param channel_index Must be 0
+     * @return Copy of the source bitmap, or nullptr if index is invalid
+     */
+    inline BitmapGrey8* ExtractChannel(const BitmapGrey8& src, uint channel_index)
+    {
+        if (channel_index != 0)
+            return nullptr;
+        
+        const int w = src.GetWidth();
+        const int h = src.GetHeight();
+        const uint8* src_data = src.GetData();
+        
+        if (!src_data || w <= 0 || h <= 0)
+            return nullptr;
+        
+        BitmapGrey8* channel = new BitmapGrey8();
+        channel->Create(w, h);
+        
+        uint8* channel_data = channel->GetData();
+        const int total = w * h;
+        
+        for (int i = 0; i < total; ++i)
+            channel_data[i] = src_data[i];
         
         return channel;
     }
@@ -259,20 +319,31 @@ namespace hgl::bitmap::channel
      * Convenient wrapper functions for common use cases
      */
     
-    // Extract R channel from RGB/RGBA
-    template<typename T, uint C>
-    inline BitmapGrey8* ExtractR(const Bitmap<T, C>& src) { return ExtractChannel(src, 0); }
+    // Extract R channel from RGBA
+    inline BitmapGrey8* ExtractR(const BitmapRGBA8& src) { return ExtractChannel(src, 0); }
     
-    // Extract G channel from RG/RGB/RGBA
-    template<typename T, uint C>
-    inline BitmapGrey8* ExtractG(const Bitmap<T, C>& src) { return ExtractChannel(src, 1); }
+    // Extract G channel from RGBA
+    inline BitmapGrey8* ExtractG(const BitmapRGBA8& src) { return ExtractChannel(src, 1); }
     
-    // Extract B channel from RGB/RGBA
-    template<typename T, uint C>
-    inline BitmapGrey8* ExtractB(const Bitmap<T, C>& src) { return ExtractChannel(src, 2); }
+    // Extract B channel from RGBA
+    inline BitmapGrey8* ExtractB(const BitmapRGBA8& src) { return ExtractChannel(src, 2); }
     
     // Extract A channel from RGBA
-    template<typename T, uint C>
-    inline BitmapGrey8* ExtractA(const Bitmap<T, C>& src) { return ExtractChannel(src, 3); }
+    inline BitmapGrey8* ExtractA(const BitmapRGBA8& src) { return ExtractChannel(src, 3); }
+
+    // Extract R channel from RGB
+    inline BitmapGrey8* ExtractR(const BitmapRGB8& src) { return ExtractChannel(src, 0); }
+    
+    // Extract G channel from RGB
+    inline BitmapGrey8* ExtractG(const BitmapRGB8& src) { return ExtractChannel(src, 1); }
+    
+    // Extract B channel from RGB
+    inline BitmapGrey8* ExtractB(const BitmapRGB8& src) { return ExtractChannel(src, 2); }
+
+    // Extract R channel from RG
+    inline BitmapGrey8* ExtractR(const BitmapRG8& src) { return ExtractChannel(src, 0); }
+    
+    // Extract G channel from RG
+    inline BitmapGrey8* ExtractG(const BitmapRG8& src) { return ExtractChannel(src, 1); }
 
 } // namespace hgl::bitmap::channel
