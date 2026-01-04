@@ -86,5 +86,5 @@ add_cm_library(CM2D "CM" ${CM2D_HEADER} ${CM2D_PIXEL_SOURCE} ${CM2D_BITMAP_SOURC
 
 # Link platform-specific libraries
 if(DEFINED CM2D_PLATFORM_LIBS)
-    target_link_libraries(CM2D ${CM2D_PLATFORM_LIBS})
+    target_link_libraries(CM2D PRIVATE ${CM2D_PLATFORM_LIBS})
 endif()

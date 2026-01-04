@@ -119,6 +119,68 @@ namespace hgl::bitmap
 
             delete[] temp;
         }
+
+        /**
+         * 从噪声函数生成位图数据
+         * @param noise 噪声生成器
+         * @param scale 缩放因子
+         * @param offsetX X坐标偏移
+         * @param offsetY Y坐标偏移
+         */
+        template<typename NoiseGenerator>
+        void GenerateFromNoise(const NoiseGenerator& noise, float scale, float offsetX = 0.0f, float offsetY = 0.0f)
+        {
+            if (!data || width <= 0 || height <= 0)
+                return;
+
+            T* ptr = data;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float nx = (x + offsetX) * scale;
+                    float ny = (y + offsetY) * scale;
+                    *ptr = (T)noise.Generate(nx, ny);
+                    ptr++;
+                }
+            }
+        }
+
+        /**
+         * 规范化像素数据到指定范围
+         * @param minValue 目标最小值
+         * @param maxValue 目标最大值
+         */
+        void Normalize(float minValue, float maxValue)
+        {
+            if (!data || width <= 0 || height <= 0)
+                return;
+
+            // Find current min and max
+            float currentMin = (float)data[0];
+            float currentMax = (float)data[0];
+            
+            int totalPixels = width * height;
+            for (int i = 0; i < totalPixels; i++)
+            {
+                float val = (float)data[i];
+                if (val < currentMin) currentMin = val;
+                if (val > currentMax) currentMax = val;
+            }
+
+            // Avoid division by zero
+            const float MIN_RANGE = 0.0001f;
+            float range = currentMax - currentMin;
+            if (range < MIN_RANGE)
+                range = 1.0f;
+
+            // Normalize to [minValue, maxValue]
+            float targetRange = maxValue - minValue;
+            for (int i = 0; i < totalPixels; i++)
+            {
+                data[i] = (T)(minValue + ((float)data[i] - currentMin) / range * targetRange);
+            }
+        }
     };//template<typename T> class Bitmap
 
     using BitmapGrey8=Bitmap<uint8,1>;
