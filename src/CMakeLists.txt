@@ -66,11 +66,23 @@ endif()
 
 set(CM2D_BITMAP_SOURCE ${CM2D_BITMAP_BASE_SOURCE} ${CM2D_BITMAP_PLATFORM_SOURCE})
 
+# Terrain generation source files
+set(CM2D_TERRAIN_SOURCE
+    Terrain/NoiseGenerator.cpp
+    Terrain/PerlinNoise.cpp
+    Terrain/SimplexNoise.cpp
+    Terrain/VoronoiNoise.cpp
+    Terrain/HeightMap.cpp
+    Terrain/BiomeMap.cpp
+    Terrain/TerrainGenerator.cpp
+)
+
 SOURCE_GROUP("Header Files" FILES ${CM2D_HEADER})
 SOURCE_GROUP("PixelFormat" FILES ${CM2D_PIXEL_SOURCE})
 SOURCE_GROUP("Bitmap" FILES ${CM2D_BITMAP_SOURCE})
+SOURCE_GROUP("Terrain" FILES ${CM2D_TERRAIN_SOURCE})
 
-add_cm_library(CM2D "CM" ${CM2D_HEADER} ${CM2D_PIXEL_SOURCE} ${CM2D_BITMAP_SOURCE})
+add_cm_library(CM2D "CM" ${CM2D_HEADER} ${CM2D_PIXEL_SOURCE} ${CM2D_BITMAP_SOURCE} ${CM2D_TERRAIN_SOURCE})
 
 # Link platform-specific libraries
 if(DEFINED CM2D_PLATFORM_LIBS)
