@@ -10,18 +10,17 @@ file(GLOB CM2D_BITMAP_BASE_SOURCE
 
 # Platform-specific source files
 set(CM2D_BITMAP_PLATFORM_SOURCE "")
+set(CM2D_PLATFORM_LIBS "")
 
 # Windows platform
 if(WIN32)
     list(APPEND CM2D_BITMAP_PLATFORM_SOURCE Bitmap/BitmapWindows.cpp)
-    set(CM2D_PLATFORM_LIBS "")
     list(APPEND CM2D_PLATFORM_LIBS gdi32 msimg32)
 endif()
 
 # macOS platform
 if(APPLE)
     list(APPEND CM2D_BITMAP_PLATFORM_SOURCE Bitmap/BitmapMacOS.cpp)
-    set(CM2D_PLATFORM_LIBS "")
     find_library(COREGRAPHICS_LIBRARY CoreGraphics)
     find_library(APPSERVICES_LIBRARY ApplicationServices)
     list(APPEND CM2D_PLATFORM_LIBS ${COREGRAPHICS_LIBRARY} ${APPSERVICES_LIBRARY})
@@ -29,8 +28,6 @@ endif()
 
 # Linux platform
 if(UNIX AND NOT APPLE)
-    set(CM2D_PLATFORM_LIBS "")
-    
     # X11 support option
     option(CM2D_USE_X11 "Enable X11 support" ON)
     if(CM2D_USE_X11)

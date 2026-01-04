@@ -82,6 +82,8 @@ namespace hgl::bitmap
         CGBitmapInfo bitmapInfo = 0;
 
         // Set bitmap info based on channel count
+        // Note: This assumes standard RGBA/RGB byte ordering. For custom pixel formats,
+        // users may need to adjust the bitmap info flags accordingly.
         if (C == 4)
         {
             // RGBA - assume RGBA format
