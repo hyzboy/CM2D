@@ -19,6 +19,8 @@ namespace hgl::bitmap
     */
     template<typename T,uint C> class Bitmap
     {
+    protected:
+
         int width,height;
 
         T *data;
