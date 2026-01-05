@@ -1,14 +1,65 @@
-file(GLOB CM2D_HEADER ${CM2D_ROOT_INCLUDE_PATH}/hgl/2d/*.h)
+set(CM2D_HEADER_PATH ${CM2D_ROOT_INCLUDE_PATH}/hgl/2d)
 
-file(GLOB CM2D_PIXEL_SOURCE PixelFormat/*.cpp)
+# ==================== Header Files Classification ====================
 
-# Base Bitmap source files (excluding platform-specific files)
-file(GLOB CM2D_BITMAP_BASE_SOURCE 
+# Core Bitmap Headers
+set(CM2D_BITMAP_HEADERS 
+    ${CM2D_HEADER_PATH}/Bitmap.h
+    ${CM2D_HEADER_PATH}/BitmapLoad.h
+    ${CM2D_HEADER_PATH}/BitmapSave.h
+    ${CM2D_HEADER_PATH}/BitmapPlatform.h
+    ${CM2D_HEADER_PATH}/BitmapImageMagick.h
+)
+
+# Image Format Headers
+set(CM2D_FORMAT_HEADERS
+    ${CM2D_HEADER_PATH}/TGA.h
+)
+
+# Image Processing Headers
+set(CM2D_PROCESSING_HEADERS
+    ${CM2D_HEADER_PATH}/Blend.h
+    ${CM2D_HEADER_PATH}/ColorConversion.h
+    ${CM2D_HEADER_PATH}/DrawGeometry.h
+    ${CM2D_HEADER_PATH}/MipMap.h
+    ${CM2D_HEADER_PATH}/Resize.h
+    ${CM2D_HEADER_PATH}/Transform.h
+    ${CM2D_HEADER_PATH}/Tile.h
+)
+
+# Channel Operation Headers
+set(CM2D_CHANNEL_HEADERS
+    ${CM2D_HEADER_PATH}/ChannelMerge.h
+    ${CM2D_HEADER_PATH}/ChannelOps.h
+    ${CM2D_HEADER_PATH}/ChannelSplit.h
+)
+
+# Terrain Generation Headers
+set(CM2D_TERRAIN_HEADERS
+    ${CM2D_HEADER_PATH}/TerrainMap.h
+    ${CM2D_HEADER_PATH}/NoiseMap.h
+)
+
+# Misc Headers
+set(CM2D_MISC_HEADERS
+    ${CM2D_HEADER_PATH}/VSBase.h
+)
+
+# ==================== Source Files Classification ====================
+
+# Pixel Format Source Files
+set(CM2D_PIXEL_SOURCE 
+    PixelFormat/rgb.cpp
+    PixelFormat/rgba.cpp
+)
+
+# Base Bitmap Source Files (platform-independent)
+set(CM2D_BITMAP_BASE_SOURCE 
     Bitmap/tga.cpp 
     Bitmap/BitmapTGAStream.cpp
 )
 
-# Platform-specific source files
+# Platform-specific Bitmap Source Files
 set(CM2D_BITMAP_PLATFORM_SOURCE "")
 set(CM2D_PLATFORM_LIBS "")
 
@@ -79,9 +130,10 @@ if(CM2D_USE_IMAGEMAGICK)
     endif()
 endif()
 
+# Combine all bitmap sources
 set(CM2D_BITMAP_SOURCE ${CM2D_BITMAP_BASE_SOURCE} ${CM2D_BITMAP_PLATFORM_SOURCE})
 
-# Terrain generation source files
+# Terrain Generation Source Files
 set(CM2D_TERRAIN_SOURCE
     Terrain/NoiseGenerator.cpp
     Terrain/PerlinNoise.cpp
@@ -92,12 +144,37 @@ set(CM2D_TERRAIN_SOURCE
     Terrain/TerrainGenerator.cpp
 )
 
-SOURCE_GROUP("Header Files" FILES ${CM2D_HEADER})
-SOURCE_GROUP("PixelFormat" FILES ${CM2D_PIXEL_SOURCE})
-SOURCE_GROUP("Bitmap" FILES ${CM2D_BITMAP_SOURCE})
-SOURCE_GROUP("Terrain" FILES ${CM2D_TERRAIN_SOURCE})
+# ==================== Source Groups for IDE Organization ====================
 
-add_cm_library(CM2D "CM" ${CM2D_HEADER} ${CM2D_PIXEL_SOURCE} ${CM2D_BITMAP_SOURCE} ${CM2D_TERRAIN_SOURCE})
+# Header File Groups
+SOURCE_GROUP("Header Files\\Bitmap" FILES ${CM2D_BITMAP_HEADERS})
+SOURCE_GROUP("Header Files\\Image Format" FILES ${CM2D_FORMAT_HEADERS})
+SOURCE_GROUP("Header Files\\Image Processing" FILES ${CM2D_PROCESSING_HEADERS})
+SOURCE_GROUP("Header Files\\Channel Operations" FILES ${CM2D_CHANNEL_HEADERS})
+SOURCE_GROUP("Header Files\\Terrain" FILES ${CM2D_TERRAIN_HEADERS})
+SOURCE_GROUP("Header Files\\Misc" FILES ${CM2D_MISC_HEADERS})
+
+# Source File Groups
+SOURCE_GROUP("Source Files\\Pixel Format" FILES ${CM2D_PIXEL_SOURCE})
+SOURCE_GROUP("Source Files\\Bitmap\\Core" FILES ${CM2D_BITMAP_BASE_SOURCE})
+SOURCE_GROUP("Source Files\\Bitmap\\Platform" FILES ${CM2D_BITMAP_PLATFORM_SOURCE})
+SOURCE_GROUP("Source Files\\Terrain" FILES ${CM2D_TERRAIN_SOURCE})
+
+# ==================== Library Target ====================
+
+add_cm_library(CM2D "CM" 
+    ${CM2D_BITMAP_HEADERS}
+    ${CM2D_FORMAT_HEADERS}
+    ${CM2D_PROCESSING_HEADERS}
+    ${CM2D_CHANNEL_HEADERS}
+    ${CM2D_TERRAIN_HEADERS}
+    ${CM2D_MISC_HEADERS}
+    ${CM2D_PIXEL_SOURCE}
+    ${CM2D_BITMAP_SOURCE}
+    ${CM2D_TERRAIN_SOURCE}
+)
+
+# ==================== Library Dependencies ====================
 
 # Link platform-specific libraries
 if(DEFINED CM2D_PLATFORM_LIBS)
