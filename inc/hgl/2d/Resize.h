@@ -6,6 +6,7 @@
 #include<hgl/math/VectorOperations.h>
 #include<algorithm>
 #include<cmath>
+#include<numbers>
 
 /**
  * Image Resize Module
@@ -136,8 +137,7 @@ namespace hgl::bitmap::resize
         if (x >= a)
             return 0.0f;
         
-        constexpr float PI = 3.14159265358979323846f;
-        float pi_x = PI * x;
+        float pi_x = std::numbers::pi_v<float> * x;
         return (a * std::sin(pi_x) * std::sin(pi_x / a)) / (pi_x * pi_x);
     }
 
@@ -148,8 +148,7 @@ namespace hgl::bitmap::resize
     {
         if (std::abs(x) < 1e-6f)
             return 1.0f;
-        constexpr float PI = 3.14159265358979323846f;
-        float pi_x = PI * x;
+        float pi_x = std::numbers::pi_v<float> * x;
         return std::sin(pi_x) / pi_x;
     }
 
