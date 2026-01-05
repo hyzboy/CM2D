@@ -26,7 +26,7 @@ void TestFormatSupport()
 {
     std::cout<<"=== Format Support Test ==="<<std::endl;
     
-    const char* test_formats[]={"PNG","JPEG","BMP","GIF","TIFF","WebP","TGA"};
+    constexpr const char* test_formats[]={"PNG","JPEG","BMP","GIF","TIFF","WebP","TGA"};
     
     for(auto format : test_formats)
     {

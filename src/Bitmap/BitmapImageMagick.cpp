@@ -3,11 +3,23 @@
 #include<hgl/2d/BitmapImageMagick.h>
 #include<Magick++.h>
 #include<sstream>
+#include<mutex>
 
 namespace hgl
 {
     namespace bitmap
     {
+        /**
+         * 线程安全的ImageMagick初始化
+         */
+        static void EnsureImageMagickInitialized()
+        {
+            static std::once_flag init_flag;
+            std::call_once(init_flag, []() {
+                Magick::InitializeMagick(nullptr);
+            });
+        }
+        
         /**
          * 将ImageMagick的StorageType转换为对应的通道数和位深度
          */
@@ -16,21 +28,12 @@ namespace hgl
                                         std::string &map)
         {
             // 设置存储类型
-            if(bits_per_channel==8)
+            switch(bits_per_channel)
             {
-                storage_type=Magick::CharPixel;
-            }
-            else if(bits_per_channel==16)
-            {
-                storage_type=Magick::ShortPixel;
-            }
-            else if(bits_per_channel==32)
-            {
-                storage_type=Magick::FloatPixel;
-            }
-            else
-            {
-                return false;
+                case 8:  storage_type=Magick::CharPixel;  break;
+                case 16: storage_type=Magick::ShortPixel; break;
+                case 32: storage_type=Magick::FloatPixel; break;
+                default: return false;
             }
             
             // 设置通道映射
@@ -55,13 +58,8 @@ namespace hgl
             
             try
             {
-                // 初始化ImageMagick（仅第一次调用有效）
-                static bool magick_initialized=false;
-                if(!magick_initialized)
-                {
-                    Magick::InitializeMagick(nullptr);
-                    magick_initialized=true;
-                }
+                // 线程安全的初始化
+                EnsureImageMagickInitialized();
                 
                 // 加载图像
                 Magick::Image image;
@@ -141,13 +139,8 @@ namespace hgl
                 
             try
             {
-                // 初始化ImageMagick
-                static bool magick_initialized=false;
-                if(!magick_initialized)
-                {
-                    Magick::InitializeMagick(nullptr);
-                    magick_initialized=true;
-                }
+                // 线程安全的初始化
+                EnsureImageMagickInitialized();
                 
                 // 确定存储格式
                 Magick::StorageType storage_type;
@@ -161,12 +154,12 @@ namespace hgl
                 image.size(Magick::Geometry(width,height));
                 
                 // 设置图像深度
-                if(single_channel_bits==8)
-                    image.depth(8);
-                else if(single_channel_bits==16)
-                    image.depth(16);
-                else if(single_channel_bits==32)
-                    image.depth(32);
+                switch(single_channel_bits)
+                {
+                    case 8:  image.depth(8);  break;
+                    case 16: image.depth(16); break;
+                    case 32: image.depth(32); break;
+                }
                 
                 // 导入像素数据
                 image.read(width,height,map,storage_type,data);
@@ -207,12 +200,8 @@ namespace hgl
             {
                 try
                 {
-                    static bool magick_initialized=false;
-                    if(!magick_initialized)
-                    {
-                        Magick::InitializeMagick(nullptr);
-                        magick_initialized=true;
-                    }
+                    // 线程安全的初始化
+                    EnsureImageMagickInitialized();
                     
                     std::list<Magick::CoderInfo> coders;
                     Magick::coderInfoList(&coders,
@@ -263,12 +252,8 @@ namespace hgl
             {
                 try
                 {
-                    static bool magick_initialized=false;
-                    if(!magick_initialized)
-                    {
-                        Magick::InitializeMagick(nullptr);
-                        magick_initialized=true;
-                    }
+                    // 线程安全的初始化
+                    EnsureImageMagickInitialized();
                     
                     Magick::CoderInfo info(format);
                     return (info.isReadable()||info.isWritable());
