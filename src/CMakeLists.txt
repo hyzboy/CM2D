@@ -64,6 +64,21 @@ if(UNIX AND NOT APPLE)
     endif()
 endif()
 
+# ImageMagick support option
+option(CM2D_USE_IMAGEMAGICK "Enable ImageMagick support for additional image formats" OFF)
+if(CM2D_USE_IMAGEMAGICK)
+    find_package(ImageMagick COMPONENTS Magick++)
+    if(ImageMagick_FOUND)
+        list(APPEND CM2D_BITMAP_BASE_SOURCE Bitmap/BitmapImageMagick.cpp)
+        add_definitions(-DHGL_IMAGEMAGICK_SUPPORT)
+        message(STATUS "ImageMagick found: ${ImageMagick_VERSION}")
+        message(STATUS "ImageMagick include: ${ImageMagick_INCLUDE_DIRS}")
+        message(STATUS "ImageMagick libraries: ${ImageMagick_LIBRARIES}")
+    else()
+        message(WARNING "ImageMagick not found, ImageMagick support disabled")
+    endif()
+endif()
+
 set(CM2D_BITMAP_SOURCE ${CM2D_BITMAP_BASE_SOURCE} ${CM2D_BITMAP_PLATFORM_SOURCE})
 
 # Terrain generation source files
@@ -87,4 +102,10 @@ add_cm_library(CM2D "CM" ${CM2D_HEADER} ${CM2D_PIXEL_SOURCE} ${CM2D_BITMAP_SOURC
 # Link platform-specific libraries
 if(DEFINED CM2D_PLATFORM_LIBS)
     target_link_libraries(CM2D PRIVATE ${CM2D_PLATFORM_LIBS})
+endif()
+
+# Link ImageMagick if enabled
+if(CM2D_USE_IMAGEMAGICK AND ImageMagick_FOUND)
+    target_include_directories(CM2D PRIVATE ${ImageMagick_INCLUDE_DIRS})
+    target_link_libraries(CM2D PRIVATE ${ImageMagick_LIBRARIES})
 endif()
