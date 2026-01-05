@@ -1,6 +1,7 @@
 #ifdef HGL_IMAGEMAGICK_SUPPORT
 
 #include<hgl/2d/BitmapImageMagick.h>
+#include<hgl/type/StdString.h>
 #include<Magick++.h>
 #include<sstream>
 #include<mutex>
@@ -66,7 +67,9 @@ namespace hgl
                 
                 #ifdef _WIN32
                     // Windows下使用宽字符
-                    image.read(filename.c_str());
+                    const std::string u8_fn=ToStdString(filename);
+
+                    image.read(u8_fn.c_str());
                 #else
                     // Unix-like系统使用UTF-8
                     image.read(std::string(filename.c_str()));
@@ -172,7 +175,9 @@ namespace hgl
                 
                 // 保存文件
                 #ifdef _WIN32
-                    image.write(filename.c_str());
+                    const std::string u8_fn=ToStdString(filename);
+
+                    image.write(u8_fn);
                 #else
                     image.write(std::string(filename.c_str()));
                 #endif
@@ -237,7 +242,7 @@ namespace hgl
             {
                 try
                 {
-                    return Magick::version();
+                    return MagickLibVersionText;
                 }
                 catch(...)
                 {
