@@ -1,5 +1,5 @@
 #include<hgl/util/csv/CSVParse.h>
-#include<hgl/type/ArrayList.h>
+#include<hgl/type/ValueArray.h>
 #include<hgl/type/Map.h>
 #include<iostream>
 #include<hgl/2d/BitmapLoad.h>
@@ -25,7 +25,7 @@ constexpr const uint ICON_SIZE=8;
 BitmapRGB8 *BackgroundBitmap=nullptr;
 DrawGeometryRGB8 *draw_bmp=nullptr;
 
-using TraceList=ArrayList<Vector2i>;
+using TraceList=ValueArray<Vector2i>;
 
 ObjectMap<uint,TraceList> PlayerTrace;
 
