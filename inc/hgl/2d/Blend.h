@@ -182,39 +182,41 @@ namespace hgl::bitmap
         template<typename T, typename F>
         inline void* GetWrapperForMode(AlphaBlendMode mode)
         {
+            #define HGL_BLEND_CASE(MODE) case AlphaBlendMode::MODE: return (void*)BlendColorWrapper<T, F, AlphaBlendMode::MODE>
             switch (mode)
             {
-                case AlphaBlendMode::None:              return (void*)BlendColorWrapper<T, F, AlphaBlendMode::None>;
-                case AlphaBlendMode::Normal:            return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Normal>;
-                case AlphaBlendMode::Add:               return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Add>;
-                case AlphaBlendMode::Subtract:          return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Subtract>;
-                case AlphaBlendMode::Multiply:          return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Multiply>;
-                case AlphaBlendMode::Screen:            return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Screen>;
-                case AlphaBlendMode::Overlay:           return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Overlay>;
-                case AlphaBlendMode::HardLight:         return (void*)BlendColorWrapper<T, F, AlphaBlendMode::HardLight>;
-                case AlphaBlendMode::SoftLight:         return (void*)BlendColorWrapper<T, F, AlphaBlendMode::SoftLight>;
-                case AlphaBlendMode::ColorDodge:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::ColorDodge>;
-                case AlphaBlendMode::ColorBurn:         return (void*)BlendColorWrapper<T, F, AlphaBlendMode::ColorBurn>;
-                case AlphaBlendMode::LinearDodge:       return (void*)BlendColorWrapper<T, F, AlphaBlendMode::LinearDodge>;
-                case AlphaBlendMode::LinearBurn:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::LinearBurn>;
-                case AlphaBlendMode::Darken:            return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Darken>;
-                case AlphaBlendMode::Lighten:           return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Lighten>;
-                case AlphaBlendMode::Difference:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Difference>;
-                case AlphaBlendMode::Exclusion:         return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Exclusion>;
-                case AlphaBlendMode::VividLight:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::VividLight>;
-                case AlphaBlendMode::LinearLight:       return (void*)BlendColorWrapper<T, F, AlphaBlendMode::LinearLight>;
-                case AlphaBlendMode::PinLight:          return (void*)BlendColorWrapper<T, F, AlphaBlendMode::PinLight>;
-                case AlphaBlendMode::HardMix:           return (void*)BlendColorWrapper<T, F, AlphaBlendMode::HardMix>;
-                case AlphaBlendMode::DarkerColor:       return (void*)BlendColorWrapper<T, F, AlphaBlendMode::DarkerColor>;
-                case AlphaBlendMode::LighterColor:      return (void*)BlendColorWrapper<T, F, AlphaBlendMode::LighterColor>;
-                case AlphaBlendMode::Hue:               return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Hue>;
-                case AlphaBlendMode::Saturation:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Saturation>;
-                case AlphaBlendMode::Color:             return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Color>;
-                case AlphaBlendMode::Luminosity:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Luminosity>;
-                case AlphaBlendMode::Divide:            return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Divide>;
-                case AlphaBlendMode::PremultipliedAlpha:return (void*)BlendColorWrapper<T, F, AlphaBlendMode::PremultipliedAlpha>;
+                HGL_BLEND_CASE(None);
+                HGL_BLEND_CASE(Normal);
+                HGL_BLEND_CASE(Add);
+                HGL_BLEND_CASE(Subtract);
+                HGL_BLEND_CASE(Multiply);
+                HGL_BLEND_CASE(Screen);
+                HGL_BLEND_CASE(Overlay);
+                HGL_BLEND_CASE(HardLight);
+                HGL_BLEND_CASE(SoftLight);
+                HGL_BLEND_CASE(ColorDodge);
+                HGL_BLEND_CASE(ColorBurn);
+                HGL_BLEND_CASE(LinearDodge);
+                HGL_BLEND_CASE(LinearBurn);
+                HGL_BLEND_CASE(Darken);
+                HGL_BLEND_CASE(Lighten);
+                HGL_BLEND_CASE(Difference);
+                HGL_BLEND_CASE(Exclusion);
+                HGL_BLEND_CASE(VividLight);
+                HGL_BLEND_CASE(LinearLight);
+                HGL_BLEND_CASE(PinLight);
+                HGL_BLEND_CASE(HardMix);
+                HGL_BLEND_CASE(DarkerColor);
+                HGL_BLEND_CASE(LighterColor);
+                HGL_BLEND_CASE(Hue);
+                HGL_BLEND_CASE(Saturation);
+                HGL_BLEND_CASE(Color);
+                HGL_BLEND_CASE(Luminosity);
+                HGL_BLEND_CASE(Divide);
+                HGL_BLEND_CASE(PremultipliedAlpha);
                 default: return nullptr;
             }
+            #undef HGL_BLEND_CASE
         }
     }
 
