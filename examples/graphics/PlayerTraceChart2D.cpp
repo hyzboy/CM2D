@@ -29,7 +29,7 @@ using TraceList=ValueArray<Vector2i>;
 
 ObjectMap<uint,TraceList> PlayerTrace;
 
-Vector3u8 *PlayerColor=nullptr;
+Color3ub *PlayerColor=nullptr;
 
 int os_main(int argc,os_char **argv)
 {

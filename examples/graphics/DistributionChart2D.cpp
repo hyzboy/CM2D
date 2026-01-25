@@ -1,7 +1,9 @@
 #include<hgl/type/StringList.h>
 #include<hgl/io/LoadStringList.h>
 #include<hgl/type/Gradient.h>
-#include<hgl/math/Vector.h>
+#include<hgl/color/Color3ub.h>
+#include<hgl/color/Color4ub.h>
+#include<hgl/2d/Bitmap.h>
 #include<hgl/io/FileInputStream.h>
 #include<hgl/io/FileOutputStream.h>
 #include<hgl/filesystem/Filename.h>
@@ -12,6 +14,7 @@
 #include"BitmapFont.h"
 
 using namespace hgl;
+using namespace hgl::math;
 using namespace hgl::bitmap;
 
 OSString csv_filename;
@@ -41,29 +44,29 @@ bool InitBitmapFont()
     return(true);
 }
 
-constexpr const float LOW_GAP=0.2f;
-constexpr const Vector4u8 black_color={0,0,0,255};
-constexpr const Vector4u8 white_color={255,255,255,255};
+const float LOW_GAP=0.2f;
+const Color4ub black_color(0,0,0,255);
+const Color4ub white_color(255,255,255,255);
 
-constexpr const Vector4u8 stop_color[]=
+const Color3ub stop_color[]=
 {
-    {  0,  0,255,255},
-    {  0,255,255,255},
-    {  0,255,  0,255},
-    {255,255,  0,255},
-    {255,  0,  0,255}
+    {  0,  0,255},
+    {  0,255,255},
+    {  0,255,  0},
+    {255,255,  0},
+    {255,  0,  0}
 };
 
-constexpr const uint STOP_COUNT=sizeof(stop_color)/sizeof(Vector4u8);
+constexpr const uint STOP_COUNT=sizeof(stop_color)/sizeof(Color3ub);
 
 uint stop_count[STOP_COUNT];
 uint top_count=0;
 
-HGL_GRADIENT_DEFINE(GradientColor3u8,uint,Vector3u8)
+HGL_GRADIENT_DEFINE(GradientColor3u8,uint,Color3ub)
 {
-    result.r=start.r+float(end.r-start.r)*pos;
-    result.g=start.g+float(end.g-start.g)*pos;
-    result.b=start.b+float(end.b-start.b)*pos;
+    result.x=start.x+float(end.x-start.x)*pos;
+    result.y=start.y+float(end.y-start.y)*pos;
+    result.z=start.z+float(end.z-start.z)*pos;
 }
 
 GradientColor3u8 ColorGradient;

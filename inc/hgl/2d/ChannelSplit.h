@@ -2,29 +2,31 @@
 
 #include<hgl/2d/Bitmap.h>
 #include<hgl/math/Vector.h>
+#include<hgl/color/Color3ub.h>
+#include<hgl/color/Color4ub.h>
 #include<cstring>
 
 /**
  * Channel Split Module
- * 
- * Provides functionality to split multi-channel bitmaps into separate single-channel 
+ *
+ * Provides functionality to split multi-channel bitmaps into separate single-channel
  * or multi-channel bitmaps. Supports various splitting patterns like:
  * - RGB -> R + G + B (3 single channels)
  * - RGBA -> RGB + A (3-channel + 1-channel)
  * - RGBA -> R + G + B + A (4 single channels)
  * - YUV -> Y + UV (1-channel + 2-channel)
- * 
+ *
  * Example usage:
  * ```cpp
  * BitmapRGBA8 source;
  * source.Create(100, 100);
- * 
+ *
  * // Split RGBA into 4 separate channels
  * auto [r, g, b, a] = hgl::bitmap::channel::SplitRGBA(source);
- * 
+ *
  * // Split RGBA into RGB + A
  * auto [rgb, alpha] = hgl::bitmap::channel::SplitRGBA_To_RGB_A(source);
- * 
+ *
  * // Split RGB into individual channels
  * auto [red, green, blue] = hgl::bitmap::channel::SplitRGB(source);
  * ```
@@ -41,17 +43,17 @@ namespace hgl::bitmap::channel
     {
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const math::Vector4u8* src_data = src.GetData();
-        
+        const Color4ub* src_data = reinterpret_cast<const Color4ub*>(src.GetData());
+
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr, nullptr, nullptr};
-        
+
         BitmapGrey8* r_channel = new BitmapGrey8();
         BitmapGrey8* g_channel = new BitmapGrey8();
         BitmapGrey8* b_channel = new BitmapGrey8();
         BitmapGrey8* a_channel = new BitmapGrey8();
-        
-        if (!r_channel->Create(w, h) || !g_channel->Create(w, h) || 
+
+        if (!r_channel->Create(w, h) || !g_channel->Create(w, h) ||
             !b_channel->Create(w, h) || !a_channel->Create(w, h))
         {
             delete r_channel;
@@ -60,12 +62,12 @@ namespace hgl::bitmap::channel
             delete a_channel;
             return {nullptr, nullptr, nullptr, nullptr};
         }
-        
+
         uint8* r_data = r_channel->GetData();
         uint8* g_data = g_channel->GetData();
         uint8* b_data = b_channel->GetData();
         uint8* a_data = a_channel->GetData();
-        
+
         const int total = w * h;
         for (int i = 0; i < total; ++i)
         {
@@ -74,7 +76,7 @@ namespace hgl::bitmap::channel
             b_data[i] = src_data[i].b;
             a_data[i] = src_data[i].a;
         }
-        
+
         return {r_channel, g_channel, b_channel, a_channel};
     }
 
@@ -87,15 +89,15 @@ namespace hgl::bitmap::channel
     {
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const math::Vector3u8* src_data = src.GetData();
-        
+        const Color3ub* src_data = reinterpret_cast<const Color3ub*>(src.GetData());
+
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr, nullptr};
-        
+
         BitmapGrey8* r_channel = new BitmapGrey8();
         BitmapGrey8* g_channel = new BitmapGrey8();
         BitmapGrey8* b_channel = new BitmapGrey8();
-        
+
         if (!r_channel->Create(w, h) || !g_channel->Create(w, h) || !b_channel->Create(w, h))
         {
             delete r_channel;
@@ -103,11 +105,11 @@ namespace hgl::bitmap::channel
             delete b_channel;
             return {nullptr, nullptr, nullptr};
         }
-        
+
         uint8* r_data = r_channel->GetData();
         uint8* g_data = g_channel->GetData();
         uint8* b_data = b_channel->GetData();
-        
+
         const int total = w * h;
         for (int i = 0; i < total; ++i)
         {
@@ -115,7 +117,7 @@ namespace hgl::bitmap::channel
             g_data[i] = src_data[i].g;
             b_data[i] = src_data[i].b;
         }
-        
+
         return {r_channel, g_channel, b_channel};
     }
 
@@ -129,30 +131,30 @@ namespace hgl::bitmap::channel
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const math::Vector2u8* src_data = src.GetData();
-        
+
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr};
-        
+
         BitmapGrey8* r_channel = new BitmapGrey8();
         BitmapGrey8* g_channel = new BitmapGrey8();
-        
+
         if (!r_channel->Create(w, h) || !g_channel->Create(w, h))
         {
             delete r_channel;
             delete g_channel;
             return {nullptr, nullptr};
         }
-        
+
         uint8* r_data = r_channel->GetData();
         uint8* g_data = g_channel->GetData();
-        
+
         const int total = w * h;
         for (int i = 0; i < total; ++i)
         {
             r_data[i] = src_data[i].r;
             g_data[i] = src_data[i].g;
         }
-        
+
         return {r_channel, g_channel};
     }
 
@@ -165,24 +167,24 @@ namespace hgl::bitmap::channel
     {
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const math::Vector4u8* src_data = src.GetData();
-        
+        const Color4ub* src_data = reinterpret_cast<const Color4ub*>(src.GetData());
+
         if (!src_data || w <= 0 || h <= 0)
             return {nullptr, nullptr};
-        
+
         BitmapRGB8* rgb_bitmap = new BitmapRGB8();
         BitmapGrey8* a_channel = new BitmapGrey8();
-        
+
         if (!rgb_bitmap->Create(w, h) || !a_channel->Create(w, h))
         {
             delete rgb_bitmap;
             delete a_channel;
             return {nullptr, nullptr};
         }
-        
-        math::Vector3u8* rgb_data = rgb_bitmap->GetData();
+
+        Color3ub* rgb_data = reinterpret_cast<Color3ub*>(rgb_bitmap->GetData());
         uint8* a_data = a_channel->GetData();
-        
+
         const int total = w * h;
         for (int i = 0; i < total; ++i)
         {
@@ -191,7 +193,7 @@ namespace hgl::bitmap::channel
             rgb_data[i].b = src_data[i].b;
             a_data[i] = src_data[i].a;
         }
-        
+
         return {rgb_bitmap, a_channel};
     }
 
@@ -205,24 +207,24 @@ namespace hgl::bitmap::channel
     {
         if (channel_index >= 4)
             return nullptr;
-        
+
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const math::Vector4u8* src_data = src.GetData();
-        
+        const Color4ub* src_data = reinterpret_cast<const Color4ub*>(src.GetData());
+
         if (!src_data || w <= 0 || h <= 0)
             return nullptr;
-        
+
         BitmapGrey8* channel = new BitmapGrey8();
         if (!channel->Create(w, h))
         {
             delete channel;
             return nullptr;
         }
-        
+
         uint8* channel_data = channel->GetData();
         const int total = w * h;
-        
+
         for (int i = 0; i < total; ++i)
         {
             if (channel_index == 0)
@@ -234,7 +236,7 @@ namespace hgl::bitmap::channel
             else
                 channel_data[i] = src_data[i].a;
         }
-        
+
         return channel;
     }
 
@@ -248,24 +250,24 @@ namespace hgl::bitmap::channel
     {
         if (channel_index >= 3)
             return nullptr;
-        
+
         const int w = src.GetWidth();
         const int h = src.GetHeight();
-        const math::Vector3u8* src_data = src.GetData();
-        
+        const Color3ub* src_data = reinterpret_cast<const Color3ub*>(src.GetData());
+
         if (!src_data || w <= 0 || h <= 0)
             return nullptr;
-        
+
         BitmapGrey8* channel = new BitmapGrey8();
         if (!channel->Create(w, h))
         {
             delete channel;
             return nullptr;
         }
-        
+
         uint8* channel_data = channel->GetData();
         const int total = w * h;
-        
+
         for (int i = 0; i < total; ++i)
         {
             if (channel_index == 0)
@@ -275,7 +277,7 @@ namespace hgl::bitmap::channel
             else
                 channel_data[i] = src_data[i].b;
         }
-        
+
         return channel;
     }
 
@@ -289,29 +291,29 @@ namespace hgl::bitmap::channel
     {
         if (channel_index >= 2)
             return nullptr;
-        
+
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const math::Vector2u8* src_data = src.GetData();
-        
+
         if (!src_data || w <= 0 || h <= 0)
             return nullptr;
-        
+
         BitmapGrey8* channel = new BitmapGrey8();
         if (!channel->Create(w, h))
         {
             delete channel;
             return nullptr;
         }
-        
+
         uint8* channel_data = channel->GetData();
         const int total = w * h;
-        
+
         for (int i = 0; i < total; ++i)
         {
             channel_data[i] = (channel_index == 0) ? src_data[i].r : src_data[i].g;
         }
-        
+
         return channel;
     }
 
@@ -325,58 +327,58 @@ namespace hgl::bitmap::channel
     {
         if (channel_index != 0)
             return nullptr;
-        
+
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const uint8* src_data = src.GetData();
-        
+
         if (!src_data || w <= 0 || h <= 0)
             return nullptr;
-        
+
         BitmapGrey8* channel = new BitmapGrey8();
         if (!channel->Create(w, h))
         {
             delete channel;
             return nullptr;
         }
-        
+
         uint8* channel_data = channel->GetData();
         const int total = w * h;
-        
+
         // Use memcpy for efficient copy
         memcpy(channel_data, src_data, total * sizeof(uint8));
-        
+
         return channel;
     }
 
     /**
      * Convenient wrapper functions for common use cases
      */
-    
+
     // Extract R channel from RGBA
     inline BitmapGrey8* ExtractR(const BitmapRGBA8& src) { return ExtractChannel(src, 0); }
-    
+
     // Extract G channel from RGBA
     inline BitmapGrey8* ExtractG(const BitmapRGBA8& src) { return ExtractChannel(src, 1); }
-    
+
     // Extract B channel from RGBA
     inline BitmapGrey8* ExtractB(const BitmapRGBA8& src) { return ExtractChannel(src, 2); }
-    
+
     // Extract A channel from RGBA
     inline BitmapGrey8* ExtractA(const BitmapRGBA8& src) { return ExtractChannel(src, 3); }
 
     // Extract R channel from RGB
     inline BitmapGrey8* ExtractR(const BitmapRGB8& src) { return ExtractChannel(src, 0); }
-    
+
     // Extract G channel from RGB
     inline BitmapGrey8* ExtractG(const BitmapRGB8& src) { return ExtractChannel(src, 1); }
-    
+
     // Extract B channel from RGB
     inline BitmapGrey8* ExtractB(const BitmapRGB8& src) { return ExtractChannel(src, 2); }
 
     // Extract R channel from RG
     inline BitmapGrey8* ExtractR(const BitmapRG8& src) { return ExtractChannel(src, 0); }
-    
+
     // Extract G channel from RG
     inline BitmapGrey8* ExtractG(const BitmapRG8& src) { return ExtractChannel(src, 1); }
 

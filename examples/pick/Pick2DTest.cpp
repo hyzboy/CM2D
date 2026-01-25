@@ -1,6 +1,7 @@
 #include<hgl/type/RectScope.h>
 #include<hgl/math/geometry/Triangle.h>
 #include<hgl/math/geometry/Ray.h>
+#include<hgl/math/Vector.h>
 #include<hgl/2d/TGA.h>
 #include<hgl/2d/Bitmap.h>
 #include<hgl/2d/BitmapSave.h>
@@ -15,26 +16,27 @@ std::uniform_real_distribution<> dis_01(0, 1);
 std::uniform_int_distribution<> dis_int(0, 1023);
 
 using namespace hgl;
+using namespace hgl::math;  // For Vector types
 using namespace std;
 
 void Pick2DRectangle()
 {
     RectScope2f rs;
-    
+
     rs.SetPosition(0,0);
     rs.SetSize(1,1);
 
-    rs.PointIn(hgl::Vector2f(0.5,0.5));
+    rs.PointIn(Vector2f(0.5,0.5));
 }
 
 void Pick2DTriangle()
 {
-    graph::Triangle2i tri;
+    Triangle2i tri;
 
     Vector2i v[3];
     Vector3i edge_length;
     Vector2i t;
-    
+
     for(int i=0;i<3;i++)
     {
         v[i].x=dis_int(gen);
@@ -53,14 +55,14 @@ void Pick2DTriangle()
     std::cout<<"triangle area(method 2): "<<tri.Area()<<std::endl;
 
     bitmap::BitmapRGB8 bmp;
-    Vector3u8 clear_color(0,0,0);
+    Color3ub clear_color(0,0,0);
 
     bmp.Create(1024,1024);
     bmp.ClearColor(clear_color);
 
     bitmap::DrawGeometryRGB8 draw(&bmp);
 
-    draw.SetDrawColor(Vector3u8(255,255,255));
+    draw.SetDrawColor(Color3ub(255,255,255));
 
     draw.DrawLine(v[0],v[1]);
     draw.DrawLine(v[1],v[2]);
@@ -74,9 +76,9 @@ void Pick2DTriangle()
         t.y=dis_int(gen);
 
         if(tri.PointIn(t))
-            draw.SetDrawColor(Vector3u8(0,255,0));
+            draw.SetDrawColor(Color3ub(0,255,0));
         else
-            draw.SetDrawColor(Vector3u8(0,0,255));
+            draw.SetDrawColor(Color3ub(0,0,255));
 
         draw.PutPixel(t);
     }

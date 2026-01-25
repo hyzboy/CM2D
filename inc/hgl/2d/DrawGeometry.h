@@ -4,6 +4,8 @@
 #include<hgl/2d/Blend.h>
 #include<hgl/math/FastTriangle.h>
 #include<hgl/math/Vector.h>
+#include<hgl/color/Color3ub.h>
+#include<hgl/color/Color4ub.h>
 
 namespace hgl::bitmap
 {
@@ -127,7 +129,7 @@ namespace hgl::bitmap
 
             for(int y=t;y<t+h;y++)
             {
-                for(int i=0;i<length;i++)
+                for(int i=0;i<width;i++)
                     *p++=(*blend)(draw_color,*p,alpha);
 
                 p+=width-w;
@@ -485,6 +487,6 @@ namespace hgl::bitmap
     };//template<typename T,uint CHANNELS> class DrawGeometry
 
     using DrawGeometryU32=DrawGeometry<uint32,BitmapU32>;
-    using DrawGeometryRGB8=DrawGeometry<Vector3u8,BitmapRGB8>;
-    using DrawGeometryRGBA8=DrawGeometry<Vector4u8,BitmapRGBA8>;
+    using DrawGeometryRGB8=DrawGeometry<Color3ub,BitmapRGB8>;
+    using DrawGeometryRGBA8=DrawGeometry<Color4ub,BitmapRGBA8>;
 }//namespace hgl::bitmap

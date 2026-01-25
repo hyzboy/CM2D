@@ -10,6 +10,5 @@ macro(cm_example_project sub_folder project_name)
     )
 endmacro()
 
-cm_example_project("Graphics" BitmapFont BitmapFont.cpp)
 cm_example_project("Graphics" DistributionChart2D DistributionChart2D.cpp)
 cm_example_project("Graphics" PlayerTraceChart2D PlayerTraceChart2D.cpp)

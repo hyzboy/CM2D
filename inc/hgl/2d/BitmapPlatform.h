@@ -1,6 +1,8 @@
 #pragma once
 
 #include<hgl/2d/Bitmap.h>
+#include<hgl/color/Color3ub.h>
+#include<hgl/color/Color4ub.h>
 
 // Platform-specific includes
 #ifdef _WIN32
@@ -100,8 +102,8 @@ namespace hgl::bitmap
         HDC GetMemDC() const { return memDC; }
     };
 
-    using BitmapRGBA8Windows = BitmapWindows<math::Vector4u8, 4>;
-    using BitmapRGB8Windows = BitmapWindows<math::Vector3u8, 3>;
+    using BitmapRGBA8Windows = BitmapWindows<Color4ub, 4>;
+    using BitmapRGB8Windows = BitmapWindows<Color3ub, 3>;
     using BitmapRG8Windows = BitmapWindows<math::Vector2u8, 2>;
     using BitmapGrey8Windows = BitmapWindows<uint8, 1>;
 #endif // _WIN32
@@ -156,8 +158,8 @@ namespace hgl::bitmap
         CGContextRef GetCGContext() const { return cgContext; }
     };
 
-    using BitmapRGBA8MacOS = BitmapMacOS<math::Vector4u8, 4>;
-    using BitmapRGB8MacOS = BitmapMacOS<math::Vector3u8, 3>;
+    using BitmapRGBA8MacOS = BitmapMacOS<Color4ub, 4>;
+    using BitmapRGB8MacOS = BitmapMacOS<Color3ub, 3>;
     using BitmapRG8MacOS = BitmapMacOS<math::Vector2u8, 2>;
     using BitmapGrey8MacOS = BitmapMacOS<uint8, 1>;
 #endif // __APPLE__
@@ -219,8 +221,8 @@ namespace hgl::bitmap
         bool IsUsingShm() const { return using_shm; }
     };
 
-    using BitmapRGBA8X11 = BitmapX11<math::Vector4u8, 4>;
-    using BitmapRGB8X11 = BitmapX11<math::Vector3u8, 3>;
+    using BitmapRGBA8X11 = BitmapX11<Color4ub, 4>;
+    using BitmapRGB8X11 = BitmapX11<Color3ub, 3>;
     using BitmapRG8X11 = BitmapX11<math::Vector2u8, 2>;
     using BitmapGrey8X11 = BitmapX11<uint8, 1>;
 #endif // HGL_X11_SUPPORT
@@ -266,8 +268,8 @@ namespace hgl::bitmap
         struct wl_buffer* GetWlBuffer() const { return buffer; }
     };
 
-    using BitmapRGBA8Wayland = BitmapWayland<math::Vector4u8, 4>;
-    using BitmapRGB8Wayland = BitmapWayland<math::Vector3u8, 3>;
+    using BitmapRGBA8Wayland = BitmapWayland<Color4ub, 4>;
+    using BitmapRGB8Wayland = BitmapWayland<Color3ub, 3>;
     using BitmapRG8Wayland = BitmapWayland<math::Vector2u8, 2>;
     using BitmapGrey8Wayland = BitmapWayland<uint8, 1>;
 #endif // HGL_WAYLAND_SUPPORT

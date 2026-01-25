@@ -6,6 +6,7 @@
 #include<hgl/2d/NoiseMap.h>
 #include<hgl/2d/TerrainMap.h>
 #include<hgl/2d/BitmapSave.h>
+#include<hgl/color/Color3ub.h>
 #include<iostream>
 
 using namespace hgl;
@@ -16,12 +17,12 @@ void ConvertFloat32ToGrayscale(const Bitmap32F& floatMap, BitmapGrey8& output)
 {
     int w = floatMap.GetWidth();
     int h = floatMap.GetHeight();
-    
+
     output.Create(w, h);
-    
+
     const float* floatData = floatMap.GetData();
     uint8* outData = output.GetData();
-    
+
     for (int i = 0; i < w * h; i++)
     {
         // Convert [0, 1] float to [0, 255] byte
@@ -38,11 +39,11 @@ void ConvertBiomeMapToColor(const BiomeMap& biomeMap, BitmapRGB8& output)
 {
     int w = biomeMap.GetWidth();
     int h = biomeMap.GetHeight();
-    
+
     output.Create(w, h);
-    
+
     // Define colors for each biome
-    math::Vector3u8 colors[] = {
+    Color3ub colors[] = {
         {0, 0, 139},      // Ocean - Dark Blue
         {238, 214, 175},  // Beach - Sandy
         {124, 252, 0},    // Plains - Light Green
@@ -53,7 +54,7 @@ void ConvertBiomeMapToColor(const BiomeMap& biomeMap, BitmapRGB8& output)
         {139, 137, 137},  // Mountain - Gray
         {30, 144, 255}    // River - Blue
     };
-    
+
     for (int y = 0; y < h; y++)
     {
         for (int x = 0; x < w; x++)
@@ -62,8 +63,8 @@ void ConvertBiomeMapToColor(const BiomeMap& biomeMap, BitmapRGB8& output)
             int biomeIdx = static_cast<int>(biome);
             if (biomeIdx < 0 || biomeIdx >= 9)
                 biomeIdx = 0;
-            
-            math::Vector3u8* pixel = output.GetData(x, y);
+
+            Color3ub* pixel = reinterpret_cast<Color3ub*>(output.GetData(x, y));
             if (pixel)
                 *pixel = colors[biomeIdx];
         }
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
     const int height = 512;
     const uint32 seed = 12345;
     const float scale = 0.005f;
-    
+
     std::cout << "Map size: " << width << "x" << height << std::endl;
     std::cout << "Seed: " << seed << std::endl;
     std::cout << std::endl;
@@ -90,15 +91,15 @@ int main(int argc, char** argv)
     {
         HeightMap heightMap;
         heightMap.Create(width, height);
-        
+
         PerlinNoise noise(seed);
         heightMap.GenerateFromNoise(noise, scale);
         heightMap.Normalize(0.0f, 1.0f);
-        
+
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_perlin.tga"), &grayscale);
-        
+
         std::cout << "   Saved: terrain_perlin.tga" << std::endl;
     }
 
@@ -107,15 +108,15 @@ int main(int argc, char** argv)
     {
         HeightMap heightMap;
         heightMap.Create(width, height);
-        
+
         SimplexNoise noise(seed);
         heightMap.GenerateFromNoise(noise, scale);
         heightMap.Normalize(0.0f, 1.0f);
-        
+
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_simplex.tga"), &grayscale);
-        
+
         std::cout << "   Saved: terrain_simplex.tga" << std::endl;
     }
 
@@ -124,16 +125,16 @@ int main(int argc, char** argv)
     {
         HeightMap heightMap;
         heightMap.Create(width, height);
-        
+
         const float VORONOI_CELL_SCALE = 10.0f; // Larger scale for bigger cells
         VoronoiNoise noise(seed);
         heightMap.GenerateFromNoise(noise, scale * VORONOI_CELL_SCALE);
         heightMap.Normalize(0.0f, 1.0f);
-        
+
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_voronoi.tga"), &grayscale);
-        
+
         std::cout << "   Saved: terrain_voronoi.tga" << std::endl;
     }
 
@@ -142,16 +143,16 @@ int main(int argc, char** argv)
     {
         HeightMap heightMap;
         heightMap.Create(width, height);
-        
+
         PerlinNoise perlin(seed);
         FractalNoise fbm(&perlin, 6, 2.0f, 0.5f, false);
         heightMap.GenerateFromNoise(fbm, scale);
         heightMap.Normalize(0.0f, 1.0f);
-        
+
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_fbm.tga"), &grayscale);
-        
+
         std::cout << "   Saved: terrain_fbm.tga" << std::endl;
     }
 
@@ -160,13 +161,13 @@ int main(int argc, char** argv)
     {
         TerrainGenerator generator(width, height, seed);
         HeightMap heightMap;
-        
+
         generator.GenerateDetailed(heightMap, 1.0f, 6, 50);
-        
+
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_eroded.tga"), &grayscale);
-        
+
         std::cout << "   Saved: terrain_eroded.tga" << std::endl;
     }
 
@@ -176,14 +177,14 @@ int main(int argc, char** argv)
         TerrainGenerator generator(width, height, seed);
         HeightMap heightMap;
         BiomeMap biomeMap;
-        
+
         generator.GenerateQuick(heightMap, 1.0f, 6);
         generator.GenerateBiomes(biomeMap, heightMap);
-        
+
         BitmapRGB8 colorMap;
         ConvertBiomeMapToColor(biomeMap, colorMap);
         SaveBitmapToTGA(U8_TEXT("terrain_biomes.tga"), &colorMap);
-        
+
         std::cout << "   Saved: terrain_biomes.tga" << std::endl;
     }
 
@@ -192,25 +193,25 @@ int main(int argc, char** argv)
     {
         HeightMap heightMap;
         heightMap.Create(width, height);
-        
+
         PerlinNoise perlin(seed);
         FractalNoise fbm(&perlin, 6, 2.0f, 0.5f, false);
         heightMap.GenerateFromNoise(fbm, scale);
         heightMap.Normalize(0.0f, 1.0f);
-        
+
         Bitmap32F slopeMap;
         heightMap.CalculateSlopeMap(slopeMap);
-        
+
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(slopeMap, grayscale);
         SaveBitmapToTGA(U8_TEXT("terrain_slope.tga"), &grayscale);
-        
+
         std::cout << "   Saved: terrain_slope.tga" << std::endl;
     }
 
     std::cout << std::endl;
     std::cout << "=== Generation Complete ===" << std::endl;
     std::cout << "All terrain images saved as .tga files in the current directory." << std::endl;
-    
+
     return 0;
 }

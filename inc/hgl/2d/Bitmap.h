@@ -2,6 +2,10 @@
 
 #include<hgl/CoreType.h>
 #include<hgl/math/Vector.h>
+#include<hgl/color/Color3ub.h>
+#include<hgl/color/Color4ub.h>
+#include<hgl/color/Color3f.h>
+#include<hgl/color/Color4f.h>
 #include<hgl/type/String.h>
 #include<hgl/math/HalfFloat.h>
 #include<iterator>
@@ -185,14 +189,14 @@ namespace hgl::bitmap
 
     using BitmapGrey8=Bitmap<uint8,1>;
     using BitmapRG8=Bitmap<math::Vector2u8,2>;
-    using BitmapRGB8=Bitmap<math::Vector3u8,3>;
-    using BitmapRGBA8=Bitmap<math::Vector4u8,4>;
+    using BitmapRGB8=Bitmap<Color3ub,3>;
+    using BitmapRGBA8=Bitmap<Color4ub,4>;
 
     using BitmapU16=Bitmap<uint16,1>;
     using BitmapU32=Bitmap<uint32,1>;
 
     using Bitmap32F=Bitmap<float,1>;
     using BitmapRG32F=Bitmap<math::Vector2f,2>;
-    using BitmapRGB32F=Bitmap<math::Vector3f,3>;
-    using BitmapRGBA32F=Bitmap<math::Vector4f,4>;
+    using BitmapRGB32F=Bitmap<Color3f,3>;
+    using BitmapRGBA32F=Bitmap<Color4f,4>;
 }//namespace hgl::bitmap
