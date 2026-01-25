@@ -3,7 +3,7 @@ set(CM2D_HEADER_PATH ${CM2D_ROOT_INCLUDE_PATH}/hgl/2d)
 # ==================== Header Files Classification ====================
 
 # Core Bitmap Headers
-set(CM2D_BITMAP_HEADERS 
+set(CM2D_BITMAP_HEADERS
     ${CM2D_HEADER_PATH}/Bitmap.h
     ${CM2D_HEADER_PATH}/BitmapLoad.h
     ${CM2D_HEADER_PATH}/BitmapSave.h
@@ -19,12 +19,16 @@ set(CM2D_FORMAT_HEADERS
 # Image Processing Headers
 set(CM2D_PROCESSING_HEADERS
     ${CM2D_HEADER_PATH}/Blend.h
-    ${CM2D_HEADER_PATH}/ColorConversion.h
     ${CM2D_HEADER_PATH}/DrawGeometry.h
     ${CM2D_HEADER_PATH}/MipMap.h
     ${CM2D_HEADER_PATH}/Resize.h
     ${CM2D_HEADER_PATH}/Transform.h
     ${CM2D_HEADER_PATH}/Tile.h
+)
+
+# Color Conversion Headers
+set(CM2D_COLORCONV_HEADERS
+    ${CM2D_HEADER_PATH}/ColorConversion.h
 )
 
 # Channel Operation Headers
@@ -48,15 +52,31 @@ set(CM2D_MISC_HEADERS
 # ==================== Source Files Classification ====================
 
 # Pixel Format Source Files
-set(CM2D_PIXEL_SOURCE 
+set(CM2D_PIXEL_SOURCE
     PixelFormat/rgb.cpp
     PixelFormat/rgba.cpp
 )
 
 # Base Bitmap Source Files (platform-independent)
-set(CM2D_BITMAP_BASE_SOURCE 
-    Bitmap/tga.cpp 
+set(CM2D_BITMAP_BASE_SOURCE
+)
+
+# Image Format Source Files
+set(CM2D_FORMAT_SOURCE
+    Bitmap/tga.cpp
     Bitmap/BitmapTGAStream.cpp
+)
+
+# Color conversion sources
+set(CM2D_COLORCONV_SOURCE
+    Bitmap/BitmapColorConversion_RGB.cpp
+    Bitmap/BitmapColorConversion_YCbCr.cpp
+    Bitmap/BitmapColorConversion_YCoCg.cpp
+    Bitmap/BitmapColorConversion_HSV.cpp
+    Bitmap/BitmapColorConversion_HSL.cpp
+    Bitmap/BitmapColorConversion_XYZ.cpp
+    Bitmap/BitmapColorConversion_Channel.cpp
+    Bitmap/BitmapColorConversion_OKLab.cpp
 )
 
 # Platform-specific Bitmap Source Files
@@ -94,7 +114,7 @@ if(UNIX AND NOT APPLE)
             message(WARNING "X11 not found, X11 support disabled")
         endif()
     endif()
-    
+
     # Wayland support option
     option(CM2D_USE_WAYLAND "Enable Wayland support" OFF)
     if(CM2D_USE_WAYLAND)
@@ -131,7 +151,10 @@ if(CM2D_USE_IMAGEMAGICK)
 endif()
 
 # Combine all bitmap sources
-set(CM2D_BITMAP_SOURCE ${CM2D_BITMAP_BASE_SOURCE} ${CM2D_BITMAP_PLATFORM_SOURCE})
+set(CM2D_BITMAP_SOURCE  ${CM2D_BITMAP_BASE_SOURCE}
+                        ${CM2D_FORMAT_SOURCE}
+                        ${CM2D_COLORCONV_SOURCE}
+                        ${CM2D_BITMAP_PLATFORM_SOURCE})
 
 # Terrain Generation Source Files
 set(CM2D_TERRAIN_SOURCE
@@ -146,26 +169,24 @@ set(CM2D_TERRAIN_SOURCE
 
 # ==================== Source Groups for IDE Organization ====================
 
-# Header File Groups
-SOURCE_GROUP("Header Files\\Bitmap" FILES ${CM2D_BITMAP_HEADERS})
-SOURCE_GROUP("Header Files\\Image Format" FILES ${CM2D_FORMAT_HEADERS})
-SOURCE_GROUP("Header Files\\Image Processing" FILES ${CM2D_PROCESSING_HEADERS})
-SOURCE_GROUP("Header Files\\Channel Operations" FILES ${CM2D_CHANNEL_HEADERS})
-SOURCE_GROUP("Header Files\\Terrain" FILES ${CM2D_TERRAIN_HEADERS})
-SOURCE_GROUP("Header Files\\Misc" FILES ${CM2D_MISC_HEADERS})
-
-# Source File Groups
-SOURCE_GROUP("Source Files\\Pixel Format" FILES ${CM2D_PIXEL_SOURCE})
-SOURCE_GROUP("Source Files\\Bitmap\\Core" FILES ${CM2D_BITMAP_BASE_SOURCE})
-SOURCE_GROUP("Source Files\\Bitmap\\Platform" FILES ${CM2D_BITMAP_PLATFORM_SOURCE})
-SOURCE_GROUP("Source Files\\Terrain" FILES ${CM2D_TERRAIN_SOURCE})
+# Unified groups (headers and sources together)
+SOURCE_GROUP("Pixel Format" FILES ${CM2D_PIXEL_SOURCE})
+SOURCE_GROUP("Bitmap\\Core" FILES ${CM2D_BITMAP_BASE_SOURCE} ${CM2D_BITMAP_HEADERS})
+SOURCE_GROUP("Image Format" FILES ${CM2D_FORMAT_SOURCE} ${CM2D_FORMAT_HEADERS})
+SOURCE_GROUP("Bitmap\\ColorConversion" FILES ${CM2D_COLORCONV_SOURCE} ${CM2D_COLORCONV_HEADERS})
+SOURCE_GROUP("Bitmap\\Platform" FILES ${CM2D_BITMAP_PLATFORM_SOURCE} ${CM2D_BITMAP_HEADERS})
+SOURCE_GROUP("Image Processing" FILES ${CM2D_PROCESSING_HEADERS})
+SOURCE_GROUP("Channel Operations" FILES ${CM2D_CHANNEL_HEADERS})
+SOURCE_GROUP("Terrain" FILES ${CM2D_TERRAIN_SOURCE} ${CM2D_TERRAIN_HEADERS})
+SOURCE_GROUP("Misc" FILES ${CM2D_MISC_HEADERS})
 
 # ==================== Library Target ====================
 
-add_cm_library(CM2D "CM" 
+add_cm_library(CM2D "CM"
     ${CM2D_BITMAP_HEADERS}
     ${CM2D_FORMAT_HEADERS}
     ${CM2D_PROCESSING_HEADERS}
+    ${CM2D_COLORCONV_HEADERS}
     ${CM2D_CHANNEL_HEADERS}
     ${CM2D_TERRAIN_HEADERS}
     ${CM2D_MISC_HEADERS}

@@ -8,413 +8,111 @@
 #include<hgl/color/Color4f.h>
 #include<hgl/color/Color3ub.h>
 #include<hgl/color/Color4ub.h>
+#include<hgl/color/YCbCr.h>
+#include<hgl/color/YCoCg.h>
 #include<cmath>
 #include<algorithm>
 
 /**
- * Color Conversion Module
+ * 颜色转换模块
  *
- * Provides various color space and format conversions for bitmaps.
- * Supports RGB/RGBA/Grayscale conversions and sRGB/Linear color space transformations.
+ * 提供用于位图的各种颜色空间和格式转换。
+ * 支持 RGB/RGBA/灰度转换以及 sRGB/线性色彩空间转换。
  *
- * Example usage:
+ * 示例用法：
  * ```cpp
- * // RGB to RGBA with opaque alpha
+ * // RGB 转 RGBA，使用不透明的 alpha 值
  * BitmapRGB8 rgb_image;
  * auto rgba_image = hgl::bitmap::color::ConvertRGBToRGBA(rgb_image, 255);
  *
- * // RGB to Grayscale using ITU-R BT.601 standard
+ * // 使用 ITU-R BT.601 标准将 RGB 转换为灰度
  * auto grey_image = hgl::bitmap::color::ConvertRGBToGrey(rgb_image);
  *
- * // Extract red channel
+ * // 提取红色通道
  * auto red_channel = hgl::bitmap::color::ExtractChannel(rgb_image, 0);
  *
- * // sRGB to Linear color space
+ * // sRGB 转线性色彩空间
  * auto linear = hgl::bitmap::color::ConvertSRGB8ToLinearF(rgb_image);
  * ```
  */
 
 namespace hgl::bitmap::color
 {
-    // ===================== RGB ↔ RGBA Conversions =====================
+    // ===================== RGB ↔ RGBA 转换 =====================
+    BitmapRGBA8 ConvertRGBToRGBA(const BitmapRGB8& source, uint8 alpha = 255);
+    BitmapRGB8 ConvertRGBAToRGB(const BitmapRGBA8& source);
 
-    /**
-     * Convert RGB to RGBA
-     *
-     * @param source Source RGB bitmap
-     * @param alpha Alpha value to use for all pixels (default: 255 = opaque)
-     * @return RGBA bitmap
-     */
-    inline BitmapRGBA8 ConvertRGBToRGBA(const BitmapRGB8& source, uint8 alpha = 255)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
+    // ===================== RGB ↔ 灰度转换 =====================
+    BitmapGrey8 ConvertRGBToGrey(const BitmapRGB8& source);
+    BitmapGrey8 ConvertRGBAToGrey(const BitmapRGBA8& source);
+    BitmapRGB8 ConvertGreyToRGB(const BitmapGrey8& source);
+    BitmapRGBA8 ConvertGreyToRGBA(const BitmapGrey8& source, uint8 alpha = 255);
 
-        BitmapRGBA8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color3ub* src = reinterpret_cast<const Color3ub*>(source.GetData());
-        Color4ub* dst = reinterpret_cast<Color4ub*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].r = src[i].r;
-            dst[i].g = src[i].g;
-            dst[i].b = src[i].b;
-            dst[i].a = alpha;
-        }
-
-        return result;
-    }
-
-    /**
-     * Convert RGBA to RGB (discards alpha channel)
-     *
-     * @param source Source RGBA bitmap
-     * @return RGB bitmap
-     */
-    inline BitmapRGB8 ConvertRGBAToRGB(const BitmapRGBA8& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapRGB8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color4ub* src = reinterpret_cast<const Color4ub*>(source.GetData());
-        Color3ub* dst = reinterpret_cast<Color3ub*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].r = src[i].r;
-            dst[i].g = src[i].g;
-            dst[i].b = src[i].b;
-        }
-
-        return result;
-    }
-
-    // ===================== RGB ↔ Grayscale Conversions =====================
-
-    /**
-     * Convert RGB to Grayscale using ITU-R BT.601 standard
-     *
-     * Uses luminance weights: Y = 0.299R + 0.587G + 0.114B
-     *
-     * @param source Source RGB bitmap
-     * @return Grayscale bitmap
-     */
-    inline BitmapGrey8 ConvertRGBToGrey(const BitmapRGB8& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapGrey8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color3ub* src = reinterpret_cast<const Color3ub*>(source.GetData());
-        uint8* dst = result.GetData();
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            // ITU-R BT.601 luma coefficients
-            float grey = 0.299f * src[i].r + 0.587f * src[i].g + 0.114f * src[i].b;
-            dst[i] = hgl::math::ClampU8(grey);
-        }
-
-        return result;
-    }
-
-    /**
-     * Convert RGBA to Grayscale using ITU-R BT.601 standard (discards alpha)
-     *
-     * @param source Source RGBA bitmap
-     * @return Grayscale bitmap
-     */
-    inline BitmapGrey8 ConvertRGBAToGrey(const BitmapRGBA8& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapGrey8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color4ub* src = reinterpret_cast<const Color4ub*>(source.GetData());
-        uint8* dst = result.GetData();
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            float grey = 0.299f * src[i].r + 0.587f * src[i].g + 0.114f * src[i].b;
-            dst[i] = hgl::math::ClampU8(grey);
-        }
-
-        return result;
-    }
-
-    /**
-     * Convert Grayscale to RGB (replicate grey value to all channels)
-     *
-     * @param source Source grayscale bitmap
-     * @return RGB bitmap
-     */
-    inline BitmapRGB8 ConvertGreyToRGB(const BitmapGrey8& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapRGB8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const uint8* src = source.GetData();
-        Color3ub* dst = reinterpret_cast<Color3ub*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].r = src[i];
-            dst[i].g = src[i];
-            dst[i].b = src[i];
-        }
-
-        return result;
-    }
-
-    /**
-     * Convert Grayscale to RGBA (replicate grey value to RGB, set alpha)
-     *
-     * @param source Source grayscale bitmap
-     * @param alpha Alpha value to use (default: 255 = opaque)
-     * @return RGBA bitmap
-     */
-    inline BitmapRGBA8 ConvertGreyToRGBA(const BitmapGrey8& source, uint8 alpha = 255)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapRGBA8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const uint8* src = source.GetData();
-        Color4ub* dst = reinterpret_cast<Color4ub*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].r = src[i];
-            dst[i].g = src[i];
-            dst[i].b = src[i];
-            dst[i].a = alpha;
-        }
-
-        return result;
-    }
-
-    // ===================== Channel Extraction =====================
-
-    /**
-     * Extract a single channel from a multi-channel bitmap
-     *
-     * @param source Source bitmap
-     * @param channel_index Channel index to extract (0=R/X, 1=G/Y, 2=B/Z, 3=A/W)
-     * @return Single-channel bitmap
-     *
-     * Note: For RGB, channels are 0=R, 1=G, 2=B
-     *       For RGBA, channels are 0=R, 1=G, 2=B, 3=A
-     */
+    // ===================== 通道提取 =====================
     template<typename T, uint C>
-    Bitmap<uint8, 1> ExtractChannel(const Bitmap<T, C>& source, uint channel_index)
-    {
-        static_assert(C > 1, "Source must be multi-channel bitmap");
+    Bitmap<uint8, 1> ExtractChannel(const Bitmap<T, C>& source, uint channel_index);
 
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
+    // ===================== sRGB ↔ 线性色彩空间 =====================
+    BitmapRGB32F ConvertSRGB8ToLinearF(const BitmapRGB8& source);
+    BitmapRGBA32F ConvertSRGBA8ToLinearF(const BitmapRGBA8& source);
+    BitmapRGB8 ConvertLinearFToSRGB8(const BitmapRGB32F& source);
+    BitmapRGBA8 ConvertLinearFToSRGBA8(const BitmapRGBA32F& source);
 
-        Bitmap<uint8, 1> result;
-        if (width == 0 || height == 0 || !source.GetData() || channel_index >= C)
-            return result;
+    // ===================== RGB ↔ YCbCr =====================
+    BitmapYCbCr8 ConvertRGBToYCbCr(const BitmapRGB8& source);
+    BitmapRGB8 ConvertYCbCrToRGB(const BitmapYCbCr8& source);
+    // Float 扩展
+    BitmapYCbCrF ConvertRGB32FToYCbCrF(const BitmapRGB32F& source);
+    BitmapRGB32F ConvertYCbCrFToRGB32F(const BitmapYCbCrF& source);
 
-        result.Create(width, height);
+    // ===================== RGB ↔ YCoCg =====================
+    BitmapYCoCg8 ConvertRGBToYCoCg(const BitmapRGB8& source);
+    BitmapRGB8 ConvertYCoCgToRGB(const BitmapYCoCg8& source);
+    // Float 扩展
+    BitmapYCoCgF ConvertRGB32FToYCoCgF(const BitmapRGB32F& source);
+    BitmapRGB32F ConvertYCoCgFToRGB32F(const BitmapYCoCgF& source);
 
-        const T* src = source.GetData();
-        uint8* dst = result.GetData();
+    // ===================== RGB ↔ HSV =====================
+    BitmapHSV8 ConvertRGBToHSV(const BitmapRGB8& source);
+    BitmapRGB8 ConvertHSVToRGB(const BitmapHSV8& source);
+    BitmapHSVA8 ConvertRGBA8ToHSVA8(const BitmapRGBA8& source);
+    BitmapRGBA8 ConvertHSVA8ToRGBA8(const BitmapHSVA8& source);
 
-        for (int i = 0; i < width * height; ++i)
-        {
-            // Access channel based on type
-            if constexpr (C == 2)
-            {
-                if (channel_index == 0)
-                    dst[i] = static_cast<uint8>(src[i].x);
-                else
-                    dst[i] = static_cast<uint8>(src[i].y);
-            }
-            else if constexpr (C == 3)
-            {
-                if (channel_index == 0)
-                    dst[i] = static_cast<uint8>(src[i].r);
-                else if (channel_index == 1)
-                    dst[i] = static_cast<uint8>(src[i].g);
-                else
-                    dst[i] = static_cast<uint8>(src[i].b);
-            }
-            else if constexpr (C == 4)
-            {
-                if (channel_index == 0)
-                    dst[i] = static_cast<uint8>(src[i].r);
-                else if (channel_index == 1)
-                    dst[i] = static_cast<uint8>(src[i].g);
-                else if (channel_index == 2)
-                    dst[i] = static_cast<uint8>(src[i].b);
-                else
-                    dst[i] = static_cast<uint8>(src[i].a);
-            }
-        }
+    // ===================== RGB ↔ HSL =====================
+    BitmapHSL8 ConvertRGBToHSL(const BitmapRGB8& source);
+    BitmapRGB8 ConvertHSLToRGB(const BitmapHSL8& source);
+    BitmapHSLA8 ConvertRGBA8ToHSLA8(const BitmapRGBA8& source);
+    BitmapRGBA8 ConvertHSLA8ToRGBA8(const BitmapHSLA8& source);
 
-        return result;
-    }
+    // ===================== RGB ↔ XYZ =====================
+    BitmapXYZ8 ConvertRGBToXYZ(const BitmapRGB8& source);
+    BitmapRGB8 ConvertXYZToRGB(const BitmapXYZ8& source);
+    BitmapXYZA8 ConvertRGBA8ToXYZA8(const BitmapRGBA8& source);
+    BitmapRGBA8 ConvertXYZA8ToRGBA8(const BitmapXYZA8& source);
 
-    // ===================== sRGB ↔ Linear Color Space =====================
+    // ===================== Float 扩展（RGB32F ↔ HSVF/HSLF/XYZF） =====================
+    BitmapHSVF  ConvertRGB32FToHSVF(const BitmapRGB32F& source);
+    BitmapRGB32F ConvertHSVFToRGB32F(const BitmapHSVF& source);
+    BitmapHSVAF ConvertRGBA32FToHSVAF(const BitmapRGBA32F& source);
+    BitmapRGBA32F ConvertHSVAFToRGBA32F(const BitmapHSVAF& source);
+    BitmapHSLF  ConvertRGB32FToHSLF(const BitmapRGB32F& source);
+    BitmapRGB32F ConvertHSLFToRGB32F(const BitmapHSLF& source);
+    BitmapHSLAf ConvertRGBA32FToHSLAf(const BitmapRGBA32F& source);
+    BitmapRGBA32F ConvertHSLAfToRGBA32F(const BitmapHSLAf& source);
+    BitmapXYZF  ConvertRGB32FToXYZF(const BitmapRGB32F& source);
+    BitmapRGB32F ConvertXYZFToRGB32F(const BitmapXYZF& source);
+    BitmapXYZAF ConvertRGBA32FToXYZAF(const BitmapRGBA32F& source);
+    BitmapRGBA32F ConvertXYZAFToRGBA32F(const BitmapXYZAF& source);
 
-    /**
-     * Convert sRGB8 to Linear float color space
-     *
-     * @param source Source sRGB bitmap (0-255)
-     * @return Linear float bitmap (0.0-1.0)
-     */
-    inline BitmapRGB32F ConvertSRGB8ToLinearF(const BitmapRGB8& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
+    // ===================== RGB ↔ OKLab =====================
+    BitmapOKLab8  ConvertRGBToOKLab(const BitmapRGB8& source);
+    BitmapRGB8    ConvertOKLabToRGB(const BitmapOKLab8& source);
+    BitmapOKLaba8 ConvertRGBA8ToOKLaba8(const BitmapRGBA8& source);
+    BitmapRGBA8   ConvertOKLaba8ToRGBA8(const BitmapOKLaba8& source);
 
-        BitmapRGB32F result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color3ub* src = reinterpret_cast<const Color3ub*>(source.GetData());
-        Color3f* dst = reinterpret_cast<Color3f*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].x = hgl::math::SRGBByteToLinear(src[i].r);
-            dst[i].y = hgl::math::SRGBByteToLinear(src[i].g);
-            dst[i].z = hgl::math::SRGBByteToLinear(src[i].b);
-        }
-
-        return result;
-    }
-
-    /**
-     * Convert sRGBA8 to Linear float color space
-     *
-     * @param source Source sRGBA bitmap (0-255)
-     * @return Linear float bitmap (0.0-1.0)
-     *
-     * Note: Alpha is converted linearly (not gamma corrected)
-     */
-    inline BitmapRGBA32F ConvertSRGBA8ToLinearF(const BitmapRGBA8& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapRGBA32F result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color4ub* src = reinterpret_cast<const Color4ub*>(source.GetData());
-        Color4f* dst = reinterpret_cast<Color4f*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].x = hgl::math::SRGBByteToLinear(src[i].r);
-            dst[i].y = hgl::math::SRGBByteToLinear(src[i].g);
-            dst[i].z = hgl::math::SRGBByteToLinear(src[i].b);
-            dst[i].w = src[i].a / 255.0f; // Alpha is linear
-        }
-
-        return result;
-    }
-
-    /**
-     * Convert Linear float to sRGB8 color space
-     *
-     * @param source Source linear float bitmap (0.0-1.0)
-     * @return sRGB bitmap (0-255)
-     */
-    inline BitmapRGB8 ConvertLinearFToSRGB8(const BitmapRGB32F& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapRGB8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color3f* src = reinterpret_cast<const Color3f*>(source.GetData());
-        Color3ub* dst = reinterpret_cast<Color3ub*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].r = hgl::math::LinearToSRGBByte(src[i].x);
-            dst[i].g = hgl::math::LinearToSRGBByte(src[i].y);
-            dst[i].b = hgl::math::LinearToSRGBByte(src[i].z);
-        }
-
-        return result;
-    }
-
-    /**
-     * Convert Linear float to sRGBA8 color space
-     *
-     * @param source Source linear float bitmap (0.0-1.0)
-     * @return sRGBA bitmap (0-255)
-     *
-     * Note: Alpha is converted linearly (not gamma corrected)
-     */
-    inline BitmapRGBA8 ConvertLinearFToSRGBA8(const BitmapRGBA32F& source)
-    {
-        const int width = source.GetWidth();
-        const int height = source.GetHeight();
-
-        BitmapRGBA8 result;
-        if (width == 0 || height == 0 || !source.GetData())
-            return result;
-
-        result.Create(width, height);
-
-        const Color4f* src = reinterpret_cast<const Color4f*>(source.GetData());
-        Color4ub* dst = reinterpret_cast<Color4ub*>(result.GetData());
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            dst[i].r = hgl::math::LinearToSRGBByte(src[i].x);
-            dst[i].g = hgl::math::LinearToSRGBByte(src[i].y);
-            dst[i].b = hgl::math::LinearToSRGBByte(src[i].z);
-            dst[i].a = hgl::math::ClampU8(src[i].w * 255.0f); // Alpha is linear
-        }
-
-        return result;
-    }
-
-} // namespace hgl::bitmap::color
+    // Float 扩展（RGB32F ↔ OKLabF/OKLabAf）
+    BitmapOKLabF  ConvertRGB32FToOKLabF(const BitmapRGB32F& source);
+    BitmapRGB32F  ConvertOKLabFToRGB32F(const BitmapOKLabF& source);
+    BitmapOKLabAf ConvertRGBA32FToOKLabAf(const BitmapRGBA32F& source);
+    BitmapRGBA32F ConvertOKLabAfToRGBA32F(const BitmapOKLabAf& source);
+}

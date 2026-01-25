@@ -20,7 +20,7 @@ namespace hgl
                 Magick::InitializeMagick(nullptr);
             });
         }
-        
+
         /**
          * 将ImageMagick的StorageType转换为对应的通道数和位深度
          */
@@ -36,7 +36,7 @@ namespace hgl
                 case 32: storage_type=Magick::FloatPixel; break;
                 default: return false;
             }
-            
+
             // 设置通道映射
             switch(channels)
             {
@@ -46,25 +46,25 @@ namespace hgl
                 case 4: map="RGBA"; break;   // Red, Green, Blue, Alpha
                 default: return false;
             }
-            
+
             return true;
         }
-        
+
         /**
          * 从ImageMagick加载图像
          */
         bool LoadBitmapFromImageMagick(const OSString &filename, ImageMagickLoader *loader)
         {
             if(!loader)return false;
-            
+
             try
             {
                 // 线程安全的初始化
                 EnsureImageMagickInitialized();
-                
+
                 // 加载图像
                 Magick::Image image;
-                
+
                 #ifdef _WIN32
                     // Windows下使用宽字符
                     const std::string u8_fn=ToStdString(filename);
@@ -74,19 +74,19 @@ namespace hgl
                     // Unix-like系统使用UTF-8
                     image.read(std::string(filename.c_str()));
                 #endif
-                
+
                 // 获取图像信息
                 uint width=image.columns();
                 uint height=image.rows();
                 uint channels=loader->OnChannels();
                 uint bits_per_channel=loader->OnChannelBits();
-                
+
                 if(width==0||height==0)
                 {
                     loader->OnLoadFailed();
                     return false;
                 }
-                
+
                 // 分配Bitmap内存
                 void *data=loader->OnRecvBitmap(width,height);
                 if(!data)
@@ -94,22 +94,22 @@ namespace hgl
                     loader->OnLoadFailed();
                     return false;
                 }
-                
+
                 // 确定存储格式
                 Magick::StorageType storage_type;
                 std::string map;
-                
+
                 if(!GetImageMagickFormat(channels,bits_per_channel,storage_type,map))
                 {
                     loader->OnLoadFailed();
                     return false;
                 }
-                
+
                 // 导出像素数据
                 // ImageMagick使用左上角为原点，与OpenGL的左下角不同
                 // 但TGA等格式通常也是左上角，所以这里保持一致
                 image.write(0,0,width,height,map,storage_type,data);
-                
+
                 return true;
             }
             catch(Magick::Exception &e)
@@ -125,7 +125,7 @@ namespace hgl
                 return false;
             }
         }
-        
+
         /**
          * 保存Bitmap到文件
          */
@@ -139,23 +139,23 @@ namespace hgl
         {
             if(!data||width==0||height==0||channels==0||single_channel_bits==0)
                 return false;
-                
+
             try
             {
                 // 线程安全的初始化
                 EnsureImageMagickInitialized();
-                
+
                 // 确定存储格式
                 Magick::StorageType storage_type;
                 std::string map;
-                
+
                 if(!GetImageMagickFormat(channels,single_channel_bits,storage_type,map))
                     return false;
-                
+
                 // 创建图像对象
                 Magick::Image image;
                 image.size(Magick::Geometry(width,height));
-                
+
                 // 设置图像深度
                 switch(single_channel_bits)
                 {
@@ -163,16 +163,16 @@ namespace hgl
                     case 16: image.depth(16); break;
                     case 32: image.depth(32); break;
                 }
-                
+
                 // 导入像素数据
                 image.read(width,height,map,storage_type,data);
-                
+
                 // 设置输出格式（如果指定）
                 if(!format.empty())
                 {
                     image.magick(format);
                 }
-                
+
                 // 保存文件
                 #ifdef _WIN32
                     const std::string u8_fn=ToStdString(filename);
@@ -181,7 +181,7 @@ namespace hgl
                 #else
                     image.write(std::string(filename.c_str()));
                 #endif
-                
+
                 return true;
             }
             catch(Magick::Exception &e)
@@ -195,7 +195,7 @@ namespace hgl
                 return false;
             }
         }
-        
+
         namespace imagemagick
         {
             /**
@@ -207,16 +207,16 @@ namespace hgl
                 {
                     // 线程安全的初始化
                     EnsureImageMagickInitialized();
-                    
+
                     std::list<Magick::CoderInfo> coders;
                     Magick::coderInfoList(&coders,
                                          Magick::CoderInfo::TrueMatch,
                                          Magick::CoderInfo::AnyMatch,
                                          Magick::CoderInfo::AnyMatch);
-                    
+
                     std::ostringstream oss;
                     bool first=true;
-                    
+
                     for(auto &coder : coders)
                     {
                         if(coder.isReadable()||coder.isWritable())
@@ -226,7 +226,7 @@ namespace hgl
                             first=false;
                         }
                     }
-                    
+
                     return oss.str();
                 }
                 catch(...)
@@ -234,7 +234,7 @@ namespace hgl
                     return "Error retrieving format list";
                 }
             }
-            
+
             /**
              * 获取ImageMagick版本
              */
@@ -249,7 +249,7 @@ namespace hgl
                     return "Unknown";
                 }
             }
-            
+
             /**
              * 检查格式是否支持
              */
@@ -259,7 +259,7 @@ namespace hgl
                 {
                     // 线程安全的初始化
                     EnsureImageMagickInitialized();
-                    
+
                     Magick::CoderInfo info(format);
                     return (info.isReadable()||info.isWritable());
                 }

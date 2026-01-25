@@ -2,13 +2,13 @@
 
 /**
  * @file Blend.h
- * @brief Flexible alpha blending system for bitmap operations
- * 
- * This file provides a template-based blending system that supports multiple
- * blend modes from CMMath library. It requires the following external dependencies:
- * - hgl::AlphaBlendMode enum from CMCoreType
- * - hgl::graph::GetAlphaBlendFunc*() functions from CMMath
- * - hgl::Color types from CMCoreType (Color3f, Color4f, Color3ub, Color4ub)
+ * @brief 用于位图操作的灵活 Alpha 混合系统
+ *
+ * 本文件提供了一个基于模板的混合系统，支持来自 CMMath 库的多种混合模式。
+ * 依赖以下外部内容：
+ * - hgl::AlphaBlendMode 枚举（来自 CMCoreType）
+ * - hgl::graph::GetAlphaBlendFunc*() 系列函数（来自 CMMath）
+ * - hgl::Color 类型（Color3f、Color4f、Color3ub、Color4ub，来自 CMCoreType）
  */
 
 #include<hgl/2d/Bitmap.h>
@@ -26,21 +26,21 @@ namespace hgl::bitmap
     using math::ToColorFloat;
     using math::ToColorByte;
 
-    // ==================== Blend Function Types ====================
+    // ==================== 混合函数类型 ====================
 
     /**
-        * @brief Function pointer type for alpha blending
-        * @tparam T Data type (Color3f, Color4f, Color3ub, Color4ub, etc.)
+        * @brief Alpha 混合的函数指针类型
+        * @tparam T 数据类型（Color3f、Color4f、Color3ub、Color4ub 等）
         */
     template<typename T>
     using BlendFunc = T (*)(const T &src, const T &dst, float alpha);
 
-    // ==================== BlendColor Template Class ====================
+    // ==================== BlendColor 模板类 ====================
 
     /**
-        * @brief Template class for flexible alpha blending
-        * Uses function pointers instead of virtual functions for better performance
-        * @tparam T Data type for color values
+        * @brief 灵活 Alpha 混合的模板类
+        * 使用函数指针而非虚函数以获得更高性能
+        * @tparam T 颜色值的数据类型
         */
     template<typename T>
     class BlendColor
@@ -50,15 +50,15 @@ namespace hgl::bitmap
 
     private:
         /**
-            * @brief Get blend function for the specified mode and type
-            * @param mode Alpha blend mode
-            * @return Function pointer for the blend operation
+            * @brief 获取指定混合模式和类型的混合函数
+            * @param mode Alpha 混合模式
+            * @return 混合操作的函数指针
             */
         BlendFunc<T> GetBlendFuncForType(AlphaBlendMode mode);
 
     public:
         /**
-            * @brief Default constructor - uses Normal blend mode
+            * @brief 默认构造函数 - 使用 Normal 混合模式
             */
         BlendColor()
         {
@@ -66,16 +66,16 @@ namespace hgl::bitmap
         }
 
         /**
-            * @brief Constructor with custom blend function
-            * @param func Custom blend function pointer
+            * @brief 使用自定义混合函数的构造函数
+            * @param func 自定义混合函数指针
             */
         explicit BlendColor(BlendFunc<T> func) : blend_func(func)
         {
         }
 
         /**
-            * @brief Set custom blend function
-            * @param func Custom blend function pointer
+            * @brief 设置自定义混合函数
+            * @param func 自定义混合函数指针
             */
         void SetBlendFunc(BlendFunc<T> func)
         {
@@ -83,8 +83,8 @@ namespace hgl::bitmap
         }
 
         /**
-            * @brief Set blend mode from AlphaBlendMode enum
-            * @param mode Alpha blend mode
+            * @brief 通过 AlphaBlendMode 枚举设置混合模式
+            * @param mode Alpha 混合模式
             */
         void SetBlendMode(AlphaBlendMode mode)
         {
@@ -92,10 +92,10 @@ namespace hgl::bitmap
         }
 
         /**
-            * @brief Blend operator with default alpha=1.0
-            * @param src Source color
-            * @param dst Destination color
-            * @return Blended color
+            * @brief 混合操作符，默认 alpha=1.0
+            * @param src 源颜色
+            * @param dst 目标颜色
+            * @return 混合后的颜色
             */
         T operator()(const T &src, const T &dst) const
         {
@@ -103,11 +103,11 @@ namespace hgl::bitmap
         }
 
         /**
-            * @brief Blend operator with custom alpha
-            * @param src Source color
-            * @param dst Destination color
-            * @param alpha Blend factor [0,1]
-            * @return Blended color
+            * @brief 混合操作符，带自定义 alpha
+            * @param src 源颜色
+            * @param dst 目标颜色
+            * @param alpha 混合因子 [0,1]
+            * @return 混合后的颜色
             */
         T operator()(const T &src, const T &dst, float alpha) const
         {
@@ -117,10 +117,10 @@ namespace hgl::bitmap
         }
     };//template<typename T> class BlendColor
 
-    // ==================== Template Specializations for GetBlendFuncForType ====================
+    // ==================== GetBlendFuncForType 模板特化 ====================
 
     /**
-        * @brief Specialization for float type - uses CMMath functions directly
+        * @brief float 类型的特化 - 直接使用 CMMath 函数
         */
     template<>
     inline BlendFunc<float> BlendColor<float>::GetBlendFuncForType(AlphaBlendMode mode)
@@ -129,7 +129,7 @@ namespace hgl::bitmap
     }
 
     /**
-        * @brief Specialization for Vector3f - uses CMMath functions directly
+        * @brief Vector3f 类型的特化 - 直接使用 CMMath 函数
         */
     template<>
     inline BlendFunc<Color3f> BlendColor<Color3f>::GetBlendFuncForType(AlphaBlendMode mode)
@@ -138,7 +138,7 @@ namespace hgl::bitmap
     }
 
     /**
-        * @brief Specialization for Vector4f - uses CMMath functions directly
+        * @brief Vector4f 类型的特化 - 直接使用 CMMath 函数
         */
     template<>
     inline BlendFunc<Color4f> BlendColor<Color4f>::GetBlendFuncForType(AlphaBlendMode mode)
@@ -146,17 +146,17 @@ namespace hgl::bitmap
         return math::GetAlphaBlendFuncColor4f(mode);
     }
 
-    // ==================== Wrapper Functions for uint8 Types ====================
+    // ==================== uint8 类型的包装函数 ====================
 
     namespace detail
     {
-        // ==================== Generic Wrapper Template ====================
+        // ==================== 通用包装模板 ====================
 
         /**
-         * @brief Generic blend wrapper that adapts uint8 colors through float blending
-         * @tparam T Color type (Color3ub or Color4ub)
-         * @tparam F Float color type (Color3f or Color4f)
-         * @tparam MODE Blend mode (compile-time constant)
+         * @brief 通用混合包装器，将 uint8 颜色通过 float 混合
+         * @tparam T 颜色类型（Color3ub 或 Color4ub）
+         * @tparam F 浮点颜色类型（Color3f 或 Color4f）
+         * @tparam MODE 混合模式（编译期常量）
          */
         template<typename T, typename F, AlphaBlendMode MODE>
         inline T BlendColorWrapper(const T &src, const T &dst, float alpha)
@@ -172,12 +172,12 @@ namespace hgl::bitmap
             return ToColorByte(result_f);
         }
 
-        // ==================== Mode Selector Template ====================
+        // ==================== 模式选择模板 ====================
 
         /**
-         * @brief Generic template to select blend wrapper by mode
-         * @tparam T Color type
-         * @tparam F Float color type
+         * @brief 通用模板，根据混合模式选择包装器
+         * @tparam T 颜色类型
+         * @tparam F 浮点颜色类型
          */
         template<typename T, typename F>
         inline void* GetWrapperForMode(AlphaBlendMode mode)
@@ -221,7 +221,7 @@ namespace hgl::bitmap
     }
 
     /**
-     * @brief Specialization for Color3ub - fully generic via trait system
+     * @brief Color3ub 类型的特化 - 通过 trait 系统实现完全通用
      */
     template<>
     inline BlendFunc<Color3ub> BlendColor<Color3ub>::GetBlendFuncForType(AlphaBlendMode mode)
@@ -230,7 +230,7 @@ namespace hgl::bitmap
     }
 
     /**
-     * @brief Specialization for Color4ub - fully generic via trait system
+     * @brief Color4ub 类型的特化 - 通过 trait 系统实现完全通用
      */
     template<>
     inline BlendFunc<Color4ub> BlendColor<Color4ub>::GetBlendFuncForType(AlphaBlendMode mode)
@@ -238,40 +238,40 @@ namespace hgl::bitmap
         return reinterpret_cast<BlendFunc<Color4ub>>(detail::GetWrapperForMode<Color4ub, Color4f>(mode));
     }
 
-    // ==================== Convenience Type Aliases ====================
+    // ==================== 便捷类型别名 ====================
 
     using BlendColorRGB8 = BlendColor<Color3ub>;
     using BlendColorRGBA8 = BlendColor<Color4ub>;
     using BlendColorRGB32F = BlendColor<Color3f>;
     using BlendColorRGBA32F = BlendColor<Color4f>;
 
-    // ==================== BlendBitmap Template Class ====================
+    // ==================== BlendBitmap 模板类 ====================
 
     /**
-        * @brief Bitmap blending template class
-        * Declares the blending operator but doesn't implement it generically.
-        * Each specific bitmap combination needs its own specialization.
-        * @tparam ST Source bitmap type
-        * @tparam DT Destination bitmap type
+        * @brief 位图混合模板类
+        * 仅声明混合操作符，不做通用实现。
+        * 每种具体位图组合需专门特化。
+        * @tparam ST 源位图类型
+        * @tparam DT 目标位图类型
         */
     template<typename ST, typename DT>
     class BlendBitmap
     {
     public:
         /**
-            * @brief Blend operator - blends source bitmap onto destination
-            * @param src Source bitmap
-            * @param dst Destination bitmap
-            * @param alpha Global alpha value [0,1]
+            * @brief 混合操作符 - 将源位图混合到目标位图
+            * @param src 源位图
+            * @param dst 目标位图
+            * @param alpha 全局 alpha 值 [0,1]
             */
         void operator()(const ST *src, DT *dst, const float alpha) const;
     };//template<typename ST,typename DT> class BlendBitmap
 
-    // ==================== Legacy Compatibility Classes ====================
+    // ==================== 兼容性旧类 ====================
 
     /**
-        * @brief Legacy additive blending for uint32
-        * Kept for backward compatibility
+        * @brief 兼容旧版的 uint32 加法混合
+        * 保留用于向后兼容
         */
     struct BlendColorU32Additive
     {
@@ -288,11 +288,11 @@ namespace hgl::bitmap
         }
     };
 
-    // ==================== Specialized BlendBitmap Implementation ====================
+    // ==================== BlendBitmap 专用实现 ====================
 
     /**
-        * @brief Specialization for RGBA8 to RGB8 blending
-        * Uses Normal blend mode by default (standard alpha blending)
+        * @brief RGBA8 到 RGB8 的专用混合实现
+        * 默认使用 Normal 混合模式（标准 alpha 混合）
         */
     template<>
     inline void BlendBitmap<BitmapRGBA8, BitmapRGB8>::operator()(const BitmapRGBA8 *src_bitmap, BitmapRGB8 *dst_bitmap, const float alpha) const
@@ -320,7 +320,7 @@ namespace hgl::bitmap
 
             // Convert RGB8 dst to RGBA8 for blending
             Color4ub dst_rgba(dst->r, dst->g, dst->b, 255);
-                
+
             // Perform blending
             Color4ub blended = blend_color(src_scaled, dst_rgba);
 

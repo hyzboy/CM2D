@@ -43,7 +43,7 @@ namespace hgl
 
             return(true);
         }
-    
+
         /**
         * 以TGA格式保存Bitmap数据到流
         */

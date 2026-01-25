@@ -21,7 +21,7 @@ namespace hgl::bitmap
     {
         // Save data pointer for cleanup
         void* dataToFree = this->data;
-        
+
         // Must set data to nullptr before releasing platform resources to prevent base class double-free
         this->data = nullptr;
 

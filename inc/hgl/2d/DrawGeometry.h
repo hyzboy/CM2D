@@ -347,7 +347,7 @@ namespace hgl::bitmap
                 }
             }
         }
-            
+
         void DrawLine(const math::Vector2i &start,const math::Vector2i &end)
         {
             DrawLine(start.x,start.y,end.x,end.y);

@@ -7,27 +7,26 @@
 #include<cstring>
 
 /**
- * Channel Split Module
+ * 通道分离模块
  *
- * Provides functionality to split multi-channel bitmaps into separate single-channel
- * or multi-channel bitmaps. Supports various splitting patterns like:
- * - RGB -> R + G + B (3 single channels)
- * - RGBA -> RGB + A (3-channel + 1-channel)
- * - RGBA -> R + G + B + A (4 single channels)
- * - YUV -> Y + UV (1-channel + 2-channel)
+ * 提供将多通道位图分离为单通道或多通道位图的功能。支持多种分离模式，例如：
+ * - RGB -> R + G + B（3 个单通道）
+ * - RGBA -> RGB + A（3 通道 + 1 通道）
+ * - RGBA -> R + G + B + A（4 个单通道）
+ * - YUV -> Y + UV（1 通道 + 2 通道）
  *
- * Example usage:
+ * 示例用法：
  * ```cpp
  * BitmapRGBA8 source;
  * source.Create(100, 100);
  *
- * // Split RGBA into 4 separate channels
+ * // 将 RGBA 分离为 4 个独立通道
  * auto [r, g, b, a] = hgl::bitmap::channel::SplitRGBA(source);
  *
- * // Split RGBA into RGB + A
+ * // 将 RGBA 分离为 RGB + A
  * auto [rgb, alpha] = hgl::bitmap::channel::SplitRGBA_To_RGB_A(source);
  *
- * // Split RGB into individual channels
+ * // 将 RGB 分离为单独通道
  * auto [red, green, blue] = hgl::bitmap::channel::SplitRGB(source);
  * ```
  */
@@ -35,9 +34,9 @@
 namespace hgl::bitmap::channel
 {
     /**
-     * Split RGBA bitmap into 4 separate single-channel bitmaps (R, G, B, A)
-     * @param src Source RGBA bitmap with Vector4u8 pixel type
-     * @return Tuple of 4 single-channel bitmaps (R, G, B, A)
+     * 将 RGBA 位图分离为 4 个单通道位图（R、G、B、A）
+     * @param src 源 RGBA 位图，像素类型为 Vector4u8
+     * @return 4 个单通道位图（R、G、B、A）的元组
      */
     inline auto SplitRGBA(const BitmapRGBA8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
     {
@@ -81,9 +80,9 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Split RGB bitmap into 3 separate single-channel bitmaps (R, G, B)
-     * @param src Source RGB bitmap with Vector3u8 pixel type
-     * @return Tuple of 3 single-channel bitmaps (R, G, B)
+     * 将 RGB 位图分离为 3 个单通道位图（R、G、B）
+     * @param src 源 RGB 位图，像素类型为 Vector3u8
+     * @return 3 个单通道位图（R、G、B）的元组
      */
     inline auto SplitRGB(const BitmapRGB8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
     {
@@ -122,9 +121,9 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Split RG bitmap into 2 separate single-channel bitmaps (R, G)
-     * @param src Source RG bitmap with Vector2u8 pixel type
-     * @return Tuple of 2 single-channel bitmaps (R, G)
+     * 将 RG 位图分离为 2 个单通道位图（R、G）
+     * @param src 源 RG 位图，像素类型为 Vector2u8
+     * @return 2 个单通道位图（R、G）的元组
      */
     inline auto SplitRG(const BitmapRG8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*>
     {
@@ -159,9 +158,9 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Split RGBA bitmap into RGB (3-channel) + A (1-channel)
-     * @param src Source RGBA bitmap with Vector4u8 pixel type
-     * @return Tuple of RGB bitmap and Alpha channel bitmap
+     * 将 RGBA 位图分离为 RGB（三通道）+ A（单通道）
+     * @param src 源 RGBA 位图，像素类型为 Vector4u8
+     * @return RGB 位图和 Alpha 通道位图的元组
      */
     inline auto SplitRGBA_To_RGB_A(const BitmapRGBA8& src) -> std::tuple<BitmapRGB8*, BitmapGrey8*>
     {
@@ -198,10 +197,10 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Extract single channel from RGBA bitmap by index
-     * @param src Source RGBA bitmap
-     * @param channel_index Channel index (0=R, 1=G, 2=B, 3=A)
-     * @return Single-channel bitmap, or nullptr if index is invalid
+     * 从 RGBA 位图中按索引提取单个通道
+     * @param src 源 RGBA 位图
+     * @param channel_index 通道索引（0=R，1=G，2=B，3=A）
+     * @return 单通道位图，若索引无效则返回 nullptr
      */
     inline BitmapGrey8* ExtractChannel(const BitmapRGBA8& src, uint channel_index)
     {
@@ -241,10 +240,10 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Extract single channel from RGB bitmap by index
-     * @param src Source RGB bitmap
-     * @param channel_index Channel index (0=R, 1=G, 2=B)
-     * @return Single-channel bitmap, or nullptr if index is invalid
+     * 从 RGB 位图中按索引提取单个通道
+     * @param src 源 RGB 位图
+     * @param channel_index 通道索引（0=R，1=G，2=B）
+     * @return 单通道位图，若索引无效则返回 nullptr
      */
     inline BitmapGrey8* ExtractChannel(const BitmapRGB8& src, uint channel_index)
     {
@@ -282,10 +281,10 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Extract single channel from RG bitmap by index
-     * @param src Source RG bitmap
-     * @param channel_index Channel index (0=R, 1=G)
-     * @return Single-channel bitmap, or nullptr if index is invalid
+     * 从 RG 位图中按索引提取单个通道
+     * @param src 源 RG 位图
+     * @param channel_index 通道索引（0=R，1=G）
+     * @return 单通道位图，若索引无效则返回 nullptr
      */
     inline BitmapGrey8* ExtractChannel(const BitmapRG8& src, uint channel_index)
     {
@@ -318,10 +317,10 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Extract single channel from single-channel bitmap (just copies)
-     * @param src Source single-channel bitmap
-     * @param channel_index Must be 0
-     * @return Copy of the source bitmap, or nullptr if index is invalid
+     * 从单通道位图中提取通道（直接复制）
+     * @param src 源单通道位图
+     * @param channel_index 必须为 0
+     * @return 源位图的副本，若索引无效则返回 nullptr
      */
     inline BitmapGrey8* ExtractChannel(const BitmapGrey8& src, uint channel_index)
     {
@@ -345,41 +344,41 @@ namespace hgl::bitmap::channel
         uint8* channel_data = channel->GetData();
         const int total = w * h;
 
-        // Use memcpy for efficient copy
+        // 使用 memcpy 高效复制
         memcpy(channel_data, src_data, total * sizeof(uint8));
 
         return channel;
     }
 
     /**
-     * Convenient wrapper functions for common use cases
+     * 常用场景的便捷封装函数
      */
 
-    // Extract R channel from RGBA
+    // 从 RGBA 提取 R 通道
     inline BitmapGrey8* ExtractR(const BitmapRGBA8& src) { return ExtractChannel(src, 0); }
 
-    // Extract G channel from RGBA
+    // 从 RGBA 提取 G 通道
     inline BitmapGrey8* ExtractG(const BitmapRGBA8& src) { return ExtractChannel(src, 1); }
 
-    // Extract B channel from RGBA
+    // 从 RGBA 提取 B 通道
     inline BitmapGrey8* ExtractB(const BitmapRGBA8& src) { return ExtractChannel(src, 2); }
 
-    // Extract A channel from RGBA
+    // 从 RGBA 提取 A 通道
     inline BitmapGrey8* ExtractA(const BitmapRGBA8& src) { return ExtractChannel(src, 3); }
 
-    // Extract R channel from RGB
+    // 从 RGB 提取 R 通道
     inline BitmapGrey8* ExtractR(const BitmapRGB8& src) { return ExtractChannel(src, 0); }
 
-    // Extract G channel from RGB
+    // 从 RGB 提取 G 通道
     inline BitmapGrey8* ExtractG(const BitmapRGB8& src) { return ExtractChannel(src, 1); }
 
-    // Extract B channel from RGB
+    // 从 RGB 提取 B 通道
     inline BitmapGrey8* ExtractB(const BitmapRGB8& src) { return ExtractChannel(src, 2); }
 
-    // Extract R channel from RG
+    // 从 RG 提取 R 通道
     inline BitmapGrey8* ExtractR(const BitmapRG8& src) { return ExtractChannel(src, 0); }
 
-    // Extract G channel from RG
+    // 从 RG 提取 G 通道
     inline BitmapGrey8* ExtractG(const BitmapRG8& src) { return ExtractChannel(src, 1); }
 
 } // namespace hgl::bitmap::channel

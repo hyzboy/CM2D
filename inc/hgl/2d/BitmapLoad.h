@@ -32,7 +32,7 @@ namespace hgl
             {
                 bmp=nullptr;
             }
-    
+
             const uint OnChannels()const override{return bmp->GetChannels();}
             const uint OnChannelBits()const override{return bmp->GetChannelBits();}
 

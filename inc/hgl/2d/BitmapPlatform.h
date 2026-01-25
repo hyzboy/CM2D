@@ -4,7 +4,7 @@
 #include<hgl/color/Color3ub.h>
 #include<hgl/color/Color4ub.h>
 
-// Platform-specific includes
+// 平台相关的头文件包含
 #ifdef _WIN32
     #include<windows.h>
 #endif
@@ -30,8 +30,8 @@ namespace hgl::bitmap
 {
 #ifdef _WIN32
     /**
-     * Windows platform bitmap class - Supports DIB (Device Independent Bitmap)
-     * Can be drawn directly to HDC using GDI functions
+     * Windows 平台位图类 - 支持 DIB（设备无关位图）
+     * 可通过 GDI 函数直接绘制到 HDC
      */
     template<typename T, uint C>
     class BitmapWindows : public Bitmap<T, C>
@@ -46,55 +46,55 @@ namespace hgl::bitmap
         virtual ~BitmapWindows();
 
         /**
-         * Create DIB Section
-         * @param w Width
-         * @param h Height
-         * @param hdc Optional device context for compatibility (default nullptr uses screen DC)
-         * @return Whether creation was successful
+         * 创建 DIB Section
+         * @param w 宽度
+         * @param h 高度
+         * @param hdc 可选设备上下文（默认 nullptr 使用屏幕 DC）
+         * @return 是否创建成功
          */
         bool CreateDIB(uint w, uint h, HDC hdc = nullptr);
 
         /**
-         * Draw to target DC using BitBlt
-         * @param hdc Target device context
-         * @param dx Destination X coordinate
-         * @param dy Destination Y coordinate
-         * @param dw Destination width
-         * @param dh Destination height
-         * @param sx Source X coordinate (default 0)
-         * @param sy Source Y coordinate (default 0)
-         * @return Whether drawing was successful
+         * 使用 BitBlt 绘制到目标 DC
+         * @param hdc 目标设备上下文
+         * @param dx 目标 X 坐标
+         * @param dy 目标 Y 坐标
+         * @param dw 目标宽度
+         * @param dh 目标高度
+         * @param sx 源 X 坐标（默认 0）
+         * @param sy 源 Y 坐标（默认 0）
+         * @return 是否绘制成功
          */
         bool BlitTo(HDC hdc, int dx, int dy, int dw, int dh, int sx = 0, int sy = 0) const;
 
         /**
-         * Stretch draw to target DC using StretchBlt
-         * @param hdc Target device context
-         * @param dx Destination X coordinate
-         * @param dy Destination Y coordinate
-         * @param dw Destination width
-         * @param dh Destination height
-         * @param sx Source X coordinate
-         * @param sy Source Y coordinate
-         * @param sw Source width
-         * @param sh Source height
-         * @return Whether drawing was successful
+         * 使用 StretchBlt 拉伸绘制到目标 DC
+         * @param hdc 目标设备上下文
+         * @param dx 目标 X 坐标
+         * @param dy 目标 Y 坐标
+         * @param dw 目标宽度
+         * @param dh 目标高度
+         * @param sx 源 X 坐标
+         * @param sy 源 Y 坐标
+         * @param sw 源宽度
+         * @param sh 源高度
+         * @return 是否绘制成功
          */
         bool StretchBlitTo(HDC hdc, int dx, int dy, int dw, int dh, int sx, int sy, int sw, int sh) const;
 
         /**
-         * Alpha blend draw using AlphaBlend
-         * @param hdc Target device context
-         * @param dx Destination X coordinate
-         * @param dy Destination Y coordinate
-         * @param dw Destination width
-         * @param dh Destination height
-         * @param sx Source X coordinate
-         * @param sy Source Y coordinate
-         * @param sw Source width
-         * @param sh Source height
-         * @param alpha Overall alpha value (0-255, default 255)
-         * @return Whether drawing was successful
+         * 使用 AlphaBlend 进行带透明度混合绘制
+         * @param hdc 目标设备上下文
+         * @param dx 目标 X 坐标
+         * @param dy 目标 Y 坐标
+         * @param dw 目标宽度
+         * @param dh 目标高度
+         * @param sx 源 X 坐标
+         * @param sy 源 Y 坐标
+         * @param sw 源宽度
+         * @param sh 源高度
+         * @param alpha 总体 alpha 值（0-255，默认 255）
+         * @return 是否绘制成功
          */
         bool AlphaBlitTo(HDC hdc, int dx, int dy, int dw, int dh, int sx, int sy, int sw, int sh, uint8 alpha = 255) const;
 
@@ -110,8 +110,8 @@ namespace hgl::bitmap
 
 #ifdef __APPLE__
     /**
-     * macOS platform bitmap class - Supports CoreGraphics
-     * Can be drawn to CGContext
+     * macOS 平台位图类 - 支持 CoreGraphics
+     * 可绘制到 CGContext
      */
     template<typename T, uint C>
     class BitmapMacOS : public Bitmap<T, C>
@@ -125,33 +125,33 @@ namespace hgl::bitmap
         virtual ~BitmapMacOS();
 
         /**
-         * Create CoreGraphics context
-         * @param w Width
-         * @param h Height
-         * @return Whether creation was successful
+         * 创建 CoreGraphics 上下文
+         * @param w 宽度
+         * @param h 高度
+         * @return 是否创建成功
          */
         bool CreateCGContext(uint w, uint h);
 
         /**
-         * Create CGImage object
-         * @return CGImage reference (caller responsible for releasing)
+         * 创建 CGImage 对象
+         * @return CGImage 引用（调用者负责释放）
          */
         CGImageRef CreateCGImage() const;
 
         /**
-         * Draw to target context
-         * @param destContext Target context
-         * @param destRect Destination rectangle
-         * @return Whether drawing was successful
+         * 绘制到目标上下文
+         * @param destContext 目标上下文
+         * @param destRect 目标区域
+         * @return 是否绘制成功
          */
         bool DrawToContext(CGContextRef destContext, CGRect destRect) const;
 
         /**
-         * Draw to target context (with source rectangle)
-         * @param destContext Target context
-         * @param destRect Destination rectangle
-         * @param sourceRect Source rectangle
-         * @return Whether drawing was successful
+         * 绘制到目标上下文（带源区域）
+         * @param destContext 目标上下文
+         * @param destRect 目标区域
+         * @param sourceRect 源区域
+         * @return 是否绘制成功
          */
         bool DrawToContext(CGContextRef destContext, CGRect destRect, CGRect sourceRect) const;
 
@@ -166,8 +166,8 @@ namespace hgl::bitmap
 
 #if defined(__linux__) && defined(HGL_X11_SUPPORT)
     /**
-     * Linux X11 platform bitmap class - Supports XImage and MIT-SHM
-     * Can be drawn to X11 Window
+     * Linux X11 平台位图类 - 支持 XImage 和 MIT-SHM
+     * 可绘制到 X11 窗口
      */
     template<typename T, uint C>
     class BitmapX11 : public Bitmap<T, C>
@@ -184,35 +184,35 @@ namespace hgl::bitmap
         virtual ~BitmapX11();
 
         /**
-         * Create XImage
-         * @param w Width
-         * @param h Height
-         * @param dpy Display connection (default nullptr opens default display)
-         * @param screen Screen number (default 0)
-         * @param try_shm Whether to try MIT-SHM extension (default true)
-         * @return Whether creation was successful
+         * 创建 XImage
+         * @param w 宽度
+         * @param h 高度
+         * @param dpy 显示连接（默认 nullptr 打开默认显示）
+         * @param screen 屏幕号（默认 0）
+         * @param try_shm 是否尝试 MIT-SHM 扩展（默认 true）
+         * @return 是否创建成功
          */
         bool CreateXImage(uint w, uint h, Display* dpy = nullptr, int screen = 0, bool try_shm = true);
 
         /**
-         * Draw to window (specified region)
-         * @param window Target window
-         * @param dx Destination X coordinate
-         * @param dy Destination Y coordinate
-         * @param sx Source X coordinate
-         * @param sy Source Y coordinate
-         * @param w Width
-         * @param h Height
-         * @return Whether drawing was successful
+         * 绘制到窗口（指定区域）
+         * @param window 目标窗口
+         * @param dx 目标 X 坐标
+         * @param dy 目标 Y 坐标
+         * @param sx 源 X 坐标
+         * @param sy 源 Y 坐标
+         * @param w 宽度
+         * @param h 高度
+         * @return 是否绘制成功
          */
         bool PutToWindow(Window window, int dx, int dy, int sx, int sy, uint w, uint h) const;
 
         /**
-         * Draw entire bitmap to window
-         * @param window Target window
-         * @param dx Destination X coordinate (default 0)
-         * @param dy Destination Y coordinate (default 0)
-         * @return Whether drawing was successful
+         * 绘制整个位图到窗口
+         * @param window 目标窗口
+         * @param dx 目标 X 坐标（默认 0）
+         * @param dy 目标 Y 坐标（默认 0）
+         * @return 是否绘制成功
          */
         bool PutToWindow(Window window, int dx = 0, int dy = 0) const;
 
@@ -229,8 +229,8 @@ namespace hgl::bitmap
 
 #if defined(__linux__) && defined(HGL_WAYLAND_SUPPORT)
     /**
-     * Linux Wayland platform bitmap class - Supports wl_shm
-     * Can be attached to Wayland Surface
+     * Linux Wayland 平台位图类 - 支持 wl_shm
+     * 可附加到 Wayland Surface
      */
     template<typename T, uint C>
     class BitmapWayland : public Bitmap<T, C>
@@ -248,20 +248,20 @@ namespace hgl::bitmap
         virtual ~BitmapWayland();
 
         /**
-         * Create shared memory buffer
-         * @param w Width
-         * @param h Height
-         * @param wayland_shm Wayland shared memory object
-         * @return Whether creation was successful
+         * 创建共享内存缓冲区
+         * @param w 宽度
+         * @param h 高度
+         * @param wayland_shm Wayland 共享内存对象
+         * @return 是否创建成功
          */
         bool CreateShmBuffer(uint w, uint h, struct wl_shm* wayland_shm);
 
         /**
-         * Attach to surface and commit
-         * @param surface Target surface
-         * @param x X offset (default 0)
-         * @param y Y offset (default 0)
-         * @return Whether successful
+         * 附加到 surface 并提交
+         * @param surface 目标 surface
+         * @param x X 偏移（默认 0）
+         * @param y Y 偏移（默认 0）
+         * @return 是否成功
          */
         bool AttachAndCommit(struct wl_surface* surface, int32_t x = 0, int32_t y = 0) const;
 
@@ -274,7 +274,7 @@ namespace hgl::bitmap
     using BitmapGrey8Wayland = BitmapWayland<uint8, 1>;
 #endif // HGL_WAYLAND_SUPPORT
 
-    // Platform-adaptive type aliases
+    // 平台自适应类型别名
 #ifdef _WIN32
     template<typename T, uint C> using BitmapPlatform = BitmapWindows<T, C>;
     using BitmapRGBA8Platform = BitmapRGBA8Windows;

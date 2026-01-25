@@ -18,50 +18,50 @@ namespace hgl
         {
             virtual const uint OnChannels()const=0;
             virtual const uint OnChannelBits()const=0;
-            
+
             virtual void *OnRecvBitmap(uint w,uint h)=0;
             virtual void OnLoadFailed()=0;
-            
+
             virtual ~ImageMagickLoader()=default;
         };
-        
+
         /**
          * ImageMagick加载器实现模板
          */
-        template<typename T> 
+        template<typename T>
         struct ImageMagickLoaderImpl:public ImageMagickLoader
         {
             T *bmp;
-            
+
             ImageMagickLoaderImpl()
             {
                 bmp=nullptr;
             }
-            
+
             ~ImageMagickLoaderImpl()
             {
                 // 不删除bmp，由调用者管理
             }
-            
+
             const uint OnChannels()const override
             {
                 return bmp?bmp->GetChannels():0;
             }
-            
+
             const uint OnChannelBits()const override
             {
                 return bmp?bmp->GetChannelBits():0;
             }
-            
+
             void *OnRecvBitmap(uint w,uint h) override
             {
                 if(!bmp)
                     bmp=new T;
-                    
+
                 bmp->Create(w,h);
                 return bmp->GetData();
             }
-            
+
             void OnLoadFailed() override
             {
                 if(bmp)
@@ -71,7 +71,7 @@ namespace hgl
                 }
             }
         };
-        
+
         /**
          * 从文件加载图像（使用ImageMagick）
          * @param filename 图像文件路径
@@ -79,7 +79,7 @@ namespace hgl
          * @return 是否加载成功
          */
         bool LoadBitmapFromImageMagick(const OSString &filename, ImageMagickLoader *loader);
-        
+
         /**
          * 从文件加载图像到指定的Bitmap类型（模板函数）
          * @tparam T Bitmap类型
@@ -90,13 +90,13 @@ namespace hgl
         inline T *LoadBitmapFromImageMagick(const OSString &filename)
         {
             ImageMagickLoaderImpl<T> loader;
-            
+
             if(LoadBitmapFromImageMagick(filename, &loader))
                 return loader.bmp;
-                
+
             return nullptr;
         }
-        
+
         /**
          * 保存Bitmap到文件（使用ImageMagick）
          * @param filename 输出文件路径
@@ -115,7 +115,7 @@ namespace hgl
                                      uint channels,
                                      uint single_channel_bits,
                                      const std::string &format="");
-        
+
         /**
          * 保存Bitmap对象到文件（模板函数）
          * @tparam T Bitmap类型
@@ -130,7 +130,7 @@ namespace hgl
                                            const std::string &format="")
         {
             if(!bmp)return false;
-            
+
             return SaveBitmapToImageMagick(filename,
                                           (void *)(bmp->GetData()),
                                           bmp->GetWidth(),
@@ -139,7 +139,7 @@ namespace hgl
                                           bmp->GetChannelBits(),
                                           format);
         }
-        
+
         /**
          * 便捷函数：加载RGB8格式图像
          */
@@ -147,7 +147,7 @@ namespace hgl
         {
             return LoadBitmapFromImageMagick<BitmapRGB8>(filename);
         }
-        
+
         /**
          * 便捷函数：加载RGBA8格式图像
          */
@@ -155,7 +155,7 @@ namespace hgl
         {
             return LoadBitmapFromImageMagick<BitmapRGBA8>(filename);
         }
-        
+
         /**
          * 便捷函数：加载灰度8格式图像
          */
@@ -163,7 +163,7 @@ namespace hgl
         {
             return LoadBitmapFromImageMagick<BitmapGrey8>(filename);
         }
-        
+
         /**
          * ImageMagick功能函数
          */
@@ -173,12 +173,12 @@ namespace hgl
              * 获取ImageMagick支持的所有格式列表
              */
             std::string GetSupportedFormats();
-            
+
             /**
              * 获取ImageMagick版本信息
              */
             std::string GetVersion();
-            
+
             /**
              * 检查指定格式是否支持
              * @param format 格式名称（如"PNG", "JPEG"）

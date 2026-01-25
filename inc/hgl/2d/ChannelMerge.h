@@ -6,23 +6,23 @@
 #include<hgl/color/Color4ub.h>
 
 /**
- * Channel Merge Module
+ * 通道合并模块
  *
- * Provides functionality to merge/combine separate single-channel bitmaps
- * into multi-channel bitmaps. This is the reverse operation of channel splitting.
+ * 提供将多个单通道位图合并为多通道位图的功能。
+ * 这是通道分离操作的逆过程。
  *
- * Example usage:
+ * 示例用法：
  * ```cpp
  * BitmapGrey8 r, g, b, a;
- * // ... initialize channels ...
+ * // ... 初始化各通道 ...
  *
- * // Merge 3 channels into RGB
+ * // 合并 3 个通道为 RGB
  * auto rgb = hgl::bitmap::channel::MergeRGB(r, g, b);
  *
- * // Merge 4 channels into RGBA
+ * // 合并 4 个通道为 RGBA
  * auto rgba = hgl::bitmap::channel::MergeRGBA(r, g, b, a);
  *
- * // Merge RGB + A into RGBA
+ * // 合并 RGB + A 为 RGBA
  * BitmapRGB8 rgb_bitmap;
  * BitmapGrey8 alpha;
  * auto rgba2 = hgl::bitmap::channel::MergeRGB_A_To_RGBA(rgb_bitmap, alpha);
@@ -32,12 +32,12 @@
 namespace hgl::bitmap::channel
 {
     /**
-     * Merge 4 single-channel bitmaps into RGBA bitmap
-     * @param r Red channel
-     * @param g Green channel
-     * @param b Blue channel
-     * @param a Alpha channel
-     * @return RGBA bitmap, or nullptr if inputs are invalid or dimensions don't match
+     * 合并 4 个单通道位图为 RGBA 位图
+     * @param r 红色通道
+     * @param g 绿色通道
+     * @param b 蓝色通道
+     * @param a Alpha 通道
+     * @return RGBA 位图，若输入无效或尺寸不一致则返回 nullptr
      */
     inline BitmapRGBA8* MergeRGBA(const BitmapGrey8& r, const BitmapGrey8& g,
                                   const BitmapGrey8& b, const BitmapGrey8& a)
@@ -45,7 +45,7 @@ namespace hgl::bitmap::channel
         const int w = r.GetWidth();
         const int h = r.GetHeight();
 
-        // Check all channels have same dimensions
+        // 检查所有通道的尺寸是否相同
         if (w != g.GetWidth() || w != b.GetWidth() || w != a.GetWidth() ||
             h != g.GetHeight() || h != b.GetHeight() || h != a.GetHeight())
             return nullptr;
@@ -80,18 +80,18 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Merge 3 single-channel bitmaps into RGB bitmap
-     * @param r Red channel
-     * @param g Green channel
-     * @param b Blue channel
-     * @return RGB bitmap, or nullptr if inputs are invalid or dimensions don't match
+     * 合并 3 个单通道位图为 RGB 位图
+     * @param r 红色通道
+     * @param g 绿色通道
+     * @param b 蓝色通道
+     * @return RGB 位图，若输入无效或尺寸不一致则返回 nullptr
      */
     inline BitmapRGB8* MergeRGB(const BitmapGrey8& r, const BitmapGrey8& g, const BitmapGrey8& b)
     {
         const int w = r.GetWidth();
         const int h = r.GetHeight();
 
-        // Check all channels have same dimensions
+        // 检查所有通道的尺寸是否相同
         if (w != g.GetWidth() || w != b.GetWidth() ||
             h != g.GetHeight() || h != b.GetHeight())
             return nullptr;
@@ -124,17 +124,17 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Merge 2 single-channel bitmaps into RG bitmap
-     * @param r Red/First channel
-     * @param g Green/Second channel
-     * @return RG bitmap, or nullptr if inputs are invalid or dimensions don't match
+     * 合并 2 个单通道位图为 RG 位图
+     * @param r 红色/第一个通道
+     * @param g 绿色/第二个通道
+     * @return RG 位图，若输入无效或尺寸不一致则返回 nullptr
      */
     inline BitmapRG8* MergeRG(const BitmapGrey8& r, const BitmapGrey8& g)
     {
         const int w = r.GetWidth();
         const int h = r.GetHeight();
 
-        // Check both channels have same dimensions
+        // 检查两个通道的尺寸是否相同
         if (w != g.GetWidth() || h != g.GetHeight())
             return nullptr;
 
@@ -164,17 +164,17 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Merge RGB bitmap and Alpha channel into RGBA bitmap
-     * @param rgb RGB bitmap
-     * @param a Alpha channel
-     * @return RGBA bitmap, or nullptr if inputs are invalid or dimensions don't match
+     * 合并 RGB 位图与 Alpha 通道为 RGBA 位图
+     * @param rgb RGB 位图
+     * @param a Alpha 通道
+     * @return RGBA 位图，若输入无效或尺寸不一致则返回 nullptr
      */
     inline BitmapRGBA8* MergeRGB_A_To_RGBA(const BitmapRGB8& rgb, const BitmapGrey8& a)
     {
         const int w = rgb.GetWidth();
         const int h = rgb.GetHeight();
 
-        // Check dimensions match
+        // 检查尺寸是否匹配
         if (w != a.GetWidth() || h != a.GetHeight())
             return nullptr;
 
@@ -206,18 +206,18 @@ namespace hgl::bitmap::channel
     }
 
     /**
-     * Merge RG bitmap and B channel into RGB bitmap
-     * Useful for YUV-like formats where you have Y+UV and want to add a third channel
-     * @param rg RG bitmap (or YU)
-     * @param b Blue/Third channel (or V)
-     * @return RGB bitmap, or nullptr if inputs are invalid or dimensions don't match
+     * 合并 RG 位图与 B 通道为 RGB 位图
+     * 适用于 YUV 等格式（如 Y+UV），需要补充第三通道
+     * @param rg RG 位图（或 YU）
+     * @param b 蓝色/第三通道（或 V）
+     * @return RGB 位图，若输入无效或尺寸不一致则返回 nullptr
      */
     inline BitmapRGB8* MergeRG_B_To_RGB(const BitmapRG8& rg, const BitmapGrey8& b)
     {
         const int w = rg.GetWidth();
         const int h = rg.GetHeight();
 
-        // Check dimensions match
+        // 检查尺寸是否匹配
         if (w != b.GetWidth() || h != b.GetHeight())
             return nullptr;
 

@@ -26,7 +26,7 @@ namespace hgl
 
             if(!fos)
                 return(false);
-        
+
             return SaveBitmapToTGA(fos,bmp);
         }
     }//namespace bitmap

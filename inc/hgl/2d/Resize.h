@@ -11,29 +11,29 @@
 #include<numbers>
 
 /**
- * Image Resize Module
+ * 图像缩放模块
  *
- * Provides various interpolation methods for image scaling.
- * Supports nearest neighbor, bilinear, bicubic, Lanczos, Mitchell-Netravali, and adaptive filtering.
+ * 提供各种插值方法用于图像缩放。
+ * 支持最近邻、双线性、三次方、Lanczos、Mitchell-Netravali和自适应滤波。
  *
- * Example usage:
+ * 示例用法：
  * ```cpp
  * BitmapRGB8 source;
  * source.Create(100, 100);
  *
- * // Resize with bilinear filtering (balanced quality/speed)
+ * // 使用双线性滤波缩放（质量和速度平衡）
  * auto resized = hgl::bitmap::resize::Resize(source, 200, 150);
  *
- * // High-quality Lanczos downscaling
+ * // 高质量Lanczos降采样
  * auto downscaled = hgl::bitmap::resize::Resize(source, 50, 50, FilterType::Lanczos3);
  *
- * // Mitchell-Netravali filter (balanced sharpness/smoothness)
+ * // Mitchell-Netravali滤波（锐度和平滑度平衡）
  * auto mitchell = hgl::bitmap::resize::Resize(source, 150, 150, FilterType::MitchellNetravali);
  *
- * // Adaptive mode (automatically selects best filter)
+ * // 自适应模式（自动选择最佳滤波器）
  * auto adaptive = hgl::bitmap::resize::Resize(source, 75, 75, FilterType::Adaptive);
  *
- * // Scale by factor with nearest neighbor (for pixel art)
+ * // 使用最近邻按比例缩放（适用于像素艺术）
  * auto scaled = hgl::bitmap::resize::ResizeScale(source, 2.0f, FilterType::NearestNeighbor);
  * ```
  */
@@ -41,23 +41,23 @@
 namespace hgl::bitmap::resize
 {
     /**
-     * Interpolation filter types
+     * 插值滤波器类型
      */
     enum class FilterType
     {
-        NearestNeighbor,  // Fast, preserves hard edges (good for pixel art)
-        Bilinear,         // Balanced quality and performance
-        Bicubic,          // High quality with cubic interpolation
-        Lanczos2,         // Lanczos with a=2 (high quality, sharper)
-        Lanczos3,         // Lanczos with a=3 (highest quality, very sharp)
-        MitchellNetravali,// Mitchell-Netravali filter (B=1/3, C=1/3) - balanced sharpness and smoothness
-        Adaptive          // Automatically select best filter based on scale ratio
+        NearestNeighbor,  // 快速，保留硬边缘（适用于像素艺术）
+        Bilinear,         // 质量和性能平衡
+        Bicubic,          // 使用三次插值的高质量
+        Lanczos2,         // Lanczos a=2（高质量，更锐利）
+        Lanczos3,         // Lanczos a=3（最高质量，非常锐利）
+        MitchellNetravali,// Mitchell-Netravali滤波（B=1/3, C=1/3）- 锐度和平滑度平衡
+        Adaptive          // 根据缩放比例自动选择最佳滤波器
     };
 
-    // ===================== Sampling Functions =====================
+    // ===================== 采样函数 =====================
 
     /**
-     * Sample pixel with nearest neighbor
+     * 使用最近邻采样像素
      */
     template<typename T, uint C>
     T SampleNearest(const Bitmap<T, C>& source, float x, float y)
@@ -75,7 +75,7 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Sample pixel with bilinear interpolation
+     * 使用双线性插值采样像素
      */
     template<typename T, uint C>
     T SampleBilinear(const Bitmap<T, C>& source, float x, float y)
@@ -84,13 +84,13 @@ namespace hgl::bitmap::resize
         const int height = source.GetHeight();
         const T* data = source.GetData();
 
-        // Get integer and fractional parts
+        // 获取整数和分数部分
         int x0 = static_cast<int>(std::floor(x));
         int y0 = static_cast<int>(std::floor(y));
         float fx = x - x0;
         float fy = y - y0;
 
-        // Clamp coordinates
+        // 限制坐标
         int x1 = x0 + 1;
         int y1 = y0 + 1;
 
@@ -99,20 +99,20 @@ namespace hgl::bitmap::resize
         y0 = std::clamp(y0, 0, height - 1);
         y1 = std::clamp(y1, 0, height - 1);
 
-        // Get four corner pixels
+        // 获取四个角像素
         T p00 = data[y0 * width + x0];
         T p10 = data[y0 * width + x1];
         T p01 = data[y1 * width + x0];
         T p11 = data[y1 * width + x1];
 
-        // Bilinear interpolation
+        // 双线性插值
         T top = hgl::math::lerp(p00, p10, fx);
         T bottom = hgl::math::lerp(p01, p11, fx);
         return hgl::math::lerp(top, bottom, fy);
     }
 
     /**
-     * Cubic interpolation weight function
+     * 三次插值权重函数
      */
     inline float CubicWeight(float x)
     {
@@ -126,10 +126,10 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Lanczos kernel function
+     * Lanczos核函数
      *
-     * @param x Distance from sample point
-     * @param a Lanczos kernel size (typically 2 or 3)
+     * @param x 距离采样点的距离
+     * @param a Lanczos核大小（通常为2或3）
      */
     inline float LanczosWeight(float x, int a)
     {
@@ -144,7 +144,7 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Sinc function for Lanczos kernel
+     * Lanczos核的Sinc函数
      */
     inline float Sinc(float x)
     {
@@ -155,25 +155,25 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Mitchell-Netravali cubic filter weight function
+     * Mitchell-Netravali三次滤波权重函数
      *
-     * Uses B=1/3, C=1/3 parameters (Mitchell-Netravali recommended values)
-     * Provides a good balance between sharpness and smoothness
+     * 使用B=1/3, C=1/3参数（Mitchell-Netravali推荐值）
+     * 在锐度和光滑度之间提供良好平衡
      *
-     * @param x Distance from sample point
-     * @return Filter weight
+     * @param x 距离采样点的距离
+     * @return 滤波权重
      */
     inline float MitchellNetravaliWeight(float x)
     {
         x = std::abs(x);
 
-        // Mitchell-Netravali parameters
+        // Mitchell-Netravali参数
         constexpr float B = 1.0f / 3.0f;
         constexpr float C = 1.0f / 3.0f;
 
         if (x < 1.0f)
         {
-            // For |x| < 1
+            // 对于|x| < 1
             float x2 = x * x;
             float x3 = x2 * x;
             return ((12.0f - 9.0f * B - 6.0f * C) * x3 +
@@ -182,7 +182,7 @@ namespace hgl::bitmap::resize
         }
         else if (x < 2.0f)
         {
-            // For 1 <= |x| < 2
+            // 对于1 <= |x| < 2
             float x2 = x * x;
             float x3 = x2 * x;
             return ((-B - 6.0f * C) * x3 +
@@ -195,7 +195,7 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Sample pixel with bicubic interpolation
+     * 使用三次插值采样像素
      */
     template<typename T, uint C>
     T SampleBicubic(const Bitmap<T, C>& source, float x, float y)
@@ -207,11 +207,11 @@ namespace hgl::bitmap::resize
         int x0 = static_cast<int>(std::floor(x));
         int y0 = static_cast<int>(std::floor(y));
 
-        // For uint8 types, we need to accumulate as floats
+        // 对于uint8类型，我们需要以浮点数累积
         float r_sum = 0.0f, g_sum = 0.0f, b_sum = 0.0f, a_sum = 0.0f;
         float weight_sum = 0.0f;
 
-        // Sample 4x4 neighborhood
+        // 采样4x4邻域
         for (int dy = -1; dy <= 2; ++dy)
         {
             for (int dx = -1; dx <= 2; ++dx)
@@ -225,10 +225,10 @@ namespace hgl::bitmap::resize
 
                 const T& pixel = data[sy * width + sx];
 
-                // Handle different pixel types
+                // 处理不同像素类型
                 if constexpr (C == 1)
                 {
-                    // Grayscale or single channel
+                    // 灰度或单通道
                     if constexpr (std::is_same_v<T, uint8>)
                         r_sum += pixel * w;
                     else
@@ -257,7 +257,7 @@ namespace hgl::bitmap::resize
             }
         }
 
-        // Normalize and construct result
+        // 归一化并构造结果
         if (weight_sum > 0.0f)
         {
             r_sum /= weight_sum;
@@ -266,7 +266,7 @@ namespace hgl::bitmap::resize
             a_sum /= weight_sum;
         }
 
-        // Construct result based on type
+        // 根据类型构造结果
         if constexpr (C == 1)
         {
             if constexpr (std::is_same_v<T, uint8>)
@@ -302,12 +302,12 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Sample pixel with Lanczos interpolation
+     * 使用Lanczos插值采样像素
      *
-     * @param source Source bitmap
-     * @param x X coordinate (can be fractional)
-     * @param y Y coordinate (can be fractional)
-     * @param a Lanczos kernel size (2 or 3)
+     * @param source 源位图
+     * @param x X坐标（可以是小数）
+     * @param y Y坐标（可以是小数）
+     * @param a Lanczos核大小（2或3）
      */
     template<typename T, uint C>
     T SampleLanczos(const Bitmap<T, C>& source, float x, float y, int a)
@@ -319,11 +319,11 @@ namespace hgl::bitmap::resize
         int x0 = static_cast<int>(std::floor(x));
         int y0 = static_cast<int>(std::floor(y));
 
-        // For uint8 types, we need to accumulate as floats
+        // 对于uint8类型，我们需要以浮点数累积
         float r_sum = 0.0f, g_sum = 0.0f, b_sum = 0.0f, a_sum = 0.0f;
         float weight_sum = 0.0f;
 
-        // Sample neighborhood based on kernel size (a)
+        // 根据核大小采样邻域（a）
         for (int dy = -a + 1; dy <= a; ++dy)
         {
             for (int dx = -a + 1; dx <= a; ++dx)
@@ -337,10 +337,10 @@ namespace hgl::bitmap::resize
 
                 const T& pixel = data[sy * width + sx];
 
-                // Handle different pixel types
+                // 处理不同像素类型
                 if constexpr (C == 1)
                 {
-                    // Grayscale or single channel
+                    // 灰度或单通道
                     if constexpr (std::is_same_v<T, uint8>)
                         r_sum += pixel * w;
                     else
@@ -369,7 +369,7 @@ namespace hgl::bitmap::resize
             }
         }
 
-        // Normalize and construct result
+        // 归一化并构造结果
         if (weight_sum > 0.0f)
         {
             r_sum /= weight_sum;
@@ -378,7 +378,7 @@ namespace hgl::bitmap::resize
             a_sum /= weight_sum;
         }
 
-        // Construct result based on type
+        // 根据类型构造结果
         if constexpr (C == 1)
         {
             if constexpr (std::is_same_v<T, uint8>)
@@ -414,14 +414,14 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Sample pixel with Mitchell-Netravali interpolation
+     * 使用Mitchell-Netravali插值采样像素
      *
-     * Uses Mitchell-Netravali cubic filter (B=1/3, C=1/3) for high-quality resampling.
-     * Provides a good balance between sharpness and smoothness.
+     * 使用Mitchell-Netravali三次滤波（B=1/3, C=1/3）进行高质量重采样。
+     * 在锐度和光滑度之间提供良好平衡。
      *
-     * @param source Source bitmap
-     * @param x X coordinate (can be fractional)
-     * @param y Y coordinate (can be fractional)
+     * @param source 源位图
+     * @param x X坐标（可以是小数）
+     * @param y Y坐标（可以是小数）
      */
     template<typename T, uint C>
     T SampleMitchellNetravali(const Bitmap<T, C>& source, float x, float y)
@@ -433,11 +433,11 @@ namespace hgl::bitmap::resize
         int x0 = static_cast<int>(std::floor(x));
         int y0 = static_cast<int>(std::floor(y));
 
-        // For uint8 types, we need to accumulate as floats
+        // 对于uint8类型，我们需要以浮点数累积
         float r_sum = 0.0f, g_sum = 0.0f, b_sum = 0.0f, a_sum = 0.0f;
         float weight_sum = 0.0f;
 
-        // Sample 4x4 neighborhood (Mitchell-Netravali has support of 2)
+        // 采样4x4邻域（Mitchell-Netravali支持范围为2）
         for (int dy = -1; dy <= 2; ++dy)
         {
             for (int dx = -1; dx <= 2; ++dx)
@@ -451,10 +451,10 @@ namespace hgl::bitmap::resize
 
                 const T& pixel = data[sy * width + sx];
 
-                // Handle different pixel types
+                // 处理不同像素类型
                 if constexpr (C == 1)
                 {
-                    // Grayscale or single channel
+                    // 灰度或单通道
                     if constexpr (std::is_same_v<T, uint8>)
                         r_sum += pixel * w;
                     else
@@ -483,7 +483,7 @@ namespace hgl::bitmap::resize
             }
         }
 
-        // Normalize and construct result
+        // 归一化并构造结果
         if (weight_sum > 0.0f)
         {
             r_sum /= weight_sum;
@@ -492,7 +492,7 @@ namespace hgl::bitmap::resize
             a_sum /= weight_sum;
         }
 
-        // Construct result based on type
+        // 根据类型构造结果
         if constexpr (C == 1)
         {
             if constexpr (std::is_same_v<T, uint8>)
@@ -528,43 +528,43 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Determine the best filter type for given scale ratio (used by Adaptive mode)
+     * 根据给定的缩放比例确定最佳滤波器类型（自适应模式使用）
      *
-     * @param scale_ratio Scaling ratio (new_size / old_size)
-     * @return Recommended filter type
+     * @param scale_ratio 缩放比例（新尺寸/旧尺寸）
+     * @return 推荐的滤波器类型
      */
     inline FilterType DetermineAdaptiveFilter(float scale_ratio)
     {
-        // For significant downscaling, use Lanczos for best quality
+        // 对于显著降采样，使用Lanczos以获得最佳质量
         if (scale_ratio <= 0.5f)
             return FilterType::Lanczos3;
 
-        // For moderate downscaling, use Bicubic
+        // 对于中等降采样，使用Bicubic
         if (scale_ratio < 0.75f)
             return FilterType::Bicubic;
 
-        // For slight downscaling or upscaling up to 2x, use Bilinear
+        // 对于轻微降采样或放大至2倍，使用Bilinear
         if (scale_ratio <= 2.0f)
             return FilterType::Bilinear;
 
-        // For significant upscaling (>2x), use Bicubic for smoother results
+        // 对于显著放大（>2倍），使用Bicubic以获得更平滑的结果
         if (scale_ratio <= 4.0f)
             return FilterType::Bicubic;
 
-        // For extreme upscaling, use Nearest Neighbor to preserve clarity
+        // 对于极端放大，使用最近邻以保留清晰度
         return FilterType::NearestNeighbor;
     }
 
-    // ===================== Main Resize Functions =====================
+    // ===================== 主要缩放函数 =====================
 
     /**
-     * Resize bitmap to specified dimensions
+     * 将位图缩放到指定尺寸
      *
-     * @param source Source bitmap
-     * @param new_width Target width
-     * @param new_height Target height
-     * @param filter Interpolation filter to use
-     * @return Resized bitmap
+     * @param source 源位图
+     * @param new_width 目标宽度
+     * @param new_height 目标高度
+     * @param filter 要使用的插值滤波器
+     * @return 缩放后的位图
      */
     template<typename T, uint C>
     Bitmap<T, C> Resize(const Bitmap<T, C>& source,
@@ -580,12 +580,12 @@ namespace hgl::bitmap::resize
         if (!source.GetData())
             return Bitmap<T, C>();
 
-        // If size is the same, just copy
+        // 如果尺寸相同，只需复制
         if (src_width == new_width && src_height == new_height)
         {
             Bitmap<T, C> result;
             result.Create(new_width, new_height);
-            // Using memcpy for POD types (consistent with Bitmap::Flip implementation)
+            // 使用memcpy处理POD类型（与Bitmap::Flip实现一致）
             memcpy(result.GetData(), source.GetData(), source.GetTotalBytes());
             return result;
         }
@@ -594,11 +594,11 @@ namespace hgl::bitmap::resize
         result.Create(new_width, new_height);
         T* dst_data = result.GetData();
 
-        // Calculate scale factors
+        // 计算缩放因子
         float x_scale = static_cast<float>(src_width) / new_width;
         float y_scale = static_cast<float>(src_height) / new_height;
 
-        // For adaptive mode, determine the best filter based on scale ratio
+        // 对于自适应模式，根据缩放比例确定最佳滤波器
         FilterType actual_filter = filter;
         if (filter == FilterType::Adaptive)
         {
@@ -606,16 +606,16 @@ namespace hgl::bitmap::resize
             actual_filter = DetermineAdaptiveFilter(avg_scale);
         }
 
-        // Resample each pixel
+        // 对每个像素进行重采样
         for (int dst_y = 0; dst_y < new_height; ++dst_y)
         {
             for (int dst_x = 0; dst_x < new_width; ++dst_x)
             {
-                // Calculate source coordinates (center of pixel)
+                // 计算源坐标（像素中心）
                 float src_x = (dst_x + 0.5f) * x_scale - 0.5f;
                 float src_y = (dst_y + 0.5f) * y_scale - 0.5f;
 
-                // Sample based on filter type
+                // 根据滤波器类型采样
                 T pixel;
                 switch (actual_filter)
                 {
@@ -638,7 +638,7 @@ namespace hgl::bitmap::resize
                         pixel = SampleMitchellNetravali(source, src_x, src_y);
                         break;
                     case FilterType::Adaptive:
-                        // Should not reach here as we resolve adaptive above
+                        // 应该不会到达这里，因为我们在上面解析了自适应
                         pixel = SampleBilinear(source, src_x, src_y);
                         break;
                 }
@@ -651,12 +651,12 @@ namespace hgl::bitmap::resize
     }
 
     /**
-     * Resize bitmap by scale factor
+     * 按缩放因子缩放位图
      *
-     * @param source Source bitmap
-     * @param scale Scale factor (2.0 = double size, 0.5 = half size)
-     * @param filter Interpolation filter to use
-     * @return Resized bitmap
+     * @param source 源位图
+     * @param scale 缩放因子（2.0 = 双倍大小，0.5 = 半倍大小）
+     * @param filter 要使用的插值滤波器
+     * @return 缩放后的位图
      */
     template<typename T, uint C>
     Bitmap<T, C> ResizeScale(const Bitmap<T, C>& source,
@@ -671,5 +671,4 @@ namespace hgl::bitmap::resize
 
         return Resize(source, new_width, new_height, filter);
     }
-
 } // namespace hgl::bitmap::resize

@@ -8,8 +8,8 @@
 namespace hgl::bitmap
 {
     /**
-     * Abstract base class for all noise generators
-     * Provides seedable random generation for procedural content
+     * 所有噪声生成器的抽象基类
+     * 提供可设种子的伪随机生成，用于过程内容
      */
     class NoiseGenerator
     {
@@ -21,10 +21,10 @@ namespace hgl::bitmap
         virtual ~NoiseGenerator() = default;
 
         /**
-         * Generate noise value at given 2D coordinates
-         * @param x X coordinate
-         * @param y Y coordinate
-         * @return Noise value in range [-1, 1]
+         * 在给定二维坐标处生成噪声值
+         * @param x X坐标
+         * @param y Y坐标
+         * @return 噪声值，范围在[-1, 1]
          */
         virtual float Generate(float x, float y) const = 0;
 
@@ -33,8 +33,8 @@ namespace hgl::bitmap
     };
 
     /**
-     * Classic Perlin noise implementation
-     * Uses permutation table and gradient-based interpolation
+     * 经典Perlin噪声实现
+     * 使用置换表与基于梯度的插值
      */
     class PerlinNoise : public NoiseGenerator
     {
@@ -53,19 +53,19 @@ namespace hgl::bitmap
     };
 
     /**
-     * Simplex noise implementation
-     * Faster than Perlin with better visual quality and fewer artifacts
+     * Simplex噪声实现
+     * 比Perlin更快，视觉质量更好且伪影更少
      */
     class SimplexNoise : public NoiseGenerator
     {
     private:
         std::vector<int> permutation;
-        
+
         struct Grad
         {
             float x, y;
         };
-        
+
         static const Grad gradients[8];
 
         int FastFloor(float x) const;
@@ -79,8 +79,8 @@ namespace hgl::bitmap
     };
 
     /**
-     * Voronoi/Cellular noise implementation
-     * Generates region-based patterns useful for biomes and textures
+     * Voronoi/蜂窝噪声实现
+     * 生成基于区域的模式，适用于生物群系和纹理
      */
     class VoronoiNoise : public NoiseGenerator
     {
@@ -96,8 +96,8 @@ namespace hgl::bitmap
     };
 
     /**
-     * Fractal Brownian Motion (FBM) noise
-     * Combines multiple octaves of noise for natural-looking terrain
+     * 分形布朗运动（FBM）噪声
+     * 通过组合多层噪声产生自然地形效果
      */
     class FractalNoise : public NoiseGenerator
     {
@@ -110,13 +110,13 @@ namespace hgl::bitmap
 
     public:
         /**
-         * @param noise Base noise generator (will be owned if ownNoise is true)
-         * @param oct Number of octaves (detail levels)
-         * @param lac Frequency multiplier per octave (typically 2.0)
-         * @param pers Amplitude multiplier per octave (typically 0.5)
-         * @param ownNoise If true, will delete noise generator in destructor
+         * @param noise 基础噪声生成器（如果ownNoise为true则由本对象拥有）
+         * @param oct 八度数（细节层数）
+         * @param lac 每层的频率倍数（通常为2.0）
+         * @param pers 每层的振幅衰减（通常为0.5）
+         * @param ownNoise 若为true，则在析构时删除噪声生成器
          */
-        FractalNoise(NoiseGenerator* noise, int oct = 6, float lac = 2.0f, 
+        FractalNoise(NoiseGenerator* noise, int oct = 6, float lac = 2.0f,
                      float pers = 0.5f, bool ownNoise = true);
         virtual ~FractalNoise();
 

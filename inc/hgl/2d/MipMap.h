@@ -6,28 +6,28 @@
 #include<algorithm>
 
 /**
- * Mipmap Generation Module
- * 
- * Generates mipmap chains for textures with automatic level generation.
- * Useful for GPU texture loading and LOD (Level of Detail) systems.
- * 
- * Example usage:
+ * Mipmap 生成模块
+ *
+ * 为纹理生成 mipmap 链（自动生成各级别）。
+ * 适用于GPU纹理加载与LOD（细节层级）系统。
+ *
+ * 示例用法：
  * ```cpp
  * BitmapRGB8 base_texture;
  * base_texture.Create(512, 512);
- * 
- * // Generate complete mipmap chain
+ *
+ * // 生成完整的mipmap链
  * auto mipmaps = hgl::bitmap::mipmap::GenerateMipMaps(base_texture);
- * 
- * // Access specific levels
- * const auto& level0 = mipmaps.GetLevel(0); // Original 512x512
+ *
+ * // 访问特定级别
+ * const auto& level0 = mipmaps.GetLevel(0); // 原始 512x512
  * const auto& level1 = mipmaps.GetLevel(1); // 256x256
  * const auto& level2 = mipmaps.GetLevel(2); // 128x128
- * 
- * // Custom configuration
+ *
+ * // 自定义配置
  * hgl::bitmap::mipmap::MipMapConfig config;
  * config.filter = resize::FilterType::NearestNeighbor;
- * config.min_size = 16; // Stop at 16x16
+ * config.min_size = 16; // 在16x16处停止
  * auto custom_mipmaps = hgl::bitmap::mipmap::GenerateMipMaps(base_texture, config);
  * ```
  */
@@ -35,7 +35,7 @@
 namespace hgl::bitmap::mipmap
 {
     /**
-     * Configuration for mipmap generation
+     * mipmap 生成配置
      */
     struct MipMapConfig
     {
@@ -45,10 +45,10 @@ namespace hgl::bitmap::mipmap
     };
 
     /**
-     * Mipmap chain container
-     * 
-     * Stores multiple levels of a texture, where each level is half the size of the previous.
-     * Level 0 is the base (full resolution) texture.
+     * Mipmap 链容器
+     *
+     * 存储纹理的多个级别，每一级通常是前一等级的一半尺寸。
+     * 级别0为基础（原始分辨率）纹理。
      */
     template<typename T, uint C>
     class MipMapChain
@@ -60,14 +60,14 @@ namespace hgl::bitmap::mipmap
         MipMapChain() = default;
 
         /**
-         * Generate mipmap levels from a base texture
-         * 
-         * @param base Base texture (level 0)
-         * @param filter Downsampling filter
-         * 
-         * Generates levels until the smallest dimension reaches 1 pixel.
+         * 从基础纹理生成mipmap级别
+         *
+         * @param base 基础纹理（级别0）
+         * @param filter 降采样使用的滤波器
+         *
+         * 生成级别直到最小维度达到1像素为止。
          */
-        void Generate(const Bitmap<T, C>& base, 
+        void Generate(const Bitmap<T, C>& base,
                      resize::FilterType filter = resize::FilterType::Bilinear)
         {
             MipMapConfig config;
@@ -76,10 +76,10 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Generate mipmap levels with custom configuration
-         * 
-         * @param base Base texture (level 0)
-         * @param config Mipmap generation configuration
+         * 使用自定义配置生成mipmap级别
+         *
+         * @param base 基础纹理（级别0）
+         * @param config mipmap 生成配置
          */
         void GenerateWithConfig(const Bitmap<T, C>& base, const MipMapConfig& config)
         {
@@ -91,36 +91,36 @@ namespace hgl::bitmap::mipmap
             if (base_width == 0 || base_height == 0 || !base.GetData())
                 return;
 
-            // Level 0 is the original image (copy it)
+            // 级别0为原始图像（复制）
             Bitmap<T, C> level0;
             level0.Create(base_width, base_height);
             // Using memcpy for POD types (consistent with Bitmap::Flip implementation)
             memcpy(level0.GetData(), base.GetData(), base.GetTotalBytes());
             levels_.push_back(std::move(level0));
 
-            // Generate subsequent levels
+            // 生成后续级别
             int current_width = base_width;
             int current_height = base_height;
             int level_count = 1;
 
             while (true)
             {
-                // Calculate next level dimensions (half size, minimum 1)
+                // 计算下一级的尺寸（减半，最小为1）
                 int next_width = std::max(1, current_width / 2);
                 int next_height = std::max(1, current_height / 2);
 
-                // Check stopping conditions
+                // 检查停止条件
                 if (config.max_levels > 0 && level_count >= config.max_levels)
                     break;
 
                 if (std::min(next_width, next_height) < config.min_size)
                     break;
 
-                // Stop if we've reached 1x1
+                // 如果已达到1x1则停止
                 if (current_width == 1 && current_height == 1)
                     break;
 
-                // Generate next level by downsampling
+                // 通过降采样生成下一级
                 auto next_level = resize::Resize(levels_.back(), next_width, next_height, config.filter);
                 levels_.push_back(std::move(next_level));
 
@@ -131,7 +131,7 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Get number of mipmap levels
+         * 获取mipmap级别数量
          */
         size_t GetLevelCount() const
         {
@@ -139,10 +139,10 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Get a specific mipmap level
-         * 
-         * @param index Level index (0 = base level)
-         * @return Reference to the bitmap at the specified level
+         * 获取指定的mipmap级别
+         *
+         * @param index 级别索引（0 = 基础级别）
+         * @return 指定级别的位图引用
          */
         Bitmap<T, C>& GetLevel(size_t index)
         {
@@ -150,10 +150,10 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Get a specific mipmap level (const version)
-         * 
-         * @param index Level index (0 = base level)
-         * @return Const reference to the bitmap at the specified level
+         * 获取指定的mipmap级别（只读版本）
+         *
+         * @param index 级别索引（0 = 基础级别）
+         * @return 指定级别的位图常量引用
          */
         const Bitmap<T, C>& GetLevel(size_t index) const
         {
@@ -161,7 +161,7 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Check if chain is empty
+         * 检查链是否为空
          */
         bool IsEmpty() const
         {
@@ -169,7 +169,7 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Clear all levels
+         * 清除所有级别
          */
         void Clear()
         {
@@ -177,7 +177,7 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Get the base level (level 0)
+         * 获取基础级别（级别0）
          */
         Bitmap<T, C>& GetBaseLevel()
         {
@@ -185,7 +185,7 @@ namespace hgl::bitmap::mipmap
         }
 
         /**
-         * Get the base level (level 0, const version)
+         * 获取基础级别（级别0，只读版本）
          */
         const Bitmap<T, C>& GetBaseLevel() const
         {
@@ -194,13 +194,13 @@ namespace hgl::bitmap::mipmap
     };
 
     /**
-     * Generate complete mipmap chain from a source bitmap
-     * 
-     * @param source Source bitmap (will become level 0)
-     * @param config Mipmap generation configuration
-     * @return MipMapChain containing all generated levels
-     * 
-     * This is a convenience function that creates and returns a MipMapChain.
+     * 从源位图生成完整的mipmap链
+     *
+     * @param source 源位图（将作为级别0）
+     * @param config mipmap 生成配置
+     * @return 包含所有生成级别的MipMapChain
+     *
+     * 这是一个便捷函数，创建并返回一个 MipMapChain。
      */
     template<typename T, uint C>
     MipMapChain<T, C> GenerateMipMaps(const Bitmap<T, C>& source,
@@ -212,12 +212,12 @@ namespace hgl::bitmap::mipmap
     }
 
     /**
-     * Calculate the number of mipmap levels for given dimensions
-     * 
-     * @param width Image width
-     * @param height Image height
-     * @param min_size Minimum dimension size
-     * @return Number of mipmap levels (including base level)
+     * 计算给定尺寸下的mipmap级别数
+     *
+     * @param width 图像宽度
+     * @param height 图像高度
+     * @param min_size 最小维度大小
+     * @return mipmap级别数（包括基础级别）
      */
     inline int CalculateMipMapLevels(int width, int height, int min_size = 1)
     {

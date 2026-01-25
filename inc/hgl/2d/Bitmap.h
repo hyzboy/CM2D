@@ -12,7 +12,7 @@
 
 namespace hgl::bitmap
 {
-    template<typename T> 
+    template<typename T>
     static void FillPixels(T *p,const T &color,const int length)
     {
         std::fill_n(p,length,color);
@@ -96,7 +96,7 @@ namespace hgl::bitmap
         void ClearColor(const T &color)
         {
             if(!data)return;
-    
+
             FillPixels<T>(data,color,width*height);
         }
 
@@ -163,7 +163,7 @@ namespace hgl::bitmap
             // Find current min and max
             float currentMin = (float)data[0];
             float currentMax = (float)data[0];
-            
+
             int totalPixels = width * height;
             for (int i = 0; i < totalPixels; i++)
             {
@@ -199,4 +199,38 @@ namespace hgl::bitmap
     using BitmapRG32F=Bitmap<math::Vector2f,2>;
     using BitmapRGB32F=Bitmap<Color3f,3>;
     using BitmapRGBA32F=Bitmap<Color4f,4>;
+
+    using BitmapYCbCr8=Bitmap<math::Vector3u8,3>;
+    using BitmapYCbCrF=Bitmap<math::Vector3f,3>;
+    using BitmapYCbCrA8=Bitmap<math::Vector4u8,4>;
+    using BitmapYCbCrAF=Bitmap<math::Vector4f,4>;
+
+    using BitmapYCoCg8=Bitmap<math::Vector3u8,3>;
+    using BitmapYCoCgF=Bitmap<math::Vector3f,3>;
+    using BitmapYCoCgA8=Bitmap<math::Vector4u8,4>;
+    using BitmapYCoCgAF=Bitmap<math::Vector4f,4>;
+
+    // HSV
+    using BitmapHSV8=Bitmap<math::Vector3u8,3>;
+    using BitmapHSVF=Bitmap<math::Vector3f,3>;
+    using BitmapHSVA8=Bitmap<math::Vector4u8,4>;
+    using BitmapHSVAF=Bitmap<math::Vector4f,4>;
+
+    // HSL
+    using BitmapHSL8=Bitmap<math::Vector3u8,3>;
+    using BitmapHSLF=Bitmap<math::Vector3f,3>;
+    using BitmapHSLA8=Bitmap<math::Vector4u8,4>;
+    using BitmapHSLAf=Bitmap<math::Vector4f,4>;
+
+    // XYZ
+    using BitmapXYZ8=Bitmap<math::Vector3u8,3>;
+    using BitmapXYZF=Bitmap<math::Vector3f,3>;
+    using BitmapXYZA8=Bitmap<math::Vector4u8,4>;
+    using BitmapXYZAF=Bitmap<math::Vector4f,4>;
+
+    // OKLab
+    using BitmapOKLab8=Bitmap<math::Vector3u8,3>;
+    using BitmapOKLabF=Bitmap<math::Vector3f,3>;
+    using BitmapOKLaba8=Bitmap<math::Vector4u8,4>;
+    using BitmapOKLabAf=Bitmap<math::Vector4f,4>;
 }//namespace hgl::bitmap

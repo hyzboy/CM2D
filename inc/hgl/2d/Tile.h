@@ -5,29 +5,29 @@
 #include<algorithm>
 
 /**
- * Tile Processing Module
- * 
- * Provides functionality for splitting images into tiles and reassembling them.
- * Also includes seamless texture generation for tiling textures.
- * 
- * Example usage:
+ * 瓦片处理模块
+ *
+ * 提供将图像分割为瓦片并重新组装的功能。
+ * 还包括用于生成无缝平铺纹理的功能。
+ *
+ * 示例用法：
  * ```cpp
  * BitmapRGB8 source;
  * source.Create(256, 256);
- * 
- * // Split into 64x64 tiles
+ *
+ * // 分割为64x64的瓦片
  * auto tileset = hgl::bitmap::tile::SplitIntoTiles(source, 64, 64);
- * 
- * // Process individual tiles...
+ *
+ * // 处理每个瓦片...
  * for (size_t i = 0; i < tileset.GetTileCount(); ++i) {
  *     auto& tile = tileset.GetTile(i);
- *     // Modify tile...
+ *     // 修改瓦片...
  * }
- * 
- * // Reassemble tiles back into image
+ *
+ * // 将瓦片重新组装为图像
  * auto assembled = hgl::bitmap::tile::AssembleTiles(tileset, 256, 256);
- * 
- * // Make texture seamless for tiling
+ *
+ * // 生成无缝平铺纹理
  * auto seamless = hgl::bitmap::tile::MakeSeamless(source, 16);
  * ```
  */
@@ -35,7 +35,7 @@
 namespace hgl::bitmap::tile
 {
     /**
-     * Information about a tile's position in the original image
+     * 瓦片在原始图像中的位置信息
      */
     struct TileInfo
     {
@@ -45,7 +45,7 @@ namespace hgl::bitmap::tile
     };
 
     /**
-     * Container for a collection of tiles
+     * 瓦片集合的容器
      */
     template<typename T, uint C>
     class TileSet
@@ -58,7 +58,7 @@ namespace hgl::bitmap::tile
         TileSet() = default;
 
         /**
-         * Get number of tiles in the set
+         * 获取集合中的瓦片数量
          */
         size_t GetTileCount() const
         {
@@ -66,7 +66,7 @@ namespace hgl::bitmap::tile
         }
 
         /**
-         * Get a specific tile (mutable)
+         * 获取指定的瓦片（可修改）
          */
         Bitmap<T, C>& GetTile(size_t index)
         {
@@ -74,7 +74,7 @@ namespace hgl::bitmap::tile
         }
 
         /**
-         * Get a specific tile (const)
+         * 获取指定的瓦片（只读）
          */
         const Bitmap<T, C>& GetTile(size_t index) const
         {
@@ -82,7 +82,7 @@ namespace hgl::bitmap::tile
         }
 
         /**
-         * Get information about a specific tile
+         * 获取指定瓦片的信息
          */
         const TileInfo& GetTileInfo(size_t index) const
         {
@@ -90,7 +90,7 @@ namespace hgl::bitmap::tile
         }
 
         /**
-         * Add a tile to the set
+         * 向集合中添加一个瓦片
          */
         void AddTile(Bitmap<T, C>&& tile, const TileInfo& info)
         {
@@ -99,7 +99,7 @@ namespace hgl::bitmap::tile
         }
 
         /**
-         * Check if tileset is empty
+         * 检查瓦片集合是否为空
          */
         bool IsEmpty() const
         {
@@ -107,7 +107,7 @@ namespace hgl::bitmap::tile
         }
 
         /**
-         * Clear all tiles
+         * 清空所有瓦片
          */
         void Clear()
         {
@@ -117,16 +117,16 @@ namespace hgl::bitmap::tile
     };
 
     /**
-     * Split a bitmap into fixed-size tiles
-     * 
-     * @param source Source bitmap to split
-     * @param tile_width Width of each tile
-     * @param tile_height Height of each tile
-     * @param allow_partial If true, include partial tiles at edges; if false, only full tiles
-     * @return TileSet containing all tiles
-     * 
-     * Tiles are created left-to-right, top-to-bottom.
-     * If allow_partial is true, edge tiles may be smaller than tile_width x tile_height.
+     * 将位图分割为固定大小的瓦片
+     *
+     * @param source 要分割的源位图
+     * @param tile_width 每个瓦片的宽度
+     * @param tile_height 每个瓦片的高度
+     * @param allow_partial 是否允许边缘生成部分瓦片（true为允许，false只生成完整瓦片）
+     * @return 包含所有瓦片的TileSet
+     *
+     * 瓦片按从左到右、从上到下的顺序生成。
+     * 如果allow_partial为true，边缘瓦片可能小于tile_width x tile_height。
      */
     template<typename T, uint C>
     TileSet<T, C> SplitIntoTiles(const Bitmap<T, C>& source,
@@ -190,15 +190,15 @@ namespace hgl::bitmap::tile
     }
 
     /**
-     * Assemble tiles back into a complete image
-     * 
-     * @param tileset Set of tiles to assemble
-     * @param target_width Width of target image
-     * @param target_height Height of target image
-     * @return Assembled bitmap
-     * 
-     * Tiles are placed at their original positions (from TileInfo).
-     * Areas not covered by any tile will remain uninitialized.
+     * 将瓦片重新组装为完整图像
+     *
+     * @param tileset 要组装的瓦片集合
+     * @param target_width 目标图像的宽度
+     * @param target_height 目标图像的高度
+     * @return 组装后的位图
+     *
+     * 瓦片会放置在其原始位置（根据TileInfo）。
+     * 没有被瓦片覆盖的区域将保持未初始化状态。
      */
     template<typename T, uint C>
     Bitmap<T, C> AssembleTiles(const TileSet<T, C>& tileset,
@@ -244,14 +244,14 @@ namespace hgl::bitmap::tile
     }
 
     /**
-     * Make a texture seamless by blending edges
-     * 
-     * @param source Source bitmap
-     * @param blend_width Width of blend region at edges (0 = auto-calculate as 10% of min dimension)
-     * @return Seamless bitmap that can tile infinitely
-     * 
-     * This function blends opposite edges to eliminate visible seams when tiling.
-     * The blend region is where pixels from opposite edges are mixed.
+     * 通过混合边缘使纹理无缝
+     *
+     * @param source 源位图
+     * @param blend_width 边缘混合区域宽度（0表示自动计算为最小边长的10%）
+     * @return 可无限平铺的无缝位图
+     *
+     * 此函数会混合相对的边缘，以消除平铺时可见的接缝。
+     * 混合区域是指对边像素进行混合的区域。
      */
     template<typename T, uint C>
     Bitmap<T, C> MakeSeamless(const Bitmap<T, C>& source, int blend_width = 0)
@@ -314,7 +314,7 @@ namespace hgl::bitmap::tile
                 {
                     // Multi-channel (RGB, RGBA, etc.)
                     T blended;
-                    
+
                     if constexpr (C == 2)
                     {
                         blended.x = static_cast<decltype(blended.x)>(left_pixel.x * (1.0f - t) + right_pixel.x * t);
@@ -333,7 +333,7 @@ namespace hgl::bitmap::tile
                         blended.b = static_cast<decltype(blended.b)>(left_pixel.b * (1.0f - t) + right_pixel.b * t);
                         blended.a = static_cast<decltype(blended.a)>(left_pixel.a * (1.0f - t) + right_pixel.a * t);
                     }
-                    
+
                     data[y * width + left_x] = blended;
                     data[y * width + right_x] = blended;
                 }
@@ -375,7 +375,7 @@ namespace hgl::bitmap::tile
                 {
                     // Multi-channel (RGB, RGBA, etc.)
                     T blended;
-                    
+
                     if constexpr (C == 2)
                     {
                         blended.x = static_cast<decltype(blended.x)>(top_pixel.x * (1.0f - t) + bottom_pixel.x * t);
@@ -394,7 +394,7 @@ namespace hgl::bitmap::tile
                         blended.b = static_cast<decltype(blended.b)>(top_pixel.b * (1.0f - t) + bottom_pixel.b * t);
                         blended.a = static_cast<decltype(blended.a)>(top_pixel.a * (1.0f - t) + bottom_pixel.a * t);
                     }
-                    
+
                     data[top_y * width + x] = blended;
                     data[bottom_y * width + x] = blended;
                 }

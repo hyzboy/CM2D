@@ -27,7 +27,7 @@ namespace hgl::bitmap
     {
         // Save data pointer for non-SHM mode cleanup
         void* dataToFree = (!using_shm) ? this->data : nullptr;
-        
+
         // Must set data to nullptr before releasing platform resources to prevent base class double-free
         this->data = nullptr;
 
