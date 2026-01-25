@@ -161,8 +161,66 @@ namespace hgl::bitmap
     using PlanarBitmapRGB8=PlanarBitmap<uint8,3>;
     using PlanarBitmapRGBA8=PlanarBitmap<uint8,4>;
 
+    using PlanarBitmapU16=PlanarBitmap<uint16,1>;
+    using PlanarBitmapRG16=PlanarBitmap<uint16,2>;
+    using PlanarBitmapRGB16=PlanarBitmap<uint16,3>;
+    using PlanarBitmapRGBA16=PlanarBitmap<uint16,4>;
+
     using PlanarBitmap32F=PlanarBitmap<float,1>;
     using PlanarBitmapRG32F=PlanarBitmap<float,2>;
     using PlanarBitmapRGB32F=PlanarBitmap<float,3>;
     using PlanarBitmapRGBA32F=PlanarBitmap<float,4>;
+
+    /**
+    * 将Bitmap<T, C>转换为PlanarBitmap<T, C>
+    */
+    template<typename T, uint C>
+    bool ConvertBitmapToPlanar(const Bitmap<T, C> &src, PlanarBitmap<typename std::remove_cv<T>::type, C> &dst)
+    {
+        using BaseT = typename std::remove_cv<T>::type;
+        if (!src.GetData() || src.GetWidth() <= 0 || src.GetHeight() <= 0)
+            return false;
+
+        if (!dst.Create(src.GetWidth(), src.GetHeight()))
+            return false;
+
+        int width = src.GetWidth();
+        int height = src.GetHeight();
+        const T *srcData = src.GetData();
+        for (uint c = 0; c < C; ++c)
+        {
+            BaseT *dstChannel = dst.GetChannelData(c);
+            for (int i = 0; i < width * height; ++i)
+            {
+                dstChannel[i] = srcData[i][c];
+            }
+        }
+        return true;
+    }
+
+    /**
+    * 将PlanarBitmap<T, C>转换为Bitmap<T, C>
+    */
+    template<typename T, uint C>
+    bool ConvertPlanarToBitmap(const PlanarBitmap<T, C> &src, Bitmap<math::Vector<T, C>, C> &dst)
+    {
+        if (!src.GetChannelData(0) || src.GetWidth() <= 0 || src.GetHeight() <= 0)
+            return false;
+
+        if (!dst.Create(src.GetWidth(), src.GetHeight()))
+            return false;
+
+        int width = src.GetWidth();
+        int height = src.GetHeight();
+        auto *dstData = dst.GetData();
+        for (int i = 0; i < width * height; ++i)
+        {
+            for (uint c = 0; c < C; ++c)
+            {
+                const T *srcChannel = src.GetChannelData(c);
+                dstData[i][c] = srcChannel[i];
+            }
+        }
+        return true;
+    }
 }//namespace hgl::bitmap
