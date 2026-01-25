@@ -184,6 +184,7 @@ namespace hgl::bitmap
         {
             switch (mode)
             {
+                case AlphaBlendMode::None:              return (void*)BlendColorWrapper<T, F, AlphaBlendMode::None>;
                 case AlphaBlendMode::Normal:            return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Normal>;
                 case AlphaBlendMode::Add:               return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Add>;
                 case AlphaBlendMode::Subtract:          return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Subtract>;
@@ -200,6 +201,17 @@ namespace hgl::bitmap
                 case AlphaBlendMode::Lighten:           return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Lighten>;
                 case AlphaBlendMode::Difference:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Difference>;
                 case AlphaBlendMode::Exclusion:         return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Exclusion>;
+                case AlphaBlendMode::VividLight:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::VividLight>;
+                case AlphaBlendMode::LinearLight:       return (void*)BlendColorWrapper<T, F, AlphaBlendMode::LinearLight>;
+                case AlphaBlendMode::PinLight:          return (void*)BlendColorWrapper<T, F, AlphaBlendMode::PinLight>;
+                case AlphaBlendMode::HardMix:           return (void*)BlendColorWrapper<T, F, AlphaBlendMode::HardMix>;
+                case AlphaBlendMode::DarkerColor:       return (void*)BlendColorWrapper<T, F, AlphaBlendMode::DarkerColor>;
+                case AlphaBlendMode::LighterColor:      return (void*)BlendColorWrapper<T, F, AlphaBlendMode::LighterColor>;
+                case AlphaBlendMode::Hue:               return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Hue>;
+                case AlphaBlendMode::Saturation:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Saturation>;
+                case AlphaBlendMode::Color:             return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Color>;
+                case AlphaBlendMode::Luminosity:        return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Luminosity>;
+                case AlphaBlendMode::Divide:            return (void*)BlendColorWrapper<T, F, AlphaBlendMode::Divide>;
                 case AlphaBlendMode::PremultipliedAlpha:return (void*)BlendColorWrapper<T, F, AlphaBlendMode::PremultipliedAlpha>;
                 default: return nullptr;
             }
