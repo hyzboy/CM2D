@@ -1,4 +1,4 @@
-#if defined(__linux__) && defined(HGL_WAYLAND_SUPPORT)
+﻿#if defined(__linux__) && defined(HGL_WAYLAND_SUPPORT)
 
 #include<hgl/2d/BitmapPlatform.h>
 #include<wayland-client.h>

@@ -1,4 +1,4 @@
-// BitmapColorConversion_XYZ.cpp
+﻿// BitmapColorConversion_XYZ.cpp
 // 实现XYZ相关的颜色空间转换函数
 #include "hgl/2d/ColorConversion.h"
 #include <hgl/color/XYZ.h>

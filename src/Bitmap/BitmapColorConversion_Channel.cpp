@@ -1,4 +1,4 @@
-#include <hgl/2d/ColorConversion.h>
+﻿#include <hgl/2d/ColorConversion.h>
 
 namespace hgl::bitmap::color
 {

@@ -1,4 +1,4 @@
-#include<hgl/2d/NoiseMap.h>
+﻿#include<hgl/2d/NoiseMap.h>
 #include<cmath>
 
 namespace hgl::bitmap
@@ -7,7 +7,7 @@ namespace hgl::bitmap
     // Base class is mostly header-only, but this file exists for future extensions
 
     // FractalNoise implementation
-    FractalNoise::FractalNoise(NoiseGenerator* noise, int oct, float lac, 
+    FractalNoise::FractalNoise(NoiseGenerator* noise, int oct, float lac,
                                float pers, bool ownNoise)
         : NoiseGenerator(noise ? noise->GetSeed() : 12345)
         , baseNoise(noise)
@@ -39,7 +39,7 @@ namespace hgl::bitmap
         for (int i = 0; i < octaves; i++)
         {
             total += baseNoise->Generate(x * frequency, y * frequency) * amplitude;
-            
+
             maxValue += amplitude;
             amplitude *= persistence;
             frequency *= lacunarity;
@@ -48,5 +48,5 @@ namespace hgl::bitmap
         // Normalize to [-1, 1]
         return total / maxValue;
     }
-    
+
 }//namespace hgl::bitmap

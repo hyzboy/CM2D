@@ -1,4 +1,4 @@
-#ifdef HGL_IMAGEMAGICK_SUPPORT
+﻿#ifdef HGL_IMAGEMAGICK_SUPPORT
 
 #include<hgl/2d/BitmapImageMagick.h>
 #include<iostream>

@@ -1,4 +1,4 @@
-#ifdef _WIN32
+﻿#ifdef _WIN32
 
 #include<hgl/2d/BitmapPlatform.h>
 #include<windows.h>
@@ -112,7 +112,7 @@ namespace hgl::bitmap
     }
 
     template<typename T, uint C>
-    bool BitmapWindows<T, C>::StretchBlitTo(HDC hdc, int dx, int dy, int dw, int dh, 
+    bool BitmapWindows<T, C>::StretchBlitTo(HDC hdc, int dx, int dy, int dw, int dh,
                                            int sx, int sy, int sw, int sh) const
     {
         if (!memDC || !hBitmap || !hdc)
@@ -126,7 +126,7 @@ namespace hgl::bitmap
     }
 
     template<typename T, uint C>
-    bool BitmapWindows<T, C>::AlphaBlitTo(HDC hdc, int dx, int dy, int dw, int dh, 
+    bool BitmapWindows<T, C>::AlphaBlitTo(HDC hdc, int dx, int dy, int dw, int dh,
                                          int sx, int sy, int sw, int sh, uint8 alpha) const
     {
         if (!memDC || !hBitmap || !hdc)

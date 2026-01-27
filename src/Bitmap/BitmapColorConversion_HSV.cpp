@@ -1,4 +1,4 @@
-// BitmapColorConversion_HSV.cpp
+﻿// BitmapColorConversion_HSV.cpp
 // 实现HSV相关的颜色空间转换函数
 #include "hgl/2d/ColorConversion.h"
 #include <hgl/color/HSV.h>

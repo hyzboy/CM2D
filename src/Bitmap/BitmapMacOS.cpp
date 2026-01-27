@@ -1,4 +1,4 @@
-#ifdef __APPLE__
+﻿#ifdef __APPLE__
 
 #include<hgl/2d/BitmapPlatform.h>
 #include<CoreGraphics/CoreGraphics.h>

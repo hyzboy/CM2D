@@ -1,4 +1,4 @@
-#include<hgl/2d/TerrainMap.h>
+﻿#include<hgl/2d/TerrainMap.h>
 
 namespace hgl::bitmap
 {
@@ -8,7 +8,7 @@ namespace hgl::bitmap
     {
         int w = heightMap.GetWidth();
         int h = heightMap.GetHeight();
-        
+
         if (!Create(w, h))
             return;
 
@@ -80,7 +80,7 @@ namespace hgl::bitmap
         const uint8* pixel = GetData(x, y);
         if (!pixel)
             return BiomeType::Ocean;
-        
+
         return static_cast<BiomeType>(*pixel);
     }
 

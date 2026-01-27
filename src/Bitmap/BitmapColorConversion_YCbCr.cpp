@@ -1,4 +1,4 @@
-// BitmapColorConversion_YCbCr.cpp
+﻿// BitmapColorConversion_YCbCr.cpp
 // 实现YCbCr相关的颜色空间转换函数
 #include <hgl/2d/ColorConversion.h>
 #include <hgl/color/YCbCr.h>

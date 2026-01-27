@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<hgl/2d/Bitmap.h>
 #include<hgl/io/FileInputStream.h>
 

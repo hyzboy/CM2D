@@ -1,9 +1,9 @@
-#include<hgl/2d/TGA.h>
+﻿#include<hgl/2d/TGA.h>
 
 namespace hgl
 {
     namespace imgfmt
-    {   
+    {
         bool FillTGAHeader(TGAHeader *header,const uint16 width,const uint16 height,const uint8 channels,const uint8 single_channel_bits)
         {
             if(!header)return(false);
@@ -21,7 +21,7 @@ namespace hgl
             TGAImageDesc desc;
 
             desc.image_desc=0;
-            
+
             if(channels==1)
             {
                 header->image_type=3;

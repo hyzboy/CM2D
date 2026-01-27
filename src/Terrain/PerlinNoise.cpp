@@ -1,4 +1,4 @@
-#include<hgl/2d/NoiseMap.h>
+﻿#include<hgl/2d/NoiseMap.h>
 #include<cmath>
 #include<algorithm>
 
@@ -8,12 +8,12 @@ namespace hgl::bitmap
     {
         // Initialize permutation table
         permutation.resize(512);
-        
+
         // Fill with values 0-255
         std::vector<int> p(256);
         for (int i = 0; i < 256; i++)
             p[i] = i;
-        
+
         // Shuffle using seed
         uint32 s = seed;
         for (int i = 255; i > 0; i--)
@@ -22,7 +22,7 @@ namespace hgl::bitmap
             int j = (s / 65536) % (i + 1);
             std::swap(p[i], p[j]);
         }
-        
+
         // Duplicate for overflow handling
         for (int i = 0; i < 256; i++)
         {
@@ -56,15 +56,15 @@ namespace hgl::bitmap
         // Find unit grid cell containing point
         int X = static_cast<int>(std::floor(x)) & 255;
         int Y = static_cast<int>(std::floor(y)) & 255;
-        
+
         // Get relative position within cell
         x -= std::floor(x);
         y -= std::floor(y);
-        
+
         // Compute fade curves
         float u = Fade(x);
         float v = Fade(y);
-        
+
         // Hash coordinates of the 4 cube corners
         int A = permutation[X] + Y;
         int AA = permutation[A];
@@ -72,14 +72,14 @@ namespace hgl::bitmap
         int B = permutation[X + 1] + Y;
         int BA = permutation[B];
         int BB = permutation[B + 1];
-        
+
         // Blend results from 4 corners
         float res = Lerp(v,
             Lerp(u, Grad(permutation[AA], x, y),
                     Grad(permutation[BA], x - 1, y)),
             Lerp(u, Grad(permutation[AB], x, y - 1),
                     Grad(permutation[BB], x - 1, y - 1)));
-        
+
         // Normalize to [-1, 1]
         return res;
     }

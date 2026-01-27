@@ -1,4 +1,4 @@
-#include<hgl/type/StringList.h>
+﻿#include<hgl/type/StringList.h>
 #include<hgl/io/LoadStringList.h>
 #include<hgl/type/Gradient.h>
 #include<hgl/color/Color3ub.h>

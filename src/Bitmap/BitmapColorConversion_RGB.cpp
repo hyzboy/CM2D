@@ -1,4 +1,4 @@
-// BitmapColorConversion_RGB.cpp
+﻿// BitmapColorConversion_RGB.cpp
 // 实现RGB相关的颜色空间转换函数
 #include "hgl/2d/ColorConversion.h"
 #include <hgl/color/sRGBConvert.h>

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include<hgl/CoreType.h>
 #include<hgl/2d/Bitmap.h>

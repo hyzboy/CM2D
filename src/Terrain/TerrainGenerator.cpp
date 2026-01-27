@@ -1,4 +1,4 @@
-#include<hgl/2d/TerrainMap.h>
+﻿#include<hgl/2d/TerrainMap.h>
 
 namespace hgl::bitmap
 {
@@ -13,7 +13,7 @@ namespace hgl::bitmap
 
         // Generate heightmap
         heightMap.GenerateFromNoise(fbm, scale / width);
-        
+
         // Normalize to [0, 1] range
         heightMap.Normalize(0.0f, 1.0f);
     }
@@ -29,10 +29,10 @@ namespace hgl::bitmap
         {
             // Apply thermal erosion (for steep slopes)
             heightMap.ApplyThermalErosion(erosionIterations / 2, 0.7f);
-            
+
             // Apply hydraulic erosion (for water flow)
             heightMap.ApplyHydraulicErosion(erosionIterations / 2, 0.1f);
-            
+
             // Re-normalize after erosion
             heightMap.Normalize(0.0f, 1.0f);
         }

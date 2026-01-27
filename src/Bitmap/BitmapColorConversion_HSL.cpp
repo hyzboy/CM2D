@@ -1,4 +1,4 @@
-// BitmapColorConversion_HSL.cpp
+﻿// BitmapColorConversion_HSL.cpp
 // 实现HSL相关的颜色空间转换函数
 #include "hgl/2d/ColorConversion.h"
 #include <hgl/color/HSL.h>

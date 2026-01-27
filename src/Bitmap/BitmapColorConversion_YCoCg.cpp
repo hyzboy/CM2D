@@ -1,4 +1,4 @@
-// BitmapColorConversion_YCoCg.cpp
+﻿// BitmapColorConversion_YCoCg.cpp
 // 实现YCoCg相关的颜色空间转换函数
 #include "hgl/2d/ColorConversion.h"
 #include "hgl/color/YCoCg.h"

@@ -1,4 +1,4 @@
-#include<hgl/2d/NoiseMap.h>
+﻿#include<hgl/2d/NoiseMap.h>
 #include<cmath>
 #include<algorithm>
 
@@ -14,11 +14,11 @@ namespace hgl::bitmap
     {
         // Initialize permutation table (same as Perlin)
         permutation.resize(512);
-        
+
         std::vector<int> p(256);
         for (int i = 0; i < 256; i++)
             p[i] = i;
-        
+
         // Shuffle using seed
         uint32 s = seed;
         for (int i = 255; i > 0; i--)
@@ -27,7 +27,7 @@ namespace hgl::bitmap
             int j = (s / 65536) % (i + 1);
             std::swap(p[i], p[j]);
         }
-        
+
         // Duplicate for overflow handling
         for (int i = 0; i < 256; i++)
         {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifdef HGL_IMAGEMAGICK_SUPPORT
 

@@ -1,4 +1,4 @@
-#if defined(__linux__) && defined(HGL_X11_SUPPORT)
+﻿#if defined(__linux__) && defined(HGL_X11_SUPPORT)
 
 #include<hgl/2d/BitmapPlatform.h>
 #include<X11/Xlib.h>

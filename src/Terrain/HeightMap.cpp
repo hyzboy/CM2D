@@ -1,4 +1,4 @@
-#include<hgl/2d/TerrainMap.h>
+﻿#include<hgl/2d/TerrainMap.h>
 #include<cmath>
 #include<algorithm>
 
@@ -31,7 +31,7 @@ namespace hgl::bitmap
         // Find current min and max
         float currentMin = data[0];
         float currentMax = data[0];
-        
+
         int totalPixels = width * height;
         for (int i = 0; i < totalPixels; i++)
         {

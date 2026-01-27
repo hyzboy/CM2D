@@ -1,4 +1,4 @@
-// BitmapColorConversion_OKLab.cpp
+﻿// BitmapColorConversion_OKLab.cpp
 // 实现OKLab颜色空间转换函数
 #include "hgl/2d/ColorConversion.h"
 #include <hgl/color/OKLab.h>

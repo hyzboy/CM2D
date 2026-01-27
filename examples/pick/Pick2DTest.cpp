@@ -1,4 +1,4 @@
-#include<hgl/type/RectScope.h>
+﻿#include<hgl/type/RectScope.h>
 #include<hgl/math/geometry/Triangle.h>
 #include<hgl/math/geometry/Ray.h>
 #include<hgl/math/Vector.h>

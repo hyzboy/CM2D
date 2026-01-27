@@ -1,4 +1,4 @@
-#include<hgl/2d/BitmapLoad.h>
+﻿#include<hgl/2d/BitmapLoad.h>
 #include<hgl/2d/TGA.h>
 #include<hgl/io/InputStream.h>
 #include<hgl/io/OutputStream.h>
