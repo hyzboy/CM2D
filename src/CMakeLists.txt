@@ -182,7 +182,7 @@ SOURCE_GROUP("Misc" FILES ${CM2D_MISC_HEADERS})
 
 # ==================== Library Target ====================
 
-add_cm_library(CM2D "CM"
+add_cm_library(CM2D "CM" ${CM2D_ROOT_INCLUDE_PATH}
     ${CM2D_BITMAP_HEADERS}
     ${CM2D_FORMAT_HEADERS}
     ${CM2D_PROCESSING_HEADERS}
@@ -196,6 +196,9 @@ add_cm_library(CM2D "CM"
 )
 
 # ==================== Library Dependencies ====================
+
+# Link CMUtil for CSV parsing and other utilities
+target_link_libraries(CM2D PUBLIC CMUtil)
 
 # Link platform-specific libraries
 if(DEFINED CM2D_PLATFORM_LIBS)
