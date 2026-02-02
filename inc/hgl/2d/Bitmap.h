@@ -9,7 +9,6 @@
 #include<hgl/type/String.h>
 #include<hgl/math/HalfFloat.h>
 #include<iterator>
-#include<algorithm>
 
 namespace hgl::bitmap
 {
@@ -36,70 +35,6 @@ namespace hgl::bitmap
         {
             data=nullptr;
             width=height=0;
-        }
-
-        Bitmap(const Bitmap &other)
-        {
-            width = other.width;
-            height = other.height;
-            if(other.data && width > 0 && height > 0)
-            {
-                data = new T[width * height];
-                std::copy_n(other.data, width * height, data);
-            }
-            else
-            {
-                data = nullptr;
-            }
-        }
-
-        Bitmap(Bitmap &&other) noexcept
-        {
-            width = other.width;
-            height = other.height;
-            data = other.data;
-            other.data = nullptr;
-            other.width = 0;
-            other.height = 0;
-        }
-
-        Bitmap &operator=(const Bitmap &other)
-        {
-            if(this == &other)
-                return *this;
-
-            delete[] data;
-            width = other.width;
-            height = other.height;
-
-            if(other.data && width > 0 && height > 0)
-            {
-                data = new T[width * height];
-                std::copy_n(other.data, width * height, data);
-            }
-            else
-            {
-                data = nullptr;
-            }
-
-            return *this;
-        }
-
-        Bitmap &operator=(Bitmap &&other) noexcept
-        {
-            if(this == &other)
-                return *this;
-
-            delete[] data;
-            data = other.data;
-            width = other.width;
-            height = other.height;
-
-            other.data = nullptr;
-            other.width = 0;
-            other.height = 0;
-
-            return *this;
         }
 
         ~Bitmap()

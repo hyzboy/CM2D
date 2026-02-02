@@ -6,6 +6,8 @@
 #include<hgl/math/Vector.h>
 #include<hgl/color/Color3ub.h>
 #include<hgl/color/Color4ub.h>
+#include<algorithm>
+#include<cmath>
 
 namespace hgl::bitmap
 {
@@ -76,7 +78,7 @@ namespace hgl::bitmap
 
             if(!p)return(false);
 
-            *p=(*blend)(draw_color,*p,alpha);
+            *p=(*blend)(*p,draw_color,alpha);
 
             return(true);
         }
@@ -103,7 +105,11 @@ namespace hgl::bitmap
             T *p=bitmap->GetData(x,y);
 
             for(int i=0;i<length;i++)
-                *p++=(*blend)(draw_color,*p,alpha);
+            {
+                T dst=*p;
+                *p=(*blend)(dst,draw_color,alpha);
+                ++p;
+            }
 
             return(true);
         }
@@ -130,7 +136,11 @@ namespace hgl::bitmap
             for(int y=t;y<t+h;y++)
             {
                 for(int i=0;i<width;i++)
-                    *p++=(*blend)(draw_color,*p,alpha);
+                {
+                    T dst=*p;
+                    *p=(*blend)(dst,draw_color,alpha);
+                    ++p;
+                }
 
                 p+=width-w;
             }
@@ -156,7 +166,7 @@ namespace hgl::bitmap
 
             for(int i=0;i<length;i++)
             {
-                *p=(*blend)(draw_color,*p,alpha);
+                *p=(*blend)(*p,draw_color,alpha);
                 p+=width;
             }
 
@@ -353,6 +363,131 @@ namespace hgl::bitmap
             DrawLine(start.x,start.y,end.x,end.y);
         }
 
+        void DrawArc(int x0,int y0,int radius,float start_angle,float end_angle,int segments=0)
+        {
+            if(!bitmap)return;
+            if(radius<=0)return;
+
+            if(segments<=0)
+            {
+                const float length=std::abs(end_angle-start_angle);
+                segments=std::max(8,int(radius*length/6.0f));
+            }
+
+            if(segments<2)segments=2;
+
+            const float step=(end_angle-start_angle)/float(segments);
+            float angle=start_angle;
+
+            int last_x=x0+int(radius*std::cos(angle));
+            int last_y=y0+int(radius*std::sin(angle));
+
+            for(int i=1;i<=segments;i++)
+            {
+                angle+=step;
+                int x=x0+int(radius*std::cos(angle));
+                int y=y0+int(radius*std::sin(angle));
+                DrawLine(last_x,last_y,x,y);
+                last_x=x;
+                last_y=y;
+            }
+        }
+
+        void DrawQuadraticBezier(const math::Vector2i &p0,const math::Vector2i &p1,const math::Vector2i &p2,int segments=0)
+        {
+            if(!bitmap)return;
+
+            if(segments<=0)
+                segments=std::max(8,int(std::max({std::abs(p2.x-p0.x),std::abs(p2.y-p0.y)})/4));
+
+            if(segments<2)segments=2;
+
+            auto eval=[&](float t)->math::Vector2i
+            {
+                float u=1.0f-t;
+                float tt=t*t;
+                float uu=u*u;
+                float x=uu*p0.x+2.0f*u*t*p1.x+tt*p2.x;
+                float y=uu*p0.y+2.0f*u*t*p1.y+tt*p2.y;
+                return math::Vector2i(int(x+0.5f),int(y+0.5f));
+            };
+
+            math::Vector2i last=eval(0.0f);
+            for(int i=1;i<=segments;i++)
+            {
+                float t=float(i)/float(segments);
+                math::Vector2i cur=eval(t);
+                DrawLine(last,cur);
+                last=cur;
+            }
+        }
+
+        void DrawCubicBezier(const math::Vector2i &p0,const math::Vector2i &p1,const math::Vector2i &p2,const math::Vector2i &p3,int segments=0)
+        {
+            if(!bitmap)return;
+
+            if(segments<=0)
+                segments=std::max(12,int(std::max({std::abs(p3.x-p0.x),std::abs(p3.y-p0.y)})/3));
+
+            if(segments<2)segments=2;
+
+            auto eval=[&](float t)->math::Vector2i
+            {
+                float u=1.0f-t;
+                float tt=t*t;
+                float uu=u*u;
+                float uuu=uu*u;
+                float ttt=tt*t;
+                float x=uuu*p0.x+3.0f*uu*t*p1.x+3.0f*u*tt*p2.x+ttt*p3.x;
+                float y=uuu*p0.y+3.0f*uu*t*p1.y+3.0f*u*tt*p2.y+ttt*p3.y;
+                return math::Vector2i(int(x+0.5f),int(y+0.5f));
+            };
+
+            math::Vector2i last=eval(0.0f);
+            for(int i=1;i<=segments;i++)
+            {
+                float t=float(i)/float(segments);
+                math::Vector2i cur=eval(t);
+                DrawLine(last,cur);
+                last=cur;
+            }
+        }
+
+        void DrawCatmullRomSpline(const math::Vector2i &p0,const math::Vector2i &p1,const math::Vector2i &p2,const math::Vector2i &p3,int segments=0,float tension=0.5f)
+        {
+            if(!bitmap)return;
+
+            if(segments<=0)
+                segments=std::max(12,int(std::max({std::abs(p2.x-p1.x),std::abs(p2.y-p1.y)})/2));
+
+            if(segments<2)segments=2;
+
+            auto eval=[&](float t)->math::Vector2i
+            {
+                float t2=t*t;
+                float t3=t2*t;
+
+                float s=(1.0f-tension)/2.0f;
+
+                float x=(2.0f*p1.x) + (-p0.x+p2.x)*s*t + (2.0f*p0.x-5.0f*p1.x+4.0f*p2.x-p3.x)*s*t2 + (-p0.x+3.0f*p1.x-3.0f*p2.x+p3.x)*s*t3;
+                float y=(2.0f*p1.y) + (-p0.y+p2.y)*s*t + (2.0f*p0.y-5.0f*p1.y+4.0f*p2.y-p3.y)*s*t2 + (-p0.y+3.0f*p1.y-3.0f*p2.y+p3.y)*s*t3;
+
+                x*=0.5f;
+                y*=0.5f;
+
+                return math::Vector2i(int(x+0.5f),int(y+0.5f));
+            };
+
+            math::Vector2i last=eval(0.0f);
+            for(int i=1;i<=segments;i++)
+            {
+                float t=float(i)/float(segments);
+                math::Vector2i cur=eval(t);
+                DrawLine(last,cur);
+                last=cur;
+            }
+        }
+
         void DrawSector(int x0, int y0, uint r, uint stangle, uint endangle)
         {
             int i, j;
@@ -468,7 +603,7 @@ namespace hgl::bitmap
                 {
                     if(*sp&bit)
                     {
-                        *tp=(*blend)(draw_color,*tp,alpha);
+                        *tp=(*blend)(*tp,draw_color,alpha);
                     }
 
                     ++tp;
