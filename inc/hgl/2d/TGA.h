@@ -1,6 +1,12 @@
 ﻿#pragma once
 
 #include<hgl/platform/Platform.h>
+#include<hgl/color/Color3ub.h>
+#include<hgl/io/FileOutputStream.h>
+#include<hgl/utf.h>
+#include<vector>
+#include<hgl/2d/Bitmap.h>
+#include<hgl/2d/BitmapSave.h>
 namespace hgl
 {
     namespace imgfmt
@@ -48,4 +54,84 @@ namespace hgl
 
         bool FillTGAHeader(TGAHeader *header,const uint16 width,const uint16 height,const uint8 channels,const uint8 single_channel_bits=8);
     }//namespace imgfmt
+
+    namespace bitmap
+    {
+        /**
+         * Save bitmap to TGA file (generic version)
+         * @param filename Output TGA filename
+         * @param bmp Bitmap pointer (any bitmap type with GetChannels, GetChannelBits, GetWidth, GetHeight, GetData methods)
+         * @return true if save successful, false otherwise
+         */
+        template<typename T>
+        bool SaveTga(const char *filename, T *bmp)
+        {
+            if(!filename || !bmp)
+                return false;
+
+            hgl::io::OpenFileOutputStream output(ToOSString(filename), hgl::io::FileOpenMode::CreateTrunc);
+            if(!output)
+                return false;
+
+            return SaveBitmapToTGA(output,
+                bmp->GetData(),
+                bmp->GetWidth(),
+                bmp->GetHeight(),
+                bmp->GetChannels(),
+                bmp->GetChannelBits());
+        }
+
+        /**
+         * Save bitmap to TGA file (specialization for Bitmap<Color3ub, 3>)
+         * Handles Color3ub (RGB) packed in uint32 by converting to proper RGB format
+         * Only used when sizeof(Color3ub) != 3 (indicating padding exists)
+         * @param filename Output TGA filename
+         * @param bmp Bitmap pointer
+         * @return true if save successful, false otherwise
+         */
+        template<>
+        inline bool SaveTga<Bitmap<Color3ub, 3>>(const char *filename, Bitmap<Color3ub, 3> *bmp)
+        {
+            if(!filename || !bmp)
+                return false;
+
+            hgl::io::OpenFileOutputStream output(ToOSString(filename), hgl::io::FileOpenMode::CreateTrunc);
+            if(!output)
+                return false;
+
+            const uint width = bmp->GetWidth();
+            const uint height = bmp->GetHeight();
+
+            // If Color3ub has padding (sizeof != 3), we need to repack the data
+            if constexpr(sizeof(Color3ub) != 3)
+            {
+                const Color3ub *src = bmp->GetData();
+                std::vector<uint8> rgb_data(width * height * 3);
+
+                for(size_t i = 0; i < width * height; ++i)
+                {
+                    rgb_data[i * 3] = src[i].r;
+                    rgb_data[i * 3 + 1] = src[i].g;
+                    rgb_data[i * 3 + 2] = src[i].b;
+                }
+
+                return SaveBitmapToTGA(output,
+                    rgb_data.data(),
+                    width,
+                    height,
+                    3,
+                    8);
+            }
+            else
+            {
+                // No padding, can save directly
+                return SaveBitmapToTGA(output,
+                    bmp->GetData(),
+                    width,
+                    height,
+                    3,
+                    8);
+            }
+        }
+    }//namespace bitmap
 }//namespace hgl
