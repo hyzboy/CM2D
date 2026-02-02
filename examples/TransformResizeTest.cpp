@@ -11,6 +11,7 @@
 #include<hgl/color/Color4ub.h>
 #include<iostream>
 #include<cmath>
+#include<vector>
 
 using namespace hgl;
 using namespace hgl::bitmap;

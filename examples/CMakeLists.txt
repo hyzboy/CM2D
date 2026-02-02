@@ -25,6 +25,9 @@ cm_example_project("" DrawGeometryTest      DrawGeometryTest.cpp)
 # Channel Operations test
 cm_example_project("" ChannelOpsTest        ChannelOpsTest.cpp)
 
+# Curve drawing test
+cm_example_project("" DrawCurvesTest        DrawCurvesTest.cpp)
+
 # ImageMagick example (only if ImageMagick is enabled)
 if(CM2D_USE_IMAGEMAGICK AND ImageMagick_FOUND)
     cm_example_project("" ImageMagickExample   ImageMagickExample.cpp)
