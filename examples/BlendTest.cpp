@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Blend Color Test Example
  * Demonstrates the CM2D blending system with various blend modes
  */

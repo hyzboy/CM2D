@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Channel Operations Test Example
  * Demonstrates channel splitting, merging, and manipulation
  */
@@ -308,7 +308,7 @@ void TestChannelComposite()
     // Create luminance (weighted average of RGB)
     BitmapGrey8 luminance;
     luminance.Create(256, 256);
-    
+
     auto* redData = redChan->GetData();
     auto* greenData = greenChan->GetData();
     auto* blueData = blueChan->GetData();

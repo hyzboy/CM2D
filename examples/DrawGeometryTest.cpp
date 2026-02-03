@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Draw Geometry Test Example
  * Demonstrates drawing primitives and geometric shapes
  */

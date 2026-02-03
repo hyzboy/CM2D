@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transform and Resize Test Example
  * Demonstrates rotation, flipping, and scaling operations
  */

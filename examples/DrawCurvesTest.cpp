@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Draw Curves Test Example
  * Demonstrates drawing arcs and spline curves using DrawGeometry
  */
