@@ -11,7 +11,7 @@ macro(cm_example_project sub_folder project_name)
 endmacro()
 
 # Root examples
-cm_example_project("" TerrainGenExample     TerrainGenExample.cpp)
+#cm_example_project("" TerrainGenExample     TerrainGenExample.cpp)
 
 # Blend system test
 cm_example_project("" BlendTest             BlendTest.cpp)
