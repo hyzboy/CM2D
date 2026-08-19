@@ -2,54 +2,16 @@
 
 ## Image Format Support
 
-CM2D provides comprehensive image format support through both native and ImageMagick integration.
+CM2D provides image format support through both native and optional ImageMagick integration.
 
 ### Native Format Support
 - **TGA (Targa)** - Fast, uncompressed format (built-in)
-- Platform-specific formats (Windows BMP, macOS, X11)
+- Platform-specific formats (Windows DIB, macOS CoreGraphics, X11, Wayland)
 
 ### ImageMagick Integration (Optional)
 
-**[ImageMagick Integration Assessment](ImageMagick_Integration_Assessment.md)** - Complete feasibility study
-- Technical compatibility analysis
-- Integration architecture design
-- Performance evaluation
-- Implementation roadmap
-
-**[ImageMagick Usage Guide](ImageMagick_Usage_Guide.md)** - How to use ImageMagick features
-- Installation and setup
-- Loading and saving images
-- Format conversion examples
-- Performance tips
-
-#### Quick Example
-
-```cpp
-#include <hgl/2d/BitmapImageMagick.h>
-
-using namespace hgl::bitmap;
-
-// Load any supported format
-auto *bitmap = LoadBitmapRGBA8FromImageMagick("image.png");
-
-// Save in different formats
-SaveBitmapToImageMagick("output.png", bitmap);
-SaveBitmapToImageMagick("output.jpg", bitmap, "JPEG");
-
-// Get supported formats
-std::string formats = imagemagick::GetSupportedFormats();
-```
-
-#### Supported Formats via ImageMagick
-
-PNG • JPEG • BMP • GIF • TIFF • WebP • TGA • EXR • HDR • ICO • SVG and 200+ more...
-
-#### Enable ImageMagick Support
-
-```bash
-cmake -DCM2D_USE_IMAGEMAGICK=ON ..
-make
-```
+Enable with `-DCM2D_USE_IMAGEMAGICK=ON` for 200+ formats (PNG/JPEG/BMP/GIF/TIFF/WebP/...).
+API: `inc/hgl/2d/BitmapImageMagick.h`（`LoadBitmapRGBA8FromImageMagick` / `SaveBitmapToImageMagick` 等）。
 
 ## BlendColor System
 
