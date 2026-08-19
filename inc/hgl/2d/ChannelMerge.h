@@ -11,6 +11,8 @@
  * 提供将多个单通道位图合并为多通道位图的功能。
  * 这是通道分离操作的逆过程。
  *
+ * 所有函数均为值语义：返回按值持有的 Bitmap，无需手动释放。
+ *
  * 示例用法：
  * ```cpp
  * BitmapGrey8 r, g, b, a;
@@ -37,18 +39,20 @@ namespace hgl::bitmap::channel
      * @param g 绿色通道
      * @param b 蓝色通道
      * @param a Alpha 通道
-     * @return RGBA 位图，若输入无效或尺寸不一致则返回 nullptr
+     * @return RGBA 位图，若输入无效或尺寸不一致则返回空位图
      */
-    inline BitmapRGBA8* MergeRGBA(const BitmapGrey8& r, const BitmapGrey8& g,
-                                  const BitmapGrey8& b, const BitmapGrey8& a)
+    inline BitmapRGBA8 MergeRGBA(const BitmapGrey8& r, const BitmapGrey8& g,
+                                 const BitmapGrey8& b, const BitmapGrey8& a)
     {
+        BitmapRGBA8 result;
+
         const int w = r.GetWidth();
         const int h = r.GetHeight();
 
         // 检查所有通道的尺寸是否相同
         if (w != g.GetWidth() || w != b.GetWidth() || w != a.GetWidth() ||
             h != g.GetHeight() || h != b.GetHeight() || h != a.GetHeight())
-            return nullptr;
+            return result;
 
         const uint8* r_data = r.GetData();
         const uint8* g_data = g.GetData();
@@ -56,16 +60,12 @@ namespace hgl::bitmap::channel
         const uint8* a_data = a.GetData();
 
         if (!r_data || !g_data || !b_data || !a_data || w <= 0 || h <= 0)
-            return nullptr;
+            return result;
 
-        BitmapRGBA8* result = new BitmapRGBA8();
-        if (!result->Create(w, h))
-        {
-            delete result;
-            return nullptr;
-        }
+        if (!result.Create(w, h))
+            return result;
 
-        Color4ub* result_data = reinterpret_cast<Color4ub*>(result->GetData());
+        Color4ub* result_data = reinterpret_cast<Color4ub*>(result.GetData());
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)
@@ -84,33 +84,31 @@ namespace hgl::bitmap::channel
      * @param r 红色通道
      * @param g 绿色通道
      * @param b 蓝色通道
-     * @return RGB 位图，若输入无效或尺寸不一致则返回 nullptr
+     * @return RGB 位图，若输入无效或尺寸不一致则返回空位图
      */
-    inline BitmapRGB8* MergeRGB(const BitmapGrey8& r, const BitmapGrey8& g, const BitmapGrey8& b)
+    inline BitmapRGB8 MergeRGB(const BitmapGrey8& r, const BitmapGrey8& g, const BitmapGrey8& b)
     {
+        BitmapRGB8 result;
+
         const int w = r.GetWidth();
         const int h = r.GetHeight();
 
         // 检查所有通道的尺寸是否相同
         if (w != g.GetWidth() || w != b.GetWidth() ||
             h != g.GetHeight() || h != b.GetHeight())
-            return nullptr;
+            return result;
 
         const uint8* r_data = r.GetData();
         const uint8* g_data = g.GetData();
         const uint8* b_data = b.GetData();
 
         if (!r_data || !g_data || !b_data || w <= 0 || h <= 0)
-            return nullptr;
+            return result;
 
-        BitmapRGB8* result = new BitmapRGB8();
-        if (!result->Create(w, h))
-        {
-            delete result;
-            return nullptr;
-        }
+        if (!result.Create(w, h))
+            return result;
 
-        Color3ub* result_data = reinterpret_cast<Color3ub*>(result->GetData());
+        Color3ub* result_data = reinterpret_cast<Color3ub*>(result.GetData());
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)
@@ -127,31 +125,29 @@ namespace hgl::bitmap::channel
      * 合并 2 个单通道位图为 RG 位图
      * @param r 红色/第一个通道
      * @param g 绿色/第二个通道
-     * @return RG 位图，若输入无效或尺寸不一致则返回 nullptr
+     * @return RG 位图，若输入无效或尺寸不一致则返回空位图
      */
-    inline BitmapRG8* MergeRG(const BitmapGrey8& r, const BitmapGrey8& g)
+    inline BitmapRG8 MergeRG(const BitmapGrey8& r, const BitmapGrey8& g)
     {
+        BitmapRG8 result;
+
         const int w = r.GetWidth();
         const int h = r.GetHeight();
 
         // 检查两个通道的尺寸是否相同
         if (w != g.GetWidth() || h != g.GetHeight())
-            return nullptr;
+            return result;
 
         const uint8* r_data = r.GetData();
         const uint8* g_data = g.GetData();
 
         if (!r_data || !g_data || w <= 0 || h <= 0)
-            return nullptr;
+            return result;
 
-        BitmapRG8* result = new BitmapRG8();
-        if (!result->Create(w, h))
-        {
-            delete result;
-            return nullptr;
-        }
+        if (!result.Create(w, h))
+            return result;
 
-        math::Vector2u8* result_data = result->GetData();
+        math::Vector2u8* result_data = result.GetData();
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)
@@ -167,31 +163,29 @@ namespace hgl::bitmap::channel
      * 合并 RGB 位图与 Alpha 通道为 RGBA 位图
      * @param rgb RGB 位图
      * @param a Alpha 通道
-     * @return RGBA 位图，若输入无效或尺寸不一致则返回 nullptr
+     * @return RGBA 位图，若输入无效或尺寸不一致则返回空位图
      */
-    inline BitmapRGBA8* MergeRGB_A_To_RGBA(const BitmapRGB8& rgb, const BitmapGrey8& a)
+    inline BitmapRGBA8 MergeRGB_A_To_RGBA(const BitmapRGB8& rgb, const BitmapGrey8& a)
     {
+        BitmapRGBA8 result;
+
         const int w = rgb.GetWidth();
         const int h = rgb.GetHeight();
 
         // 检查尺寸是否匹配
         if (w != a.GetWidth() || h != a.GetHeight())
-            return nullptr;
+            return result;
 
         const Color3ub* rgb_data = reinterpret_cast<const Color3ub*>(rgb.GetData());
         const uint8* a_data = a.GetData();
 
         if (!rgb_data || !a_data || w <= 0 || h <= 0)
-            return nullptr;
+            return result;
 
-        BitmapRGBA8* result = new BitmapRGBA8();
-        if (!result->Create(w, h))
-        {
-            delete result;
-            return nullptr;
-        }
+        if (!result.Create(w, h))
+            return result;
 
-        Color4ub* result_data = reinterpret_cast<Color4ub*>(result->GetData());
+        Color4ub* result_data = reinterpret_cast<Color4ub*>(result.GetData());
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)
@@ -210,31 +204,29 @@ namespace hgl::bitmap::channel
      * 适用于 YUV 等格式（如 Y+UV），需要补充第三通道
      * @param rg RG 位图（或 YU）
      * @param b 蓝色/第三通道（或 V）
-     * @return RGB 位图，若输入无效或尺寸不一致则返回 nullptr
+     * @return RGB 位图，若输入无效或尺寸不一致则返回空位图
      */
-    inline BitmapRGB8* MergeRG_B_To_RGB(const BitmapRG8& rg, const BitmapGrey8& b)
+    inline BitmapRGB8 MergeRG_B_To_RGB(const BitmapRG8& rg, const BitmapGrey8& b)
     {
+        BitmapRGB8 result;
+
         const int w = rg.GetWidth();
         const int h = rg.GetHeight();
 
         // 检查尺寸是否匹配
         if (w != b.GetWidth() || h != b.GetHeight())
-            return nullptr;
+            return result;
 
         const math::Vector2u8* rg_data = rg.GetData();
         const uint8* b_data = b.GetData();
 
         if (!rg_data || !b_data || w <= 0 || h <= 0)
-            return nullptr;
+            return result;
 
-        BitmapRGB8* result = new BitmapRGB8();
-        if (!result->Create(w, h))
-        {
-            delete result;
-            return nullptr;
-        }
+        if (!result.Create(w, h))
+            return result;
 
-        Color3ub* result_data = reinterpret_cast<Color3ub*>(result->GetData());
+        Color3ub* result_data = reinterpret_cast<Color3ub*>(result.GetData());
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)

@@ -1,6 +1,7 @@
 ﻿/**
  * Channel Operations Test Example
  * Demonstrates channel splitting, merging, and manipulation
+ * (value-semantics API: no manual memory management)
  */
 
 #include<hgl/2d/Bitmap.h>
@@ -20,15 +21,23 @@ using namespace hgl;
 using namespace hgl::bitmap;
 namespace channel = hgl::bitmap::channel;
 
+static int failures = 0;
+
+#define CHECK(cond, msg) \
+    do { \
+        if (!(cond)) { std::cerr << "FAIL: " << msg << std::endl; ++failures; } \
+        else { std::cout << "  ok: " << msg << std::endl; } \
+    } while (0)
+
 /**
  * Create a test image with color gradients
  */
-BitmapRGBA8* CreateTestImageWithAlpha(int width, int height)
+BitmapRGBA8 CreateTestImageWithAlpha(int width, int height)
 {
-    auto* bitmap = new BitmapRGBA8();
-    bitmap->Create(width, height);
+    BitmapRGBA8 bitmap;
+    bitmap.Create(width, height);
 
-    auto* data = bitmap->GetData();
+    auto* data = bitmap.GetData();
 
     for (int y = 0; y < height; y++)
     {
@@ -54,26 +63,35 @@ void TestChannelSplitRGBA()
 {
     std::cout << "Testing RGBA channel split..." << std::endl;
 
-    auto* original = CreateTestImageWithAlpha(256, 256);
+    auto original = CreateTestImageWithAlpha(256, 256);
 
-    auto split_rgba = channel::SplitRGBA(*original);
-    auto* redChannel = std::get<0>(split_rgba);
-    auto* greenChannel = std::get<1>(split_rgba);
-    auto* blueChannel = std::get<2>(split_rgba);
-    auto* alphaChannel = std::get<3>(split_rgba);
+    auto [redChannel, greenChannel, blueChannel, alphaChannel] = channel::SplitRGBA(original);
 
-    SaveTga("channel_red.tga", redChannel);
-    SaveTga("channel_green.tga", greenChannel);
-    SaveTga("channel_blue.tga", blueChannel);
-    SaveTga("channel_alpha.tga", alphaChannel);
+    CHECK(redChannel.GetData() != nullptr, "split: red channel data");
+    CHECK(redChannel.GetWidth() == 256 && redChannel.GetHeight() == 256, "split: channel size");
+
+    SaveTga("channel_red.tga", &redChannel);
+    SaveTga("channel_green.tga", &greenChannel);
+    SaveTga("channel_blue.tga", &blueChannel);
+    SaveTga("channel_alpha.tga", &alphaChannel);
 
     std::cout << "  Split RGBA into R, G, B, A channels" << std::endl;
 
-    delete redChannel;
-    delete greenChannel;
-    delete blueChannel;
-    delete alphaChannel;
-    delete original;
+    // Roundtrip: merge back must reproduce the source exactly
+    auto restored = channel::MergeRGBA(redChannel, greenChannel, blueChannel, alphaChannel);
+    bool roundtrip_ok = (restored.GetWidth() == 256);
+    if (roundtrip_ok)
+    {
+        for (int i = 0; i < 256 * 256; ++i)
+        {
+            if (restored.GetData()[i] != original.GetData()[i])
+            {
+                roundtrip_ok = false;
+                break;
+            }
+        }
+    }
+    CHECK(roundtrip_ok, "split: RGBA roundtrip equals source");
 }
 
 /**
@@ -140,12 +158,14 @@ void TestChannelMerge()
     }
 
     // Merge channels
-    BitmapRGBA8* mergedImage = channel::MergeRGBA(redChan, greenChan, blueChan, alphaChan);
+    auto mergedImage = channel::MergeRGBA(redChan, greenChan, blueChan, alphaChan);
 
-    SaveTga("channel_merged_rgba.tga", mergedImage);
+    CHECK(mergedImage.GetData() != nullptr, "merge: result data");
+    CHECK(mergedImage.GetData()[0].r == redChan.GetData()[0], "merge: r[0] == red channel[0]");
+    CHECK(mergedImage.GetData()[255].r == redChan.GetData()[255], "merge: r[255] == red channel[255]");
+
+    SaveTga("channel_merged_rgba.tga", &mergedImage);
     std::cout << "  Merged 4 channels into RGBA image" << std::endl;
-
-    delete mergedImage;
 }
 
 /**
@@ -155,38 +175,25 @@ void TestChannelSwap()
 {
     std::cout << "Testing channel swap operations..." << std::endl;
 
-    auto* original = CreateTestImageWithAlpha(256, 256);
+    auto original = CreateTestImageWithAlpha(256, 256);
 
     // Get channels
-    auto split_rgba = channel::SplitRGBA(*original);
-    auto* redChan = std::get<0>(split_rgba);
-    auto* greenChan = std::get<1>(split_rgba);
-    auto* blueChan = std::get<2>(split_rgba);
-    auto* alphaChan = std::get<3>(split_rgba);
+    auto [redChan, greenChan, blueChan, alphaChan] = channel::SplitRGBA(original);
 
     // Swap R and G channels
-    BitmapRGBA8* swappedRG = channel::MergeRGBA(*greenChan, *redChan, *blueChan, *alphaChan);
-    SaveTga("channel_swap_rg.tga", swappedRG);
+    auto swappedRG = channel::MergeRGBA(greenChan, redChan, blueChan, alphaChan);
+    SaveTga("channel_swap_rg.tga", &swappedRG);
     std::cout << "  Swapped R and G channels" << std::endl;
 
     // Swap R and B channels
-    BitmapRGBA8* swappedRB = channel::MergeRGBA(*blueChan, *greenChan, *redChan, *alphaChan);
-    SaveTga("channel_swap_rb.tga", swappedRB);
+    auto swappedRB = channel::MergeRGBA(blueChan, greenChan, redChan, alphaChan);
+    SaveTga("channel_swap_rb.tga", &swappedRB);
     std::cout << "  Swapped R and B channels" << std::endl;
 
     // Grayscale: all channels to red (or any channel)
-    BitmapRGBA8* grayscaleImage = channel::MergeRGBA(*redChan, *redChan, *redChan, *alphaChan);
-    SaveTga("channel_grayscale_from_red.tga", grayscaleImage);
+    auto grayscaleImage = channel::MergeRGBA(redChan, redChan, redChan, alphaChan);
+    SaveTga("channel_grayscale_from_red.tga", &grayscaleImage);
     std::cout << "  Created grayscale from red channel" << std::endl;
-
-    delete swappedRG;
-    delete swappedRB;
-    delete grayscaleImage;
-    delete redChan;
-    delete greenChan;
-    delete blueChan;
-    delete alphaChan;
-    delete original;
 }
 
 /**
@@ -196,48 +203,36 @@ void TestChannelManipulation()
 {
     std::cout << "Testing channel manipulation..." << std::endl;
 
-    auto* original = CreateTestImageWithAlpha(256, 256);
+    auto original = CreateTestImageWithAlpha(256, 256);
 
     // Get channels
-    auto split_rgba = channel::SplitRGBA(*original);
-    auto* redChan = std::get<0>(split_rgba);
-    auto* greenChan = std::get<1>(split_rgba);
-    auto* blueChan = std::get<2>(split_rgba);
-    auto* alphaChan = std::get<3>(split_rgba);
+    auto [redChan, greenChan, blueChan, alphaChan] = channel::SplitRGBA(original);
 
     // Invert red channel
     {
-        auto* data = redChan->GetData();
+        auto* data = redChan.GetData();
         for (int i = 0; i < 256 * 256; i++)
         {
             data[i] = 255 - data[i];
         }
     }
 
-    BitmapRGBA8* invertedRed = channel::MergeRGBA(*redChan, *greenChan, *blueChan, *alphaChan);
-    SaveTga("channel_inverted_red.tga", invertedRed);
+    auto invertedRed = channel::MergeRGBA(redChan, greenChan, blueChan, alphaChan);
+    SaveTga("channel_inverted_red.tga", &invertedRed);
     std::cout << "  Inverted red channel" << std::endl;
 
     // Scale blue channel (make it darker)
     {
-        auto* data = blueChan->GetData();
+        auto* data = blueChan.GetData();
         for (int i = 0; i < 256 * 256; i++)
         {
             data[i] = static_cast<uint8>(data[i] * 0.5f);
         }
     }
 
-    BitmapRGBA8* scaledBlue = channel::MergeRGBA(*redChan, *greenChan, *blueChan, *alphaChan);
-    SaveTga("channel_scaled_blue.tga", scaledBlue);
+    auto scaledBlue = channel::MergeRGBA(redChan, greenChan, blueChan, alphaChan);
+    SaveTga("channel_scaled_blue.tga", &scaledBlue);
     std::cout << "  Scaled blue channel to 50%" << std::endl;
-
-    delete invertedRed;
-    delete scaledBlue;
-    delete redChan;
-    delete greenChan;
-    delete blueChan;
-    delete alphaChan;
-    delete original;
 }
 
 /**
@@ -267,26 +262,32 @@ void TestRGBChannels()
     }
 
     // Split RGB
-    auto split_rgb = channel::SplitRGB(rgbBitmap);
-    auto* r = std::get<0>(split_rgb);
-    auto* g = std::get<1>(split_rgb);
-    auto* b = std::get<2>(split_rgb);
+    auto [r, g, b] = channel::SplitRGB(rgbBitmap);
 
-    SaveTga("channel_rgb_red.tga", r);
-    SaveTga("channel_rgb_green.tga", g);
-    SaveTga("channel_rgb_blue.tga", b);
+    CHECK(r.GetData() != nullptr && g.GetData() != nullptr && b.GetData() != nullptr, "rgb split: channels");
+
+    SaveTga("channel_rgb_red.tga", &r);
+    SaveTga("channel_rgb_green.tga", &g);
+    SaveTga("channel_rgb_blue.tga", &b);
 
     std::cout << "  Split RGB into separate channels" << std::endl;
 
     // Merge back
-    BitmapRGB8* mergedRGB = channel::MergeRGB(*r, *g, *b);
-    SaveTga("channel_rgb_merged.tga", mergedRGB);
+    auto mergedRGB = channel::MergeRGB(r, g, b);
+    SaveTga("channel_rgb_merged.tga", &mergedRGB);
     std::cout << "  Merged RGB channels back" << std::endl;
 
-    delete r;
-    delete g;
-    delete b;
-    delete mergedRGB;
+    // Roundtrip check
+    bool roundtrip_ok = true;
+    for (int i = 0; i < 256 * 256; ++i)
+    {
+        if (mergedRGB.GetData()[i] != rgbBitmap.GetData()[i])
+        {
+            roundtrip_ok = false;
+            break;
+        }
+    }
+    CHECK(roundtrip_ok, "rgb split: roundtrip equals source");
 }
 
 /**
@@ -296,22 +297,18 @@ void TestChannelComposite()
 {
     std::cout << "Testing channel composite operations..." << std::endl;
 
-    auto* original = CreateTestImageWithAlpha(256, 256);
+    auto original = CreateTestImageWithAlpha(256, 256);
 
     // Get channels
-    auto split_rgba = channel::SplitRGBA(*original);
-    auto* redChan = std::get<0>(split_rgba);
-    auto* greenChan = std::get<1>(split_rgba);
-    auto* blueChan = std::get<2>(split_rgba);
-    auto* alphaChan = std::get<3>(split_rgba);
+    auto [redChan, greenChan, blueChan, alphaChan] = channel::SplitRGBA(original);
 
     // Create luminance (weighted average of RGB)
     BitmapGrey8 luminance;
     luminance.Create(256, 256);
 
-    auto* redData = redChan->GetData();
-    auto* greenData = greenChan->GetData();
-    auto* blueData = blueChan->GetData();
+    auto* redData = redChan.GetData();
+    auto* greenData = greenChan.GetData();
+    auto* blueData = blueChan.GetData();
     auto* lumData = luminance.GetData();
 
     for (int i = 0; i < 256 * 256; i++)
@@ -328,11 +325,11 @@ void TestChannelComposite()
     SaveTga("channel_luminance.tga", &luminance);
     std::cout << "  Created luminance from RGB channels" << std::endl;
 
-    delete redChan;
-    delete greenChan;
-    delete blueChan;
-    delete alphaChan;
-    delete original;
+    // ExtractChannel convenience wrappers
+    auto extracted = channel::ExtractR(original);
+    CHECK(extracted.GetData() != nullptr, "extract: ExtractR works");
+    auto extracted_a = channel::ExtractA(original);
+    CHECK(extracted_a.GetData() != nullptr, "extract: ExtractA works");
 }
 
 int main(int argc, char** argv)
@@ -358,7 +355,12 @@ int main(int argc, char** argv)
     TestChannelComposite();
     std::cout << std::endl;
 
-    std::cout << "All tests completed!" << std::endl;
+    if (failures == 0)
+    {
+        std::cout << "All tests completed!" << std::endl;
+        return 0;
+    }
 
-    return 0;
+    std::cerr << failures << " test(s) failed" << std::endl;
+    return 1;
 }

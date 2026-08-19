@@ -32,18 +32,13 @@
  *
  * // 处理各个通道...
  *
- * // 合并回 RGBA
- * auto result = hgl::bitmap::channel::MergeRGBA(*r, *g, *b, *a);
- *
- * // 清理内存
- * delete r; delete g; delete b; delete a;
- * delete result;
+ * // 合并回 RGBA（值语义，无需手动释放）
+ * auto result = hgl::bitmap::channel::MergeRGBA(r, g, b, a);
  *
  * // 或分离为 RGB + A 进行处理
  * auto [rgb, alpha] = hgl::bitmap::channel::SplitRGBA_To_RGB_A(source);
  * // ... 处理 ...
- * auto merged = hgl::bitmap::channel::MergeRGB_A_To_RGBA(*rgb, *alpha);
- * delete rgb; delete alpha; delete merged;
+ * auto merged = hgl::bitmap::channel::MergeRGB_A_To_RGBA(rgb, alpha);
  * ```
  */
 

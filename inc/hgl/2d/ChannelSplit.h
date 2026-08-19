@@ -5,6 +5,7 @@
 #include<hgl/color/Color3ub.h>
 #include<hgl/color/Color4ub.h>
 #include<cstring>
+#include<tuple>
 
 /**
  * 通道分离模块
@@ -14,6 +15,8 @@
  * - RGBA -> RGB + A（3 通道 + 1 通道）
  * - RGBA -> R + G + B + A（4 个单通道）
  * - YUV -> Y + UV（1 通道 + 2 通道）
+ *
+ * 所有函数均为值语义：返回按值持有的 Bitmap，无需手动释放。
  *
  * 示例用法：
  * ```cpp
@@ -35,37 +38,28 @@ namespace hgl::bitmap::channel
 {
     /**
      * 将 RGBA 位图分离为 4 个单通道位图（R、G、B、A）
-     * @param src 源 RGBA 位图，像素类型为 Vector4u8
+     * @param src 源 RGBA 位图，像素类型为 Color4ub
      * @return 4 个单通道位图（R、G、B、A）的元组
      */
-    inline auto SplitRGBA(const BitmapRGBA8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
+    inline std::tuple<BitmapGrey8, BitmapGrey8, BitmapGrey8, BitmapGrey8> SplitRGBA(const BitmapRGBA8& src)
     {
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const Color4ub* src_data = reinterpret_cast<const Color4ub*>(src.GetData());
 
+        BitmapGrey8 r_channel, g_channel, b_channel, a_channel;
+
         if (!src_data || w <= 0 || h <= 0)
-            return {nullptr, nullptr, nullptr, nullptr};
+            return {};
 
-        BitmapGrey8* r_channel = new BitmapGrey8();
-        BitmapGrey8* g_channel = new BitmapGrey8();
-        BitmapGrey8* b_channel = new BitmapGrey8();
-        BitmapGrey8* a_channel = new BitmapGrey8();
+        if (!r_channel.Create(w, h) || !g_channel.Create(w, h) ||
+            !b_channel.Create(w, h) || !a_channel.Create(w, h))
+            return {};
 
-        if (!r_channel->Create(w, h) || !g_channel->Create(w, h) ||
-            !b_channel->Create(w, h) || !a_channel->Create(w, h))
-        {
-            delete r_channel;
-            delete g_channel;
-            delete b_channel;
-            delete a_channel;
-            return {nullptr, nullptr, nullptr, nullptr};
-        }
-
-        uint8* r_data = r_channel->GetData();
-        uint8* g_data = g_channel->GetData();
-        uint8* b_data = b_channel->GetData();
-        uint8* a_data = a_channel->GetData();
+        uint8* r_data = r_channel.GetData();
+        uint8* g_data = g_channel.GetData();
+        uint8* b_data = b_channel.GetData();
+        uint8* a_data = a_channel.GetData();
 
         const int total = w * h;
         for (int i = 0; i < total; ++i)
@@ -76,38 +70,31 @@ namespace hgl::bitmap::channel
             a_data[i] = src_data[i].a;
         }
 
-        return {r_channel, g_channel, b_channel, a_channel};
+        return {std::move(r_channel), std::move(g_channel), std::move(b_channel), std::move(a_channel)};
     }
 
     /**
      * 将 RGB 位图分离为 3 个单通道位图（R、G、B）
-     * @param src 源 RGB 位图，像素类型为 Vector3u8
+     * @param src 源 RGB 位图，像素类型为 Color3ub
      * @return 3 个单通道位图（R、G、B）的元组
      */
-    inline auto SplitRGB(const BitmapRGB8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*, BitmapGrey8*>
+    inline std::tuple<BitmapGrey8, BitmapGrey8, BitmapGrey8> SplitRGB(const BitmapRGB8& src)
     {
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const Color3ub* src_data = reinterpret_cast<const Color3ub*>(src.GetData());
 
+        BitmapGrey8 r_channel, g_channel, b_channel;
+
         if (!src_data || w <= 0 || h <= 0)
-            return {nullptr, nullptr, nullptr};
+            return {};
 
-        BitmapGrey8* r_channel = new BitmapGrey8();
-        BitmapGrey8* g_channel = new BitmapGrey8();
-        BitmapGrey8* b_channel = new BitmapGrey8();
+        if (!r_channel.Create(w, h) || !g_channel.Create(w, h) || !b_channel.Create(w, h))
+            return {};
 
-        if (!r_channel->Create(w, h) || !g_channel->Create(w, h) || !b_channel->Create(w, h))
-        {
-            delete r_channel;
-            delete g_channel;
-            delete b_channel;
-            return {nullptr, nullptr, nullptr};
-        }
-
-        uint8* r_data = r_channel->GetData();
-        uint8* g_data = g_channel->GetData();
-        uint8* b_data = b_channel->GetData();
+        uint8* r_data = r_channel.GetData();
+        uint8* g_data = g_channel.GetData();
+        uint8* b_data = b_channel.GetData();
 
         const int total = w * h;
         for (int i = 0; i < total; ++i)
@@ -117,7 +104,7 @@ namespace hgl::bitmap::channel
             b_data[i] = src_data[i].b;
         }
 
-        return {r_channel, g_channel, b_channel};
+        return {std::move(r_channel), std::move(g_channel), std::move(b_channel)};
     }
 
     /**
@@ -125,27 +112,22 @@ namespace hgl::bitmap::channel
      * @param src 源 RG 位图，像素类型为 Vector2u8
      * @return 2 个单通道位图（R、G）的元组
      */
-    inline auto SplitRG(const BitmapRG8& src) -> std::tuple<BitmapGrey8*, BitmapGrey8*>
+    inline std::tuple<BitmapGrey8, BitmapGrey8> SplitRG(const BitmapRG8& src)
     {
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const math::Vector2u8* src_data = src.GetData();
 
+        BitmapGrey8 r_channel, g_channel;
+
         if (!src_data || w <= 0 || h <= 0)
-            return {nullptr, nullptr};
+            return {};
 
-        BitmapGrey8* r_channel = new BitmapGrey8();
-        BitmapGrey8* g_channel = new BitmapGrey8();
+        if (!r_channel.Create(w, h) || !g_channel.Create(w, h))
+            return {};
 
-        if (!r_channel->Create(w, h) || !g_channel->Create(w, h))
-        {
-            delete r_channel;
-            delete g_channel;
-            return {nullptr, nullptr};
-        }
-
-        uint8* r_data = r_channel->GetData();
-        uint8* g_data = g_channel->GetData();
+        uint8* r_data = r_channel.GetData();
+        uint8* g_data = g_channel.GetData();
 
         const int total = w * h;
         for (int i = 0; i < total; ++i)
@@ -154,35 +136,31 @@ namespace hgl::bitmap::channel
             g_data[i] = src_data[i].g;
         }
 
-        return {r_channel, g_channel};
+        return {std::move(r_channel), std::move(g_channel)};
     }
 
     /**
      * 将 RGBA 位图分离为 RGB（三通道）+ A（单通道）
-     * @param src 源 RGBA 位图，像素类型为 Vector4u8
+     * @param src 源 RGBA 位图，像素类型为 Color4ub
      * @return RGB 位图和 Alpha 通道位图的元组
      */
-    inline auto SplitRGBA_To_RGB_A(const BitmapRGBA8& src) -> std::tuple<BitmapRGB8*, BitmapGrey8*>
+    inline std::tuple<BitmapRGB8, BitmapGrey8> SplitRGBA_To_RGB_A(const BitmapRGBA8& src)
     {
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const Color4ub* src_data = reinterpret_cast<const Color4ub*>(src.GetData());
 
+        BitmapRGB8 rgb_bitmap;
+        BitmapGrey8 a_channel;
+
         if (!src_data || w <= 0 || h <= 0)
-            return {nullptr, nullptr};
+            return {};
 
-        BitmapRGB8* rgb_bitmap = new BitmapRGB8();
-        BitmapGrey8* a_channel = new BitmapGrey8();
+        if (!rgb_bitmap.Create(w, h) || !a_channel.Create(w, h))
+            return {};
 
-        if (!rgb_bitmap->Create(w, h) || !a_channel->Create(w, h))
-        {
-            delete rgb_bitmap;
-            delete a_channel;
-            return {nullptr, nullptr};
-        }
-
-        Color3ub* rgb_data = reinterpret_cast<Color3ub*>(rgb_bitmap->GetData());
-        uint8* a_data = a_channel->GetData();
+        Color3ub* rgb_data = reinterpret_cast<Color3ub*>(rgb_bitmap.GetData());
+        uint8* a_data = a_channel.GetData();
 
         const int total = w * h;
         for (int i = 0; i < total; ++i)
@@ -193,35 +171,33 @@ namespace hgl::bitmap::channel
             a_data[i] = src_data[i].a;
         }
 
-        return {rgb_bitmap, a_channel};
+        return {std::move(rgb_bitmap), std::move(a_channel)};
     }
 
     /**
      * 从 RGBA 位图中按索引提取单个通道
      * @param src 源 RGBA 位图
      * @param channel_index 通道索引（0=R，1=G，2=B，3=A）
-     * @return 单通道位图，若索引无效则返回 nullptr
+     * @return 单通道位图，若索引无效则返回空位图
      */
-    inline BitmapGrey8* ExtractChannel(const BitmapRGBA8& src, uint channel_index)
+    inline BitmapGrey8 ExtractChannel(const BitmapRGBA8& src, uint channel_index)
     {
+        BitmapGrey8 channel;
+
         if (channel_index >= 4)
-            return nullptr;
+            return channel;
 
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const Color4ub* src_data = reinterpret_cast<const Color4ub*>(src.GetData());
 
         if (!src_data || w <= 0 || h <= 0)
-            return nullptr;
+            return channel;
 
-        BitmapGrey8* channel = new BitmapGrey8();
-        if (!channel->Create(w, h))
-        {
-            delete channel;
-            return nullptr;
-        }
+        if (!channel.Create(w, h))
+            return channel;
 
-        uint8* channel_data = channel->GetData();
+        uint8* channel_data = channel.GetData();
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)
@@ -243,28 +219,26 @@ namespace hgl::bitmap::channel
      * 从 RGB 位图中按索引提取单个通道
      * @param src 源 RGB 位图
      * @param channel_index 通道索引（0=R，1=G，2=B）
-     * @return 单通道位图，若索引无效则返回 nullptr
+     * @return 单通道位图，若索引无效则返回空位图
      */
-    inline BitmapGrey8* ExtractChannel(const BitmapRGB8& src, uint channel_index)
+    inline BitmapGrey8 ExtractChannel(const BitmapRGB8& src, uint channel_index)
     {
+        BitmapGrey8 channel;
+
         if (channel_index >= 3)
-            return nullptr;
+            return channel;
 
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const Color3ub* src_data = reinterpret_cast<const Color3ub*>(src.GetData());
 
         if (!src_data || w <= 0 || h <= 0)
-            return nullptr;
+            return channel;
 
-        BitmapGrey8* channel = new BitmapGrey8();
-        if (!channel->Create(w, h))
-        {
-            delete channel;
-            return nullptr;
-        }
+        if (!channel.Create(w, h))
+            return channel;
 
-        uint8* channel_data = channel->GetData();
+        uint8* channel_data = channel.GetData();
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)
@@ -284,28 +258,26 @@ namespace hgl::bitmap::channel
      * 从 RG 位图中按索引提取单个通道
      * @param src 源 RG 位图
      * @param channel_index 通道索引（0=R，1=G）
-     * @return 单通道位图，若索引无效则返回 nullptr
+     * @return 单通道位图，若索引无效则返回空位图
      */
-    inline BitmapGrey8* ExtractChannel(const BitmapRG8& src, uint channel_index)
+    inline BitmapGrey8 ExtractChannel(const BitmapRG8& src, uint channel_index)
     {
+        BitmapGrey8 channel;
+
         if (channel_index >= 2)
-            return nullptr;
+            return channel;
 
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const math::Vector2u8* src_data = src.GetData();
 
         if (!src_data || w <= 0 || h <= 0)
-            return nullptr;
+            return channel;
 
-        BitmapGrey8* channel = new BitmapGrey8();
-        if (!channel->Create(w, h))
-        {
-            delete channel;
-            return nullptr;
-        }
+        if (!channel.Create(w, h))
+            return channel;
 
-        uint8* channel_data = channel->GetData();
+        uint8* channel_data = channel.GetData();
         const int total = w * h;
 
         for (int i = 0; i < total; ++i)
@@ -320,28 +292,26 @@ namespace hgl::bitmap::channel
      * 从单通道位图中提取通道（直接复制）
      * @param src 源单通道位图
      * @param channel_index 必须为 0
-     * @return 源位图的副本，若索引无效则返回 nullptr
+     * @return 源位图的副本，若索引无效则返回空位图
      */
-    inline BitmapGrey8* ExtractChannel(const BitmapGrey8& src, uint channel_index)
+    inline BitmapGrey8 ExtractChannel(const BitmapGrey8& src, uint channel_index)
     {
+        BitmapGrey8 channel;
+
         if (channel_index != 0)
-            return nullptr;
+            return channel;
 
         const int w = src.GetWidth();
         const int h = src.GetHeight();
         const uint8* src_data = src.GetData();
 
         if (!src_data || w <= 0 || h <= 0)
-            return nullptr;
+            return channel;
 
-        BitmapGrey8* channel = new BitmapGrey8();
-        if (!channel->Create(w, h))
-        {
-            delete channel;
-            return nullptr;
-        }
+        if (!channel.Create(w, h))
+            return channel;
 
-        uint8* channel_data = channel->GetData();
+        uint8* channel_data = channel.GetData();
         const int total = w * h;
 
         // 使用 memcpy 高效复制
@@ -355,30 +325,30 @@ namespace hgl::bitmap::channel
      */
 
     // 从 RGBA 提取 R 通道
-    inline BitmapGrey8* ExtractR(const BitmapRGBA8& src) { return ExtractChannel(src, 0); }
+    inline BitmapGrey8 ExtractR(const BitmapRGBA8& src) { return ExtractChannel(src, 0); }
 
     // 从 RGBA 提取 G 通道
-    inline BitmapGrey8* ExtractG(const BitmapRGBA8& src) { return ExtractChannel(src, 1); }
+    inline BitmapGrey8 ExtractG(const BitmapRGBA8& src) { return ExtractChannel(src, 1); }
 
     // 从 RGBA 提取 B 通道
-    inline BitmapGrey8* ExtractB(const BitmapRGBA8& src) { return ExtractChannel(src, 2); }
+    inline BitmapGrey8 ExtractB(const BitmapRGBA8& src) { return ExtractChannel(src, 2); }
 
     // 从 RGBA 提取 A 通道
-    inline BitmapGrey8* ExtractA(const BitmapRGBA8& src) { return ExtractChannel(src, 3); }
+    inline BitmapGrey8 ExtractA(const BitmapRGBA8& src) { return ExtractChannel(src, 3); }
 
     // 从 RGB 提取 R 通道
-    inline BitmapGrey8* ExtractR(const BitmapRGB8& src) { return ExtractChannel(src, 0); }
+    inline BitmapGrey8 ExtractR(const BitmapRGB8& src) { return ExtractChannel(src, 0); }
 
     // 从 RGB 提取 G 通道
-    inline BitmapGrey8* ExtractG(const BitmapRGB8& src) { return ExtractChannel(src, 1); }
+    inline BitmapGrey8 ExtractG(const BitmapRGB8& src) { return ExtractChannel(src, 1); }
 
     // 从 RGB 提取 B 通道
-    inline BitmapGrey8* ExtractB(const BitmapRGB8& src) { return ExtractChannel(src, 2); }
+    inline BitmapGrey8 ExtractB(const BitmapRGB8& src) { return ExtractChannel(src, 2); }
 
     // 从 RG 提取 R 通道
-    inline BitmapGrey8* ExtractR(const BitmapRG8& src) { return ExtractChannel(src, 0); }
+    inline BitmapGrey8 ExtractR(const BitmapRG8& src) { return ExtractChannel(src, 0); }
 
     // 从 RG 提取 G 通道
-    inline BitmapGrey8* ExtractG(const BitmapRG8& src) { return ExtractChannel(src, 1); }
+    inline BitmapGrey8 ExtractG(const BitmapRG8& src) { return ExtractChannel(src, 1); }
 
 } // namespace hgl::bitmap::channel
