@@ -9,6 +9,7 @@
 #include<hgl/type/String.h>
 #include<hgl/math/HalfFloat.h>
 #include<iterator>
+#include<cstring>
 
 namespace hgl::bitmap
 {
@@ -40,6 +41,62 @@ namespace hgl::bitmap
         ~Bitmap()
         {
             delete[] data;
+        }
+
+        Bitmap(const Bitmap &src)
+        {
+            data=nullptr;
+            width=height=0;
+
+            if(src.data)
+            {
+                width=src.width;
+                height=src.height;
+                data=new T[width*height];
+                memcpy(data,src.data,width*height*sizeof(T));
+            }
+        }
+
+        Bitmap(Bitmap &&src)noexcept
+        {
+            data=src.data;
+            width=src.width;
+            height=src.height;
+
+            src.data=nullptr;
+            src.width=src.height=0;
+        }
+
+        Bitmap &operator=(const Bitmap &src)
+        {
+            if(this!=&src)
+            {
+                Bitmap tmp(src);
+                Swap(tmp);
+            }
+            return *this;
+        }
+
+        Bitmap &operator=(Bitmap &&src)noexcept
+        {
+            if(this!=&src)
+            {
+                delete[] data;
+                data=src.data;
+                width=src.width;
+                height=src.height;
+
+                src.data=nullptr;
+                src.width=src.height=0;
+            }
+            return *this;
+        }
+
+        void Swap(Bitmap &o)noexcept
+        {
+            std::swap(width,o.width);
+            std::swap(height,o.height);
+            std::swap(data,o.data);
         }
 
         const uint GetChannels      ()const{return C;}
