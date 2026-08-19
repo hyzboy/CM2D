@@ -6,10 +6,8 @@
 #include<sstream>
 #include<mutex>
 
-namespace hgl
+namespace hgl::bitmap
 {
-    namespace bitmap
-    {
         /**
          * 线程安全的ImageMagick初始化
          */
@@ -269,7 +267,6 @@ namespace hgl
                 }
             }
         }//namespace imagemagick
-    }//namespace bitmap
-}//namespace hgl
+}//namespace hgl::bitmap
 
 #endif //HGL_IMAGEMAGICK_SUPPORT

@@ -99,14 +99,14 @@ namespace hgl::bitmap
             std::swap(data,o.data);
         }
 
-        const uint GetChannels      ()const{return C;}
-        const uint GetChannelBits   ()const{return (sizeof(T)/C)<<3;}
+        uint GetChannels      ()const{return C;}
+        uint GetChannelBits   ()const{return (sizeof(T)/C)<<3;}
 
-        const int  GetWidth         ()const{return width;}
-        const int  GetHeight        ()const{return height;}
-        const uint GetTotalPixels   ()const{return width*height;}
-        const uint GetLineBytes     ()const{return width*sizeof(T);}
-        const uint GetTotalBytes    ()const{return width*height*sizeof(T);}
+        int  GetWidth         ()const{return width;}
+        int  GetHeight        ()const{return height;}
+        uint GetTotalPixels   ()const{return width*height;}
+        uint GetLineBytes     ()const{return width*sizeof(T);}
+        uint GetTotalBytes    ()const{return width*height*sizeof(T);}
 
         T *GetData(){return data;}
         T *GetData(int x,int y)

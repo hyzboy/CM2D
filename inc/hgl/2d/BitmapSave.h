@@ -2,10 +2,8 @@
 #include<hgl/2d/Bitmap.h>
 #include<hgl/io/FileOutputStream.h>
 
-namespace hgl
+namespace hgl::bitmap
 {
-    namespace bitmap
-    {
         bool SaveBitmapToTGA(io::OutputStream *os,void *data,uint width,uint height,uint channels,uint single_channel_bits);
 
         template<typename T>
@@ -29,5 +27,4 @@ namespace hgl
 
             return SaveBitmapToTGA(fos,bmp);
         }
-    }//namespace bitmap
-}//namespace hgl
+}//namespace hgl::bitmap

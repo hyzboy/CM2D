@@ -6,18 +6,16 @@
 #include<hgl/type/String.h>
 #include<string>
 
-namespace hgl
+namespace hgl::bitmap
 {
-    namespace bitmap
-    {
         /**
          * ImageMagick加载器结构
          * 提供从ImageMagick加载图像到Bitmap的功能
          */
         struct ImageMagickLoader
         {
-            virtual const uint OnChannels()const=0;
-            virtual const uint OnChannelBits()const=0;
+            virtual uint OnChannels()const=0;
+            virtual uint OnChannelBits()const=0;
 
             virtual void *OnRecvBitmap(uint w,uint h)=0;
             virtual void OnLoadFailed()=0;
@@ -43,12 +41,12 @@ namespace hgl
                 // 不删除bmp，由调用者管理
             }
 
-            const uint OnChannels()const override
+            uint OnChannels()const override
             {
                 return bmp?bmp->GetChannels():0;
             }
 
-            const uint OnChannelBits()const override
+            uint OnChannelBits()const override
             {
                 return bmp?bmp->GetChannelBits():0;
             }
@@ -185,7 +183,6 @@ namespace hgl
              */
             bool IsSupportedFormat(const std::string &format);
         }//namespace imagemagick
-    }//namespace bitmap
-}//namespace hgl
+}//namespace hgl::bitmap
 
 #endif //HGL_IMAGEMAGICK_SUPPORT

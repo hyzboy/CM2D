@@ -7,10 +7,8 @@
 #include<vector>
 #include<hgl/2d/Bitmap.h>
 #include<hgl/2d/BitmapSave.h>
-namespace hgl
+namespace hgl::imgfmt
 {
-    namespace imgfmt
-    {
         constexpr const uint TGA_IMAGE_TYPE_COLOR_MAP   =1;
         constexpr const uint TGA_IMAGE_TYPE_TRUE_COLOR  =2;
         constexpr const uint TGA_IMAGE_TYPE_GRAYSCALE   =3;
@@ -53,10 +51,10 @@ namespace hgl
         constexpr size_t TGAHeaderSize=sizeof(TGAHeader);       ///<TGA文件头，必须等于18
 
         bool FillTGAHeader(TGAHeader *header,const uint16 width,const uint16 height,const uint8 channels,const uint8 single_channel_bits=8);
-    }//namespace imgfmt
+}//namespace hgl::imgfmt
 
-    namespace bitmap
-    {
+namespace hgl::bitmap
+{
         /**
          * Save bitmap to TGA file (generic version)
          * @param filename Output TGA filename
@@ -133,5 +131,4 @@ namespace hgl
                     8);
             }
         }
-    }//namespace bitmap
-}//namespace hgl
+}//namespace hgl::bitmap

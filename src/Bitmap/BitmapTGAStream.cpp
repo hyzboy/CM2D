@@ -3,13 +3,11 @@
 #include<hgl/io/InputStream.h>
 #include<hgl/io/OutputStream.h>
 
-namespace hgl
+namespace hgl::bitmap
 {
     using namespace io;
     using namespace imgfmt;
 
-    namespace bitmap
-    {
         bool LoadBitmapFromTGAStream(io::InputStream *is,BitmapLoader *bl)
         {
             if(!is||!bl)return(false);
@@ -66,5 +64,4 @@ namespace hgl
 
             return(true);
         }
-    }//namespace bitmap
-}//namespace hgl
+}//namespace hgl::bitmap

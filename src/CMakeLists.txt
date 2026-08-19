@@ -44,18 +44,7 @@ set(CM2D_TERRAIN_HEADERS
     ${CM2D_HEADER_PATH}/NoiseMap.h
 )
 
-# Misc Headers
-set(CM2D_MISC_HEADERS
-    ${CM2D_HEADER_PATH}/VSBase.h
-)
-
 # ==================== Source Files Classification ====================
-
-# Pixel Format Source Files
-set(CM2D_PIXEL_SOURCE
-    PixelFormat/rgb.cpp
-    PixelFormat/rgba.cpp
-)
 
 # Base Bitmap Source Files (platform-independent)
 set(CM2D_BITMAP_BASE_SOURCE
@@ -170,7 +159,6 @@ set(CM2D_TERRAIN_SOURCE
 # ==================== Source Groups for IDE Organization ====================
 
 # Unified groups (headers and sources together)
-SOURCE_GROUP("Pixel Format" FILES ${CM2D_PIXEL_SOURCE})
 SOURCE_GROUP("Bitmap\\Core" FILES ${CM2D_BITMAP_BASE_SOURCE} ${CM2D_BITMAP_HEADERS})
 SOURCE_GROUP("Image Format" FILES ${CM2D_FORMAT_SOURCE} ${CM2D_FORMAT_HEADERS})
 SOURCE_GROUP("Bitmap\\ColorConversion" FILES ${CM2D_COLORCONV_SOURCE} ${CM2D_COLORCONV_HEADERS})
@@ -178,7 +166,6 @@ SOURCE_GROUP("Bitmap\\Platform" FILES ${CM2D_BITMAP_PLATFORM_SOURCE} ${CM2D_BITM
 SOURCE_GROUP("Image Processing" FILES ${CM2D_PROCESSING_HEADERS})
 SOURCE_GROUP("Channel Operations" FILES ${CM2D_CHANNEL_HEADERS})
 SOURCE_GROUP("Terrain" FILES ${CM2D_TERRAIN_SOURCE} ${CM2D_TERRAIN_HEADERS})
-SOURCE_GROUP("Misc" FILES ${CM2D_MISC_HEADERS})
 
 # ==================== Library Target ====================
 
@@ -189,7 +176,6 @@ add_cm_library(CM2D "CM" ${CM2D_ROOT_INCLUDE_PATH}
     ${CM2D_COLORCONV_HEADERS}
     ${CM2D_CHANNEL_HEADERS}
     ${CM2D_TERRAIN_HEADERS}
-    ${CM2D_MISC_HEADERS}
     ${CM2D_PIXEL_SOURCE}
     ${CM2D_BITMAP_SOURCE}
     ${CM2D_TERRAIN_SOURCE}

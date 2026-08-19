@@ -2,16 +2,14 @@
 #include<hgl/2d/Bitmap.h>
 #include<hgl/io/FileInputStream.h>
 
-namespace hgl
+namespace hgl::bitmap
 {
-    namespace bitmap
-    {
-        struct BitmapLoader
+    struct BitmapLoader
         {
-            virtual const uint OnChannels()const=0;
-            virtual const uint OnChannelBits()const=0;
+            virtual uint OnChannels()const=0;
+            virtual uint OnChannelBits()const=0;
 
-            const uint OnPixelBits()const
+            uint OnPixelBits()const
             {
                 return OnChannelBits()*OnChannels();
             }
@@ -33,8 +31,8 @@ namespace hgl
                 bmp=nullptr;
             }
 
-            const uint OnChannels()const override{return bmp->GetChannels();}
-            const uint OnChannelBits()const override{return bmp->GetChannelBits();}
+            uint OnChannels()const override{return bmp->GetChannels();}
+            uint OnChannelBits()const override{return bmp->GetChannelBits();}
 
             void *OnRecvBitmap(uint w,uint h) override
             {
@@ -86,5 +84,4 @@ namespace hgl
 
         inline BitmapRGB8 *LoadBitmapRGB8FromTGA(const OSString &filename){return LoadBitmapFromTGA<BitmapRGB8>(filename);}
         inline BitmapRGBA8 *LoadBitmapRGBA8FromTGA(const OSString &filename){return LoadBitmapFromTGA<BitmapRGBA8>(filename);}
-    }//namespace bitmap
-}//namespace hgl
+}//namespace hgl::bitmap

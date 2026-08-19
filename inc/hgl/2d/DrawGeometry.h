@@ -11,7 +11,7 @@
 
 namespace hgl::bitmap
 {
-    using namespace math;
+    using math::Vector2i;
 
     template<typename T,typename FormatBitmap> class DrawGeometry
     {
