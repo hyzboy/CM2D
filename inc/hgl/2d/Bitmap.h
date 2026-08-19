@@ -120,7 +120,7 @@ namespace hgl::bitmap
             return (x<0||x>=width||y<0||y>=height)?nullptr:data+(y*width+x);
         }
 
-        bool Create(uint w,uint h)
+        virtual bool Create(uint w,uint h)
         {
             if(!w||!h)return(false);
 
@@ -139,7 +139,7 @@ namespace hgl::bitmap
             return(true);
         }
 
-        void Clear()
+        virtual void Clear()
         {
             if(data)
             {

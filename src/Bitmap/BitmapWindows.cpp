@@ -12,32 +12,30 @@ namespace hgl::bitmap
         hBitmap = nullptr;
         memDC = nullptr;
         hOldBitmap = nullptr;
+
+        scratchBitmap = nullptr;
+        scratchDC = nullptr;
+        scratchOldBitmap = nullptr;
+        scratchBits = nullptr;
+        scratchW = scratchH = 0;
     }
 
     template<typename T, uint C>
     BitmapWindows<T, C>::~BitmapWindows()
     {
-        // Must set data to nullptr before releasing platform resources to prevent base class double-free
-        this->data = nullptr;
-
-        if (memDC)
-        {
-            if (hOldBitmap)
-                SelectObject(memDC, hOldBitmap);
-            DeleteDC(memDC);
-        }
-
-        if (hBitmap)
-            DeleteObject(hBitmap);
+        // 释放 DIB 资源并置 data=nullptr，防止基类析构 delete[] 掉 CreateDIBSection 分配的内存
+        Clear();
     }
 
     template<typename T, uint C>
-    bool BitmapWindows<T, C>::CreateDIB(uint w, uint h, HDC hdc)
+    bool BitmapWindows<T, C>::Create(uint w, uint h)
     {
-        if (!w || !h)
-            return false;
+        return CreateDIB(w, h);
+    }
 
-        // Clean up old resources
+    template<typename T, uint C>
+    void BitmapWindows<T, C>::Clear()
+    {
         if (memDC)
         {
             if (hOldBitmap)
@@ -53,16 +51,122 @@ namespace hgl::bitmap
             hBitmap = nullptr;
         }
 
+        if (scratchDC)
+        {
+            if (scratchOldBitmap)
+                SelectObject(scratchDC, scratchOldBitmap);
+            DeleteDC(scratchDC);
+            scratchDC = nullptr;
+            scratchOldBitmap = nullptr;
+        }
+
+        if (scratchBitmap)
+        {
+            DeleteObject(scratchBitmap);
+            scratchBitmap = nullptr;
+        }
+
+        scratchBits = nullptr;
+        scratchW = scratchH = 0;
+
         this->data = nullptr;
+        this->width = this->height = 0;
+    }
+
+    template<typename T, uint C>
+    bool BitmapWindows<T, C>::EnsureScratch(uint w, uint h) const
+    {
+        if (scratchDC && scratchW == (int)w && scratchH == (int)h)
+            return true;
+
+        if (scratchDC)
+        {
+            if (scratchOldBitmap)
+                SelectObject(scratchDC, scratchOldBitmap);
+            DeleteDC(scratchDC);
+            scratchDC = nullptr;
+            scratchOldBitmap = nullptr;
+        }
+
+        if (scratchBitmap)
+        {
+            DeleteObject(scratchBitmap);
+            scratchBitmap = nullptr;
+        }
+
+        scratchBits = nullptr;
+        scratchW = scratchH = 0;
+
+        HDC screenDC = GetDC(nullptr);
+        scratchDC = CreateCompatibleDC(screenDC);
+
+        if (scratchDC)
+        {
+            // 32bpp top-down DIB（BGRX 字节序）
+            BITMAPINFO bmi = {};
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = w;
+            bmi.bmiHeader.biHeight = -(int)h;
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
+            bmi.bmiHeader.biCompression = BI_RGB;
+
+            void *bits = nullptr;
+            scratchBitmap = CreateDIBSection(scratchDC, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
+            scratchBits = bits;
+        }
+
+        if (screenDC)
+            ReleaseDC(nullptr, screenDC);
+
+        if (!scratchBitmap || !scratchBits)
+        {
+            if (scratchDC)
+            {
+                DeleteDC(scratchDC);
+                scratchDC = nullptr;
+            }
+            return false;
+        }
+
+        scratchOldBitmap = (HBITMAP)SelectObject(scratchDC, scratchBitmap);
+        scratchW = (int)w;
+        scratchH = (int)h;
+        return true;
+    }
+
+    template<typename T, uint C>
+    bool BitmapWindows<T, C>::SwizzleToScratch(uint8 alpha, bool premultiply) const
+    {
+        if (!this->data || !scratchBits)
+            return false;
+        if (scratchW != this->width || scratchH != this->height)
+            return false;
+
+        ConvertPixelsToBGRX<T, C>(this->data, static_cast<uint32 *>(scratchBits),
+                                  this->width, this->height, alpha, premultiply);
+        return true;
+    }
+
+    template<typename T, uint C>
+    bool BitmapWindows<T, C>::CreateDIB(uint w, uint h, HDC hdc)
+    {
+        if (!w || !h)
+            return false;
+
+        // Clean up old resources (including scratch)
+        Clear();
+
         this->width = w;
         this->height = h;
 
         // Create memory DC
         HDC screenDC = hdc ? hdc : GetDC(nullptr);
         memDC = CreateCompatibleDC(screenDC);
+
         if (!memDC)
         {
-            if (!hdc)
+            if (!hdc && screenDC)
                 ReleaseDC(nullptr, screenDC);
             return false;
         }
@@ -77,19 +181,25 @@ namespace hgl::bitmap
         bmi.bmiHeader.biCompression = BI_RGB;
 
         // Create DIB Section
-        void* bits = nullptr;
+        void *bits = nullptr;
         hBitmap = CreateDIBSection(memDC, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
 
-        if (!hdc)
+        if (!hdc && screenDC)
             ReleaseDC(nullptr, screenDC);
 
         if (!hBitmap || !bits)
         {
+            if (hBitmap)
+            {
+                DeleteObject(hBitmap);
+                hBitmap = nullptr;
+            }
             if (memDC)
             {
                 DeleteDC(memDC);
                 memDC = nullptr;
             }
+            this->width = this->height = 0;
             return false;
         }
 
@@ -97,7 +207,7 @@ namespace hgl::bitmap
         hOldBitmap = (HBITMAP)SelectObject(memDC, hBitmap);
 
         // Point base class data pointer to DIB Section memory
-        this->data = (T*)bits;
+        this->data = (T *)bits;
 
         return true;
     }
@@ -108,18 +218,30 @@ namespace hgl::bitmap
         if (!memDC || !hBitmap || !hdc)
             return false;
 
-        return BitBlt(hdc, dx, dy, dw, dh, memDC, sx, sy, SRCCOPY) != FALSE;
+        if (!EnsureScratch(this->width, this->height))
+            return false;
+
+        if (!SwizzleToScratch(255, false))
+            return false;
+
+        return BitBlt(hdc, dx, dy, dw, dh, scratchDC, sx, sy, SRCCOPY) != FALSE;
     }
 
     template<typename T, uint C>
     bool BitmapWindows<T, C>::StretchBlitTo(HDC hdc, int dx, int dy, int dw, int dh,
-                                           int sx, int sy, int sw, int sh) const
+                                            int sx, int sy, int sw, int sh) const
     {
         if (!memDC || !hBitmap || !hdc)
             return false;
 
+        if (!EnsureScratch(this->width, this->height))
+            return false;
+
+        if (!SwizzleToScratch(255, false))
+            return false;
+
         int oldMode = SetStretchBltMode(hdc, HALFTONE);
-        bool result = StretchBlt(hdc, dx, dy, dw, dh, memDC, sx, sy, sw, sh, SRCCOPY) != FALSE;
+        bool result = StretchBlt(hdc, dx, dy, dw, dh, scratchDC, sx, sy, sw, sh, SRCCOPY) != FALSE;
         SetStretchBltMode(hdc, oldMode);
 
         return result;
@@ -127,23 +249,35 @@ namespace hgl::bitmap
 
     template<typename T, uint C>
     bool BitmapWindows<T, C>::AlphaBlitTo(HDC hdc, int dx, int dy, int dw, int dh,
-                                         int sx, int sy, int sw, int sh, uint8 alpha) const
+                                          int sx, int sy, int sw, int sh, uint8 alpha) const
     {
         if (!memDC || !hBitmap || !hdc)
+            return false;
+
+        if (!EnsureScratch(this->width, this->height))
+            return false;
+
+        // C==4: 全局 alpha 已预乘进像素，SourceConstantAlpha 必须为 255 防二次乘
+        // C!=4: 无每像素 alpha，全局 alpha 由 SourceConstantAlpha 承担
+        const bool premultiply = (C == 4);
+
+        if (!SwizzleToScratch(alpha, premultiply))
             return false;
 
         BLENDFUNCTION blend = {};
         blend.BlendOp = AC_SRC_OVER;
         blend.BlendFlags = 0;
-        blend.SourceConstantAlpha = alpha;
-        blend.AlphaFormat = (C == 4) ? AC_SRC_ALPHA : 0;  // Only RGBA format uses per-pixel alpha
+        blend.SourceConstantAlpha = premultiply ? 255 : alpha;
+        blend.AlphaFormat = (C == 4) ? AC_SRC_ALPHA : 0;
 
-        return AlphaBlend(hdc, dx, dy, dw, dh, memDC, sx, sy, sw, sh, blend) != FALSE;
+        return AlphaBlend(hdc, dx, dy, dw, dh, scratchDC, sx, sy, sw, sh, blend) != FALSE;
     }
 
-    // Explicit instantiation of common types
-    template class BitmapWindows<math::Vector4u8, 4>;
-    template class BitmapWindows<math::Vector3u8, 3>;
+    // Explicit instantiation must match the public aliases:
+    // BitmapRGBA8Windows=BitmapWindows<Color4ub,4>, BitmapRGB8Windows=BitmapWindows<Color3ub,3>,
+    // BitmapRG8Windows=BitmapWindows<math::Vector2u8,2>, BitmapGrey8Windows=BitmapWindows<uint8,1>
+    template class BitmapWindows<Color4ub, 4>;
+    template class BitmapWindows<Color3ub, 3>;
     template class BitmapWindows<math::Vector2u8, 2>;
     template class BitmapWindows<uint8, 1>;
 

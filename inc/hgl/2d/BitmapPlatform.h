@@ -41,9 +41,22 @@ namespace hgl::bitmap
         HDC memDC;
         HBITMAP hOldBitmap;
 
+        // Scratch 32bpp BGRX DIB for GDI-boundary color conversion
+        mutable HBITMAP scratchBitmap;
+        mutable HDC scratchDC;
+        mutable HBITMAP scratchOldBitmap;
+        mutable void *scratchBits;
+        mutable int scratchW, scratchH;
+
+        bool EnsureScratch(uint w, uint h) const;
+        bool SwizzleToScratch(uint8 alpha, bool premultiply) const;
+
     public:
         BitmapWindows();
         virtual ~BitmapWindows();
+
+        bool Create(uint w,uint h) override;
+        void Clear() override;
 
         /**
          * 创建 DIB Section
@@ -106,6 +119,80 @@ namespace hgl::bitmap
     using BitmapRGB8Windows = BitmapWindows<Color3ub, 3>;
     using BitmapRG8Windows = BitmapWindows<math::Vector2u8, 2>;
     using BitmapGrey8Windows = BitmapWindows<uint8, 1>;
+
+    /**
+     * 将像素数据转换为 GDI 32bpp BGRX 布局（DIB 内存字节序）。
+     * GDI 的 32bpp DIB 按 B,G,R,X 字节序存储，而 Color3ub/Color4ub 是 R,G,B,(A) 序，
+     * 直接 Blt 会导致红蓝互换。此函数在 GDI 边界完成 RGB↔BGR 交换。
+     * @param src 源像素
+     * @param dst 目标 32bpp 缓冲（每像素 uint32: X<<24|R<<16|G<<8|B）
+     * @param w 宽度
+     * @param h 高度
+     * @param alpha 全局 alpha（0-255）
+     * @param premultiply 是否预乘（AC_SRC_ALPHA 要求预乘 alpha）
+     */
+    template<typename T, uint C>
+    inline void ConvertPixelsToBGRX(const T *src, uint32 *dst, int w, int h, uint8 alpha, bool premultiply)
+    {
+        if(!src||!dst||w<=0||h<=0)return;
+
+        const float a_scale=alpha/255.0f;
+
+        for(int y=0;y<h;y++)
+        {
+            const T *srow=src+(size_t)y*w;
+            uint32 *drow=dst+(size_t)y*w;
+
+            for(int x=0;x<w;x++)
+            {
+                uint32 b,g,r,a;
+
+                if constexpr(C==1)
+                {
+                    const uint8 v=srow[x];
+                    b=g=r=v;
+                    a=alpha;
+                }
+                else if constexpr(C==2)
+                {
+                    b=srow[x].x;
+                    g=srow[x].y;
+                    r=0;
+                    a=alpha;
+                }
+                else if constexpr(C==3)
+                {
+                    b=srow[x].b;
+                    g=srow[x].g;
+                    r=srow[x].r;
+                    a=alpha;
+                }
+                else
+                {
+                    b=srow[x].b;
+                    g=srow[x].g;
+                    r=srow[x].r;
+                    a=srow[x].a;
+                }
+
+                if(premultiply)
+                {
+                    const float k=(a*a_scale)/255.0f;
+
+                    b=(uint32)(b*k);
+                    g=(uint32)(g*k);
+                    r=(uint32)(r*k);
+                    a=(uint32)(a*a_scale);
+                }
+                else if(C==4)
+                {
+                    a=(uint32)(a*a_scale);
+                }
+
+                drow[x]=(a<<24)|(r<<16)|(g<<8)|b;
+            }
+        }
+    }
 #endif // _WIN32
 
 #ifdef __APPLE__

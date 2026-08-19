@@ -37,6 +37,11 @@ cm_example_project("" GeometryVerifyTest     GeometryVerifyTest.cpp)
 # Tile/MipMap verification test
 cm_example_project("" TileMipMapTest         TileMipMapTest.cpp)
 
+# BitmapWindows platform test (Windows only)
+if(WIN32)
+    cm_example_project("" BitmapWindowsTest   BitmapWindowsTest.cpp)
+endif()
+
 # ImageMagick example (only if ImageMagick is enabled)
 if(CM2D_USE_IMAGEMAGICK AND ImageMagick_FOUND)
     cm_example_project("" ImageMagickExample   ImageMagickExample.cpp)
