@@ -2,6 +2,7 @@
 
 #include<hgl/2d/Bitmap.h>
 #include<hgl/2d/Blend.h>
+#include<hgl/math/TrigConstants.h>
 #include<hgl/math/FastTriangle.h>
 #include<hgl/math/Vector.h>
 #include<hgl/color/Color3ub.h>
@@ -185,7 +186,7 @@ namespace hgl::bitmap
 
             y=radius;
             x=0;
-            xmax=int(radius*HGL_SIN_45);
+            xmax=int(radius*math::HGL_SIN_45);
             tn=(1-radius*2);
 
             while(x<=xmax)
@@ -488,7 +489,7 @@ namespace hgl::bitmap
             int xmax;
 
             y=r; x=0;
-            xmax=(int)(r*HGL_SIN_45);
+            xmax=(int)(r*math::HGL_SIN_45);
             tn=(1-r*2);
 
             xy[0]=x0+r;xy[1]=y0;
@@ -504,10 +505,10 @@ namespace hgl::bitmap
             ex=endangle/45;
             ben=ex-bx-1;
 
-            xy[16]=(int)(r*Lcos(stangle));
-            xy[17]=(int)(r*Lsin(stangle));
-            xy[18]=(int)(r*Lcos(endangle));
-            xy[19]=(int)(r*Lsin(endangle));
+            xy[16]=(int)(r*math::Lcos(stangle));
+            xy[17]=(int)(r*math::Lsin(stangle));
+            xy[18]=(int)(r*math::Lcos(endangle));
+            xy[19]=(int)(r*math::Lsin(endangle));
 
             DrawLine(x0+xy[16], y0-xy[17], x0, y0);
             DrawLine(x0+xy[18], y0-xy[19], x0, y0);
