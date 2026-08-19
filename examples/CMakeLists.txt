@@ -31,6 +31,9 @@ cm_example_project("" DrawCurvesTest        DrawCurvesTest.cpp)
 # Bitmap value-semantics test
 cm_example_project("" BitmapSemanticsTest   BitmapSemanticsTest.cpp)
 
+# DrawGeometry primitive verification test
+cm_example_project("" GeometryVerifyTest     GeometryVerifyTest.cpp)
+
 # ImageMagick example (only if ImageMagick is enabled)
 if(CM2D_USE_IMAGEMAGICK AND ImageMagick_FOUND)
     cm_example_project("" ImageMagickExample   ImageMagickExample.cpp)

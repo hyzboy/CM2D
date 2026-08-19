@@ -135,7 +135,7 @@ namespace hgl::bitmap
 
             for(int y=t;y<t+h;y++)
             {
-                for(int i=0;i<width;i++)
+                for(int i=0;i<w;i++)
                 {
                     T dst=*p;
                     *p=(*blend)(dst,draw_color,alpha);
@@ -209,15 +209,6 @@ namespace hgl::bitmap
 
                 x++;
             }
-
-            PutPixel(x0+y,y0+x);
-            PutPixel(x0+x,y0+y);
-            PutPixel(x0-x,y0+y);
-            PutPixel(x0-y,y0+x);
-            PutPixel(x0-y,y0-x);
-            PutPixel(x0-x,y0-y);
-            PutPixel(x0+x,y0-y);
-            PutPixel(x0+y,y0-x);
 
             return(true);
         }
@@ -584,10 +575,12 @@ namespace hgl::bitmap
 
         void DrawMonoBitmap(const int left,const int top,const uint8 *data,const int w,const int h)
         {
-            if(!data)return;
+            if(!bitmap)return;
+            if(!data||w<=0||h<=0)return;
 
-            if(left<0||left>=bitmap->GetWidth()-w)return;
-            if(top<0||top>=bitmap->GetHeight()-h)return;
+            if(left<0||top<0)return;
+            if(left+w>bitmap->GetWidth())return;
+            if(top+h>bitmap->GetHeight())return;
 
             const uint8 *sp=data;
             uint8 bit;
