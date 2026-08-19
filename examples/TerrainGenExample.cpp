@@ -6,6 +6,7 @@
 #include<hgl/2d/NoiseMap.h>
 #include<hgl/2d/TerrainMap.h>
 #include<hgl/2d/BitmapSave.h>
+#include<hgl/utf.h>
 #include<hgl/color/Color3ub.h>
 #include<iostream>
 
@@ -98,7 +99,7 @@ int main(int argc, char** argv)
 
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
-        SaveBitmapToTGA(U8_TEXT("terrain_perlin.tga"), &grayscale);
+        SaveBitmapToTGA(ToOSString(U8_TEXT("terrain_perlin.tga")), &grayscale);
 
         std::cout << "   Saved: terrain_perlin.tga" << std::endl;
     }
@@ -115,7 +116,7 @@ int main(int argc, char** argv)
 
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
-        SaveBitmapToTGA(U8_TEXT("terrain_simplex.tga"), &grayscale);
+        SaveBitmapToTGA(ToOSString(U8_TEXT("terrain_simplex.tga")), &grayscale);
 
         std::cout << "   Saved: terrain_simplex.tga" << std::endl;
     }
@@ -133,7 +134,7 @@ int main(int argc, char** argv)
 
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
-        SaveBitmapToTGA(U8_TEXT("terrain_voronoi.tga"), &grayscale);
+        SaveBitmapToTGA(ToOSString(U8_TEXT("terrain_voronoi.tga")), &grayscale);
 
         std::cout << "   Saved: terrain_voronoi.tga" << std::endl;
     }
@@ -151,7 +152,7 @@ int main(int argc, char** argv)
 
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
-        SaveBitmapToTGA(U8_TEXT("terrain_fbm.tga"), &grayscale);
+        SaveBitmapToTGA(ToOSString(U8_TEXT("terrain_fbm.tga")), &grayscale);
 
         std::cout << "   Saved: terrain_fbm.tga" << std::endl;
     }
@@ -166,7 +167,7 @@ int main(int argc, char** argv)
 
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(heightMap, grayscale);
-        SaveBitmapToTGA(U8_TEXT("terrain_eroded.tga"), &grayscale);
+        SaveBitmapToTGA(ToOSString(U8_TEXT("terrain_eroded.tga")), &grayscale);
 
         std::cout << "   Saved: terrain_eroded.tga" << std::endl;
     }
@@ -183,7 +184,7 @@ int main(int argc, char** argv)
 
         BitmapRGB8 colorMap;
         ConvertBiomeMapToColor(biomeMap, colorMap);
-        SaveBitmapToTGA(U8_TEXT("terrain_biomes.tga"), &colorMap);
+        SaveBitmapToTGA(ToOSString(U8_TEXT("terrain_biomes.tga")), &colorMap);
 
         std::cout << "   Saved: terrain_biomes.tga" << std::endl;
     }
@@ -204,7 +205,7 @@ int main(int argc, char** argv)
 
         BitmapGrey8 grayscale;
         ConvertFloat32ToGrayscale(slopeMap, grayscale);
-        SaveBitmapToTGA(U8_TEXT("terrain_slope.tga"), &grayscale);
+        SaveBitmapToTGA(ToOSString(U8_TEXT("terrain_slope.tga")), &grayscale);
 
         std::cout << "   Saved: terrain_slope.tga" << std::endl;
     }
