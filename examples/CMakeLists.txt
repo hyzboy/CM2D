@@ -34,6 +34,9 @@ cm_example_project("" BitmapSemanticsTest   BitmapSemanticsTest.cpp)
 # DrawGeometry primitive verification test
 cm_example_project("" GeometryVerifyTest     GeometryVerifyTest.cpp)
 
+# Tile/MipMap verification test
+cm_example_project("" TileMipMapTest         TileMipMapTest.cpp)
+
 # ImageMagick example (only if ImageMagick is enabled)
 if(CM2D_USE_IMAGEMAGICK AND ImageMagick_FOUND)
     cm_example_project("" ImageMagickExample   ImageMagickExample.cpp)
